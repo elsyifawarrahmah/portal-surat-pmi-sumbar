@@ -30,10 +30,11 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
-          <div style={{width:36,height:36,background:'var(--pmi-red)',borderRadius:8}} />
+          <img src="/logo-pmi.svg" alt="Logo PMI" style={{width:40,height:40,flexShrink:0}} />
           <div>
-            <div style={{fontWeight:700,fontSize:15}}>Portal Surat Digital</div>
-            <div style={{fontSize:11,color:'var(--ink-soft)'}}>PMI Provinsi Sumatera Barat</div>
+            <div style={{fontWeight:700,fontSize:14.5}}>Palang Merah Indonesia</div>
+            <div style={{fontSize:12,color:'var(--ink-soft)'}}>Provinsi Sumatera Barat</div>
+            <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:2}}>Portal Surat Digital</div>
           </div>
         </div>
         <h1 style={{fontSize:19,margin:'0 0 4px'}}>{mode==='signin' ? 'Masuk Akun Petugas' : 'Daftar Akun Petugas Baru'}</h1>

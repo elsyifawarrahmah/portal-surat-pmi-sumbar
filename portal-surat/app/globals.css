@@ -44,3 +44,37 @@ td{padding:10px 12px;border-bottom:1px solid var(--line);}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--pmi-red-dark);}
 .login-card{background:#fff;border-radius:18px;padding:34px 30px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
 .error-box{background:#FBE7E7;color:#B3261E;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+.row-click{cursor:pointer;}
+.row-click:hover{background:var(--cream);}
+
+/* ===== Responsif HP ===== */
+@media (max-width: 768px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 14px;gap:10px;}
+  .brand{border:none;padding:0;display:flex;flex-direction:column;gap:2px;flex:1;min-width:170px;}
+  .nav{display:flex;padding:0;flex:2;overflow-x:auto;gap:2px;}
+  .nav a{white-space:nowrap;padding:8px 10px;font-size:12.5px;margin-bottom:0;}
+  .sidebar-foot{border:none;padding:0;order:3;width:auto;}
+  .sidebar-foot .btn{width:auto;padding:8px 12px;font-size:12px;}
+  .main{padding:16px;}
+  .topbar{flex-direction:column;align-items:flex-start;}
+  .topbar h1{font-size:18px;}
+  .grid4{grid-template-columns:1fr 1fr;}
+  .login-card{padding:26px 20px;margin:16px;}
+}
+@media (max-width: 420px){
+  .grid4{grid-template-columns:1fr;}
+}
+
+/* Tabel jadi kartu di layar HP tegak — biar tidak kepotong/perlu geser-geser */
+@media (max-width: 600px){
+  table{border:none;}
+  thead{display:none;}
+  tbody, tr, td{display:block; width:100%;}
+  tr{border:1px solid var(--line); border-radius:12px; margin-bottom:10px; padding:6px 4px; background:#fff;}
+  tr.row-click:active{background:var(--cream);}
+  td{border:none; padding:6px 10px; text-align:left; white-space:normal; display:flex; justify-content:space-between; gap:10px; align-items:center;}
+  td[data-label]:before{content:attr(data-label); font-size:10.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; flex-shrink:0;}
+  td[data-label=""]:before{content:none;}
+  td:not([data-label]){justify-content:center;}
+}
