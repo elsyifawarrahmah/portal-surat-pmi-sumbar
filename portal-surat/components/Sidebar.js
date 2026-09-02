@@ -22,7 +22,7 @@ export default function Sidebar() {
     <div className="sidebar">
       <div className="brand">
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logo-pmi.svg?v=2" alt="Logo PMI" style={{width:32,height:32,flexShrink:0}} />
+          <img src="/logo-pmi.png?v=3" alt="Logo PMI" style={{width:32,height:32,flexShrink:0}} />
           <div style={{lineHeight:1.25}}>
             <div style={{fontWeight:700,fontSize:13.5}}>Palang Merah Indonesia</div>
             <div style={{fontSize:11.5,opacity:.85}}>Provinsi Sumatera Barat</div>
