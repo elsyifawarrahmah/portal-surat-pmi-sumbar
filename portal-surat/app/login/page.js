@@ -30,7 +30,7 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
-          <img src="/logo-pmi.svg" alt="Logo PMI" style={{width:40,height:40,flexShrink:0}} />
+          <img src="/logo-pmi.svg?v=2" alt="Logo PMI" style={{width:40,height:40,flexShrink:0}} />
           <div>
             <div style={{fontWeight:700,fontSize:14.5}}>Palang Merah Indonesia</div>
             <div style={{fontSize:12,color:'var(--ink-soft)'}}>Provinsi Sumatera Barat</div>
