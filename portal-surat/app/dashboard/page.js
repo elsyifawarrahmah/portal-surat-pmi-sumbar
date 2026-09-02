@@ -70,10 +70,10 @@ export default function Dashboard() {
         <NotifikasiButton />
 
         <div className="grid4">
-          <div className="stat" style={{'--accent':'var(--stock)'}}><div className="lbl">Total Surat Masuk</div><div className="val">{suratMasuk.length}</div></div>
-          <div className="stat" style={{'--accent':'var(--gold)'}}><div className="lbl">Total Surat Keluar</div><div className="val">{suratKeluar.length}</div></div>
-          <div className="stat" style={{'--accent':'var(--pmi-red)'}}><div className="lbl">Sedang Berjalan</div><div className="val">{tertahan.length}</div></div>
-          <div className="stat" style={{'--accent':'#B3261E'}}><div className="lbl">Tertahan ≥2 Hari</div><div className="val">{bermasalah.length}</div></div>
+          <div className="stat row-click" style={{'--accent':'var(--stock)'}} onClick={()=>router.push('/surat-masuk')}><div className="lbl">Total Surat Masuk</div><div className="val">{suratMasuk.length}</div></div>
+          <div className="stat row-click" style={{'--accent':'var(--gold)'}} onClick={()=>router.push('/surat-keluar')}><div className="lbl">Total Surat Keluar</div><div className="val">{suratKeluar.length}</div></div>
+          <div className="stat row-click" style={{'--accent':'var(--pmi-red)'}} onClick={()=>router.push('/surat-masuk')}><div className="lbl">Sedang Berjalan</div><div className="val">{tertahan.length}</div></div>
+          <div className="stat row-click" style={{'--accent':'#B3261E'}} onClick={()=>router.push('/surat-masuk')}><div className="lbl">Tertahan ≥2 Hari</div><div className="val">{bermasalah.length}</div></div>
         </div>
 
         <div className="panel">
