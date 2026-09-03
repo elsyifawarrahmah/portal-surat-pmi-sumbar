@@ -9,7 +9,18 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:'Inter',sans-
 h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
 .mono{font-family:'IBM Plex Mono',monospace;}
 .app{display:flex;min-height:100vh;}
-.sidebar{width:236px;flex-shrink:0;background:var(--pmi-red-dark);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+.sidebar{width:236px;flex-shrink:0;background:var(--pmi-red-dark);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;transition:margin-left .25s ease, transform .25s ease;}
+.sidebar.collapsed{margin-left:-236px;}
+.hamburger-btn{
+  position:fixed;top:18px;left:18px;z-index:60;width:38px;height:38px;border-radius:10px;
+  background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.hamburger-btn:hover{background:var(--cream);}
+.hamburger-btn span{display:block;width:16px;height:2px;background:var(--ink);position:relative;}
+.hamburger-btn span::before,.hamburger-btn span::after{content:"";position:absolute;left:0;width:16px;height:2px;background:var(--ink);}
+.hamburger-btn span::before{top:-5px;}
+.hamburger-btn span::after{top:5px;}
 .brand{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,.14);}
 .brand .cross{width:34px;height:34px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
 .brand .title{font-weight:700;font-size:15px;}
