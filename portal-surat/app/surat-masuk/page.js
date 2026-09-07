@@ -75,6 +75,11 @@ function SuratMasukInner() {
     if (!form.nomor_surat || !form.tanggal_surat || !form.tanggal_diterima_kantor || !form.asal_surat || !form.perihal) {
       setError('Lengkapi semua field wajib.'); return
     }
+    // cek nomor surat sudah pernah dicatat atau belum, biar data tidak dobel
+    const { data: existing } = await supabase.from('surat_masuk').select('id').eq('nomor_surat', form.nomor_surat.trim())
+    if (existing && existing.length > 0) {
+      setError(`Nomor surat "${form.nomor_surat}" sudah pernah dicatat sebelumnya. Cek lagi di daftar surat masuk.`); return
+    }
     const { data: userData } = await supabase.auth.getUser()
     const { file_bukti_nama, ...payload } = form
     const { data: newSurat, error: err } = await supabase.from('surat_masuk').insert({
@@ -157,20 +162,27 @@ function SuratMasukInner() {
               <tbody>
                 {loading ? <tr><td colSpan={8} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
                 filtered.length === 0 ? <tr><td colSpan={8} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada surat tercatat.</td></tr> :
-                filtered.map(s => (
-                  <tr key={s.id} className="row-click" onClick={()=>openTahap(s.id)}>
+                filtered.map(s => {
+                  const isRahasia = s.sifat === 'Rahasia' && !isAdmin
+                  return (
+                  <tr key={s.id} className="row-click" onClick={()=>{ if (!isRahasia) openTahap(s.id) }}>
                     <td data-label="Tgl Diterima">{s.tanggal_diterima_kantor}</td>
-                    <td data-label="No. Surat" className="mono">{s.nomor_surat}</td>
-                    <td data-label="Asal">{s.asal_surat}</td>
-                    <td data-label="Perihal">{s.perihal}</td>
+                    <td data-label="No. Surat" className="mono">{isRahasia ? '••••••' : s.nomor_surat}</td>
+                    <td data-label="Asal">{isRahasia ? '🔒 Rahasia' : s.asal_surat}</td>
+                    <td data-label="Perihal">{isRahasia ? 'Hanya admin yang bisa lihat' : s.perihal}</td>
                     <td data-label="Sifat"><span className="tag" style={sifatStyle(s.sifat)}>{s.sifat}</span></td>
-                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{s.file_bukti_url ? <a href={s.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
+                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <a href={s.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
                     <td data-label="Petugas">{s.profiles?.nama_lengkap || '-'}</td>
-                    <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right'}}>Lihat Alur →</td>
+                    <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right'}}>{isRahasia ? '' : 'Lihat Alur →'}</td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
+            {surat.some(s => s.sifat === 'Rahasia') && !isAdmin && (
+              <div style={{padding:'10px 20px',fontSize:12,color:'var(--ink-soft)',borderTop:'1px solid var(--line)'}}>
+                🔒 Sebagian surat ditandai Rahasia dan hanya bisa dibuka oleh admin (Kabid).
+              </div>
+            )}
           </div>
         </div>
       </div>
