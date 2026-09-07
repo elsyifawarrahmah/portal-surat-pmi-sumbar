@@ -137,6 +137,25 @@ function SuratMasukInner() {
 
   const filtered = surat.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
 
+  function exportCSV() {
+    const header = ['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat','Petugas'].join(';')
+    const csvRows = filtered.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
+    const csv = '\uFEFF' + [header, ...csvRows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `surat-masuk-${new Date().toISOString().slice(0,10)}.csv`
+    a.click(); URL.revokeObjectURL(url)
+  }
+
+  function generateNomorOtomatis() {
+    const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
+    const now = new Date()
+    const nomorUrut = String(surat.length + 1).padStart(3, '0')
+    const nomor = `${nomorUrut}/PMI-SB/${bulanRomawi[now.getMonth()]}/${now.getFullYear()}`
+    setForm(f => ({ ...f, nomor_surat: nomor }))
+  }
+
   return (
     <div className="app">
       <Sidebar />
@@ -155,6 +174,7 @@ function SuratMasukInner() {
         <div className="panel">
           <div className="panel-head">
             <input placeholder="Cari nomor surat / asal / perihal..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:280}} />
+            <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
@@ -196,7 +216,13 @@ function SuratMasukInner() {
             </div>
             <div style={{padding:'20px 22px'}}>
               {error && <div className="error-box">{error}</div>}
-              <div className="field"><label>Nomor Surat</label><input value={form.nomor_surat||''} onChange={e=>setForm({...form,nomor_surat:e.target.value})} placeholder="005/PMI-SB/VIII/2026" /></div>
+              <div className="field">
+                <label>Nomor Surat</label>
+                <div style={{display:'flex',gap:6}}>
+                  <input value={form.nomor_surat||''} onChange={e=>setForm({...form,nomor_surat:e.target.value})} placeholder="005/PMI-SB/VIII/2026" />
+                  <button type="button" className="btn btn-ghost" style={{whiteSpace:'nowrap',fontSize:12}} onClick={generateNomorOtomatis}>Buat Otomatis</button>
+                </div>
+              </div>
               <div className="field"><label>Tanggal Surat (tertulis di surat)</label><input type="date" value={form.tanggal_surat||''} onChange={e=>setForm({...form,tanggal_surat:e.target.value})} /></div>
               <div className="field"><label>Tanggal Diterima di Kantor</label><input type="date" value={form.tanggal_diterima_kantor||''} onChange={e=>setForm({...form,tanggal_diterima_kantor:e.target.value})} /></div>
               <div className="field"><label>Asal Surat</label><input value={form.asal_surat||''} onChange={e=>setForm({...form,asal_surat:e.target.value})} placeholder="PMI Pusat / Dinas Sosial / dll" /></div>

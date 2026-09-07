@@ -87,6 +87,25 @@ export default function SuratKeluarPage() {
 
   const filtered = rows.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
 
+  function exportCSV() {
+    const header = ['Tanggal','Nomor Surat','Tujuan','Perihal','Sifat','Petugas'].join(';')
+    const csvRows = filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.tujuan_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
+    const csv = '\uFEFF' + [header, ...csvRows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `surat-keluar-${new Date().toISOString().slice(0,10)}.csv`
+    a.click(); URL.revokeObjectURL(url)
+  }
+
+  function generateNomorOtomatis() {
+    const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
+    const now = new Date()
+    const nomorUrut = String(rows.length + 1).padStart(3, '0')
+    const nomor = `${nomorUrut}/PMI-SB/${bulanRomawi[now.getMonth()]}/${now.getFullYear()}`
+    setForm(f => ({ ...f, nomor_surat: nomor }))
+  }
+
   return (
     <div className="app">
       <Sidebar />
@@ -105,6 +124,7 @@ export default function SuratKeluarPage() {
         <div className="panel">
           <div className="panel-head">
             <input placeholder="Cari..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:260}} />
+            <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
@@ -147,6 +167,11 @@ export default function SuratKeluarPage() {
                     <select value={form[f.k]||''} onChange={e=>setForm({...form,[f.k]:e.target.value})}>
                       {f.opts.map(o=><option key={o}>{o}</option>)}
                     </select>
+                  ) : f.k === 'nomor_surat' ? (
+                    <div style={{display:'flex',gap:6}}>
+                      <input type={f.type} value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
+                      <button type="button" className="btn btn-ghost" style={{whiteSpace:'nowrap',fontSize:12}} onClick={generateNomorOtomatis}>Buat Otomatis</button>
+                    </div>
                   ) : (
                     <input type={f.type} value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
                   )}
