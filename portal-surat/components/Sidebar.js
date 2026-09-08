@@ -9,6 +9,7 @@ const LINKS = [
   { href: '/surat-keluar', label: 'Surat Keluar' },
   { href: '/data-user', label: 'Data User' },
   { href: '/log-aktivitas', label: 'Log Aktivitas' },
+  { href: '/backup', label: 'Backup Data' },
 ]
 
 export default function Sidebar() {
