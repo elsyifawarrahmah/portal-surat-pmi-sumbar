@@ -30,7 +30,14 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
-          <img src="/logo-pmi.png?v=3" alt="Logo PMI" style={{width:40,height:40,flexShrink:0}} />
+          <div style={{
+            width:46, height:46, borderRadius:11, background:'#fff', flexShrink:0,
+            display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(200,16,46,.2)',
+            position:'relative', border:'1px solid var(--line)'
+          }}>
+            <div style={{position:'absolute', width:22, height:7, background:'var(--pmi-red)', borderRadius:1.5}}></div>
+            <div style={{position:'absolute', width:7, height:22, background:'var(--pmi-red)', borderRadius:1.5}}></div>
+          </div>
           <div>
             <div style={{fontWeight:700,fontSize:14.5}}>Palang Merah Indonesia</div>
             <div style={{fontSize:12,color:'var(--ink-soft)'}}>Provinsi Sumatera Barat</div>
