@@ -4,8 +4,8 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    icon: '/logo-pmi.svg',
-    badge: '/logo-pmi.svg',
+    icon: '/icon-pmi.svg',
+    badge: '/icon-pmi.svg',
     data: { url: data.url || '/surat-masuk' },
     vibrate: [200, 100, 200],
     silent: false,

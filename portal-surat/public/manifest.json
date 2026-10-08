@@ -6,6 +6,6 @@
   "background_color": "#FAF6EF",
   "theme_color": "#C8102E",
   "icons": [
-    { "src": "/logo-pmi.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "/icon-pmi.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }
