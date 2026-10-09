@@ -89,3 +89,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--line);}
   td[data-label=""]:before{content:none;}
   td:not([data-label]){justify-content:center;}
 }
+
+/* Beri ruang untuk tombol hamburger supaya tidak menimpa lambang */
+.sidebar:not(.collapsed) .brand{padding-top:72px;}
+.sidebar.collapsed ~ .main{padding-top:74px;}
