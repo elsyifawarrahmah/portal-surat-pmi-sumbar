@@ -62,9 +62,8 @@ export default function Sidebar() {
       <div className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="brand">
           <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <div style={{width:36,height:36,borderRadius:9,background:'#fff',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.15)',position:'relative'}}>
-              <div style={{position:'absolute',width:18,height:6,background:'var(--pmi-red)',borderRadius:1.5}}></div>
-              <div style={{position:'absolute',width:6,height:18,background:'var(--pmi-red)',borderRadius:1.5}}></div>
+            <div style={{width:40,height:40,borderRadius:10,background:'#fff',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.15)'}}>
+              <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={32} height={32} style={{objectFit:'contain',display:'block'}} />
             </div>
             <div style={{lineHeight:1.25}}>
               <div style={{fontWeight:700,fontSize:13.5}}>Palang Merah Indonesia</div>
