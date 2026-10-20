@@ -53,3 +53,15 @@ Ini **WEB TERPISAH**, tidak ada hubungannya dengan portal logistik kemarin. Ikut
 3. **Run**
 
 Selesai — sekarang punya 2 web terpisah: satu untuk logistik, satu khusus surat.
+
+---
+
+## Tambahan: Perjanjian Kerja Sama, Sertifikat & Piagam, Surat Keputusan
+
+Tiga menu ini menyimpan datanya di tabel `arsip_dokumen`. **Jalankan sekali** file
+`supabase/migrasi-arsip-dokumen.sql` di Supabase Dashboard > SQL Editor > New query > Run.
+Sebelum itu dijalankan, halaman barunya akan menampilkan pesan bahwa tabel belum dibuat.
+
+- Upload dokumen memakai bucket `bukti-surat` yang sudah ada (sama seperti Surat Masuk/Keluar).
+- Hanya admin yang bisa menambah, mengubah, dan menghapus. Akun lain hanya bisa melihat.
+- Backup Data (Excel) otomatis ikut memuat tiga data ini.
