@@ -30,13 +30,13 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div style={{marginBottom:18}}>
-          <div className="brand-logo">
-            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={60} height={60} />
-            <div className="brand-name" style={{color:'#000',fontSize:23}}>Palang<br />Merah<br />Indonesia</div>
+          <div className="brand-logo" style={{gap:12}}>
+            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={56} height={56} />
+            <div className="brand-name" style={{color:'#000',fontSize:21}}>Palang<br />Merah<br />Indonesia</div>
+            <div className="brand-vline" style={{color:'#000'}} />
+            <div className="brand-prov" style={{color:'#000',fontSize:16}}>Provinsi<br />Sumatera Barat</div>
           </div>
-          <div className="brand-line" style={{color:'var(--pmi-red)'}} />
-          <div style={{fontSize:13.5,fontWeight:600,color:'var(--ink)'}}>Provinsi Sumatera Barat</div>
-          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:4}}>Portal Surat Digital</div>
+          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:10}}>Portal Surat Digital</div>
         </div>
         <h1 style={{fontSize:19,margin:'0 0 4px'}}>{mode==='signin' ? 'Masuk Akun Petugas' : 'Daftar Akun Petugas Baru'}</h1>
         <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 18px'}}>

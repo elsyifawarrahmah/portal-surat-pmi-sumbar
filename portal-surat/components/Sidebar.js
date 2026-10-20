@@ -62,12 +62,12 @@ export default function Sidebar() {
       <div className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="brand">
           <div className="brand-logo">
-            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={54} height={54} />
+            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={42} height={42} />
             <div className="brand-name">Palang<br />Merah<br />Indonesia</div>
+            <div className="brand-vline" />
+            <div className="brand-prov">Provinsi<br />Sumatera Barat</div>
           </div>
-          <div className="brand-line" />
-          <div style={{fontSize:13,fontWeight:600,letterSpacing:'.02em'}}>Provinsi Sumatera Barat</div>
-          <div style={{fontSize:10.5,opacity:.65,marginTop:6,letterSpacing:'.03em',textTransform:'uppercase'}}>Portal Surat Digital</div>
+          <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>Portal Surat Digital</div>
         </div>
         <div className="nav">
           {LINKS.map(l => (
