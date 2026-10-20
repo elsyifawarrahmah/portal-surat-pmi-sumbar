@@ -29,4 +29,8 @@ export async function middleware(request) {
   return response
 }
 
-export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'] }
+// File publik (gambar, ikon, manifest, service worker) harus bisa dibuka tanpa login,
+// kalau tidak, logo di halaman login akan rusak karena dialihkan ke /login.
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)'],
+}
