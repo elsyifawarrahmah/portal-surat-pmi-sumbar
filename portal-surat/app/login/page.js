@@ -29,19 +29,14 @@ export default function LoginPage() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:18}}>
-          <div style={{
-            width:50, height:50, borderRadius:12, background:'#fff', flexShrink:0,
-            display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(200,16,46,.2)',
-            border:'1px solid var(--line)'
-          }}>
-            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={40} height={40} style={{objectFit:'contain',display:'block'}} />
+        <div style={{marginBottom:18}}>
+          <div className="brand-logo">
+            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={60} height={60} />
+            <div className="brand-name" style={{color:'#000',fontSize:23}}>Palang<br />Merah<br />Indonesia</div>
           </div>
-          <div>
-            <div style={{fontWeight:700,fontSize:14.5}}>Palang Merah Indonesia</div>
-            <div style={{fontSize:12,color:'var(--ink-soft)'}}>Provinsi Sumatera Barat</div>
-            <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:2}}>Portal Surat Digital</div>
-          </div>
+          <div className="brand-line" style={{color:'var(--pmi-red)'}} />
+          <div style={{fontSize:13.5,fontWeight:600,color:'var(--ink)'}}>Provinsi Sumatera Barat</div>
+          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:4}}>Portal Surat Digital</div>
         </div>
         <h1 style={{fontSize:19,margin:'0 0 4px'}}>{mode==='signin' ? 'Masuk Akun Petugas' : 'Daftar Akun Petugas Baru'}</h1>
         <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 18px'}}>

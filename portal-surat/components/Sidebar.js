@@ -61,16 +61,13 @@ export default function Sidebar() {
       {mobileOpen && <div className="backdrop" onClick={()=>setMobileOpen(false)} />}
       <div className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="brand">
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <div style={{width:40,height:40,borderRadius:10,background:'#fff',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.15)'}}>
-              <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={32} height={32} style={{objectFit:'contain',display:'block'}} />
-            </div>
-            <div style={{lineHeight:1.25}}>
-              <div style={{fontWeight:700,fontSize:13.5}}>Palang Merah Indonesia</div>
-              <div style={{fontSize:11.5,opacity:.85}}>Provinsi Sumatera Barat</div>
-            </div>
+          <div className="brand-logo">
+            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={54} height={54} />
+            <div className="brand-name">Palang<br />Merah<br />Indonesia</div>
           </div>
-          <div style={{fontSize:10.5,opacity:.65,marginTop:8,letterSpacing:'.03em',textTransform:'uppercase'}}>Portal Surat Digital</div>
+          <div className="brand-line" />
+          <div style={{fontSize:13,fontWeight:600,letterSpacing:'.02em'}}>Provinsi Sumatera Barat</div>
+          <div style={{fontSize:10.5,opacity:.65,marginTop:6,letterSpacing:'.03em',textTransform:'uppercase'}}>Portal Surat Digital</div>
         </div>
         <div className="nav">
           {LINKS.map(l => (
