@@ -76,3 +76,12 @@ Sebelum itu dijalankan, halaman barunya akan menampilkan pesan bahwa tabel belum
 - Alur surat masuk (default surat baru): Biro Umum → Sekretaris → Kepala Markas → Ketua / Ketua Bidang →
   Bidang / Divisi Tujuan → Selesai → Pengarsipan oleh Biro Umum → Biro Umum (Arsip Kembali). Daftar tahap ada di `lib/tahap.js`.
 - Tombol "Unduh Semua Berkas (ZIP)" ada di Surat Masuk, Surat Keluar, Perjanjian Kerja Sama, Sertifikat & Piagam, dan Surat Keputusan; mengunduh semua berkas sesuai hasil pencarian (kode di `lib/zip.js`).
+
+---
+
+## Tambahan: Arsip Biro Umum
+
+- **Jalankan sekali** `supabase/migrasi-arsip-biro-umum.sql` di Supabase SQL Editor (membuat tabel `arsip_catatan`).
+- Menu **Arsip Biro Umum** menampilkan semua dokumen (surat masuk, surat keluar, PKS, sertifikat/piagam, SK) dengan status
+  *Siap diarsip / Sudah diarsip / Masih berjalan*, lokasi simpan fisik, filter jenis/status/tahun, register CSV, dan unduh berkas ZIP.
+- Hanya admin yang bisa mengarsipkan. Mengarsipkan surat masuk otomatis menutup alurnya (Pengarsipan selesai).

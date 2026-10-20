@@ -13,13 +13,14 @@ export default function BackupPage() {
     try {
       const XLSX = await import('xlsx')
 
-      const [suratMasuk, suratTahapan, suratKeluar, users, logAktivitas, arsip] = await Promise.all([
+      const [suratMasuk, suratTahapan, suratKeluar, users, logAktivitas, arsip, catatanArsip] = await Promise.all([
         supabase.from('surat_masuk').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal_diterima_kantor', { ascending: false }),
         supabase.from('surat_tahapan').select('*'),
         supabase.from('surat_keluar').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal_surat', { ascending: false }),
         supabase.from('profiles').select('nama_lengkap, email, role, last_seen'),
         supabase.from('log_aktivitas').select('*, profiles:dilakukan_oleh(nama_lengkap)').order('waktu', { ascending: false }).limit(1000),
         supabase.from('arsip_dokumen').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal', { ascending: false }),
+        supabase.from('arsip_catatan').select('*, profiles:diarsip_oleh(nama_lengkap)').order('tanggal_arsip', { ascending: false }),
       ])
 
       const wb = XLSX.utils.book_new()
@@ -67,6 +68,13 @@ export default function BackupPage() {
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSk), 'Surat Keputusan')
 
+      // Register arsip Biro Umum (lokasi simpan) — kosong bila tabel arsip_catatan belum dibuat
+      const sheetArsip = (catatanArsip.data || []).map(r => ({
+        'Jenis': r.jenis, 'ID Dokumen': r.ref_id, 'Lokasi Arsip': r.lokasi_arsip || '',
+        'Tanggal Arsip': r.tanggal_arsip, 'Diarsip Oleh': r.profiles?.nama_lengkap || '', 'Catatan': r.catatan || '',
+      }))
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetArsip), 'Register Arsip')
+
       const sheetUsers = (users.data || []).map(r => ({
         'Nama': r.nama_lengkap, 'Email': r.email, 'Role': r.role,
         'Terakhir Aktif': r.last_seen ? new Date(r.last_seen).toLocaleString('id-ID') : '',
@@ -101,7 +109,7 @@ export default function BackupPage() {
             <div style={{fontSize:40, marginBottom:10}}>🗄️</div>
             <h3 style={{margin:'0 0 8px'}}>Backup Lengkap Portal Surat</h3>
             <p style={{color:'var(--ink-soft)', fontSize:13.5, maxWidth:440, margin:'0 auto 20px'}}>
-              File Excel ini berisi 8 sheet: Surat Masuk, Alur Surat Masuk, Surat Keluar, Perjanjian Kerja Sama, Sertifikat & Piagam, Surat Keputusan, Data User, dan Log Aktivitas.
+              File Excel ini berisi 9 sheet: Surat Masuk, Alur Surat Masuk, Surat Keluar, Perjanjian Kerja Sama, Sertifikat & Piagam, Surat Keputusan, Register Arsip, Data User, dan Log Aktivitas.
               Simpan file ini secara berkala (misal tiap minggu) di komputer/Google Drive kantor sebagai cadangan.
             </p>
             <button className="btn btn-primary" onClick={buatBackup} disabled={loading} style={{padding:'12px 28px', fontSize:14}}>
