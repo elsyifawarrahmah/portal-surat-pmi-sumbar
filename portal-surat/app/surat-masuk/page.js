@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
 
-const TAHAP_DEFAULT = ['Biro Umum', 'Sekretaris', 'Ketua Markas', 'Ketua', 'Divisi Tujuan']
+import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isPengarsipan } from '@/lib/tahap'
 
 export default function SuratMasukPage() {
   return (
@@ -22,6 +22,7 @@ function SuratMasukInner() {
   const [search, setSearch] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showTahapModal, setShowTahapModal] = useState(null)
+  const [zipProg, setZipProg] = useState(null)
   const [tahapanList, setTahapanList] = useState([])
   const [form, setForm] = useState({})
   const [error, setError] = useState('')
@@ -53,7 +54,17 @@ function SuratMasukInner() {
     setShowTahapModal(suratId)
     const { data } = await supabase.from('surat_tahapan').select('*').eq('surat_id', suratId).order('urutan')
     if (data && data.length > 0) {
-      setTahapanList(data)
+      let list = data
+      // Surat lama belum punya tahap Pengarsipan -> tampilkan, tersimpan saat tombol Simpan/Teruskan ditekan
+      if (!data.some(t => isPengarsipan(t.nama_tahap))) {
+        const maks = Math.max(...data.map(t => t.urutan || 0))
+        const kosong = { penerima_nama: '', tanggal_diterima: null, tanggal_diteruskan: null, catatan: '', _new: true }
+        list = [...data,
+          { ...kosong, nama_tahap: 'Pengarsipan', urutan: maks + 1 },
+          { ...kosong, nama_tahap: 'Biro Umum (Arsip Kembali)', urutan: maks + 2 },
+        ]
+      }
+      setTahapanList(list)
     } else {
       setTahapanList(TAHAP_DEFAULT.map((nama, i) => ({ nama_tahap: nama, urutan: i + 1, penerima_nama: '', tanggal_diterima: null, tanggal_diteruskan: null, catatan: '', _new: true })))
     }
@@ -96,21 +107,24 @@ function SuratMasukInner() {
     load()
   }
 
-  async function saveTahap(idx) {
-    const t = tahapanList[idx]
+  async function simpanSatu(t) {
     if (t.id) {
       await supabase.from('surat_tahapan').update({
         penerima_nama: t.penerima_nama, tanggal_diterima: t.tanggal_diterima,
         tanggal_diteruskan: t.tanggal_diteruskan, catatan: t.catatan
       }).eq('id', t.id)
-    } else {
-      const { data } = await supabase.from('surat_tahapan').insert({
-        surat_id: showTahapModal, nama_tahap: t.nama_tahap, urutan: t.urutan,
-        penerima_nama: t.penerima_nama, tanggal_diterima: t.tanggal_diterima,
-        tanggal_diteruskan: t.tanggal_diteruskan, catatan: t.catatan
-      }).select().single()
-      const updated = [...tahapanList]; updated[idx] = { ...data }; setTahapanList(updated)
+      return t
     }
+    const { data } = await supabase.from('surat_tahapan').insert({
+      surat_id: showTahapModal, nama_tahap: t.nama_tahap, urutan: t.urutan,
+      penerima_nama: t.penerima_nama, tanggal_diterima: t.tanggal_diterima,
+      tanggal_diteruskan: t.tanggal_diteruskan, catatan: t.catatan
+    }).select().single()
+    return data ? { ...data } : t
+  }
+  async function saveTahap(idx) {
+    const hasil = await simpanSatu(tahapanList[idx])
+    const updated = [...tahapanList]; updated[idx] = hasil; setTahapanList(updated)
     load()
   }
 
@@ -121,13 +135,45 @@ function SuratMasukInner() {
   }
 
   function terimaSekarang(idx) { updateTahapField(idx, 'tanggal_diterima', new Date().toISOString()) }
-  function teruskanSekarang(idx) {
-    updateTahapField(idx, 'tanggal_diteruskan', new Date().toISOString())
-    if (idx + 1 < tahapanList.length && !tahapanList[idx + 1].tanggal_diterima) {
-      const updated = [...tahapanList]
-      updated[idx + 1] = { ...updated[idx + 1], tanggal_diterima: new Date().toISOString() }
-      setTahapanList(updated)
+  // Teruskan ke tahap berikutnya, langsung tersimpan (tahap ini + tahap berikutnya)
+  async function teruskanSekarang(idx) {
+    const t = tahapanList[idx]
+    if (isTujuan(t.nama_tahap) && !confirm('Apakah proses surat di bidang/divisi tujuan sudah SELESAI?\n\nKlik OK jika sudah selesai — surat akan diteruskan ke Pengarsipan.')) return
+    const now = new Date().toISOString()
+    const list = tahapanList.map(x => ({ ...x }))
+    list[idx].tanggal_diteruskan = now
+    const next = idx + 1
+    if (next < list.length && !list[next].tanggal_diterima) list[next].tanggal_diterima = now
+    const hasil = [...list]
+    hasil[idx] = await simpanSatu(list[idx])
+    if (next < list.length) hasil[next] = await simpanSatu(list[next])
+    setTahapanList(hasil)
+    load()
+  }
+
+  // Kepala Markas bisa meneruskan ke tahap lain dulu sebelum ke Bidang/Divisi Tujuan
+  async function tambahTahapLain(idx) {
+    const nama = prompt('Nama tahap lanjutan setelah ini (mis. Ketua Bidang, Sekretaris, Bendahara):')
+    if (!nama || !nama.trim()) return
+    const list = [...tahapanList]
+    list.splice(idx + 1, 0, { nama_tahap: nama.trim(), penerima_nama: '', tanggal_diterima: null, tanggal_diteruskan: null, catatan: '', _new: true })
+    const hasil = []
+    for (let i = 0; i < list.length; i++) {
+      const t = { ...list[i], urutan: i + 1 }
+      if (t.id && list[i].urutan !== t.urutan) await supabase.from('surat_tahapan').update({ urutan: t.urutan }).eq('id', t.id)
+      hasil.push(t)
     }
+    hasil[idx + 1] = await simpanSatu(hasil[idx + 1])
+    setTahapanList(hasil)
+    load()
+  }
+
+  // Tahap lain boleh disisipkan antara Kepala Markas dan Bidang/Divisi Tujuan, selama surat belum pindah ke tahap berikutnya
+  function canTambah(idx) {
+    const km = tahapanList.findIndex(x => isKepalaMarkas(x.nama_tahap))
+    let tj = tahapanList.findIndex(x => isTujuan(x.nama_tahap))
+    if (tj < 0) tj = tahapanList.length
+    return km >= 0 && idx >= km && idx < tj - 0 && idx + 1 <= tj && !tahapanList[idx + 1]?.tanggal_diterima
   }
 
   function hariTertahan(t) {
@@ -136,6 +182,51 @@ function SuratMasukInner() {
   }
 
   const filtered = surat.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
+
+  // Unduh semua berkas surat masuk (sesuai hasil pencarian) sekaligus dalam satu file ZIP
+  async function unduhSemuaBerkas() {
+    const boleh = filtered.filter(r => !(r.sifat === 'Rahasia' && !isAdmin))
+    const target = boleh.filter(r => r.file_bukti_url)
+    if (target.length === 0) { alert('Belum ada berkas surat yang bisa diunduh.'); return }
+    const tanpaBerkas = boleh.length - target.length
+    if (!confirm(`Unduh ${target.length} berkas surat masuk dalam satu file ZIP?` + (tanpaBerkas ? `\n(${tanpaBerkas} surat lain tidak punya berkas terunggah.)` : ''))) return
+    const JSZip = (await import('jszip')).default
+    const zip = new JSZip()
+    const dipakai = new Set()
+    const gagal = []
+    let selesai = 0
+    setZipProg({ n: 0, total: target.length })
+    const kerjakan = async (r) => {
+      try {
+        const res = await fetch(r.file_bukti_url)
+        if (!res.ok) throw new Error('HTTP ' + res.status)
+        const blob = await res.blob()
+        const ext = (r.file_bukti_url.split('?')[0].split('.').pop() || 'pdf').toLowerCase().slice(0, 5)
+        let nama = `${r.tanggal_diterima_kantor || 'tanpa-tanggal'}_${String(r.nomor_surat || 'tanpa-nomor').replace(/[^a-zA-Z0-9]+/g, '-')}`
+        let unik = nama, i = 2
+        while (dipakai.has(unik)) unik = `${nama}-${i++}`
+        dipakai.add(unik)
+        zip.file(`${unik}.${ext}`, blob)
+      } catch (e) {
+        gagal.push(`${r.nomor_surat} (${r.file_bukti_url})`)
+      }
+      selesai++
+      setZipProg({ n: selesai, total: target.length })
+    }
+    for (let i = 0; i < target.length; i += 4) await Promise.all(target.slice(i, i + 4).map(kerjakan))
+    const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const csv = '\uFEFF' + [['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat'].map(esc).join(';'),
+      ...boleh.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat].map(esc).join(';'))].join('\n')
+    zip.file('daftar-surat-masuk.csv', csv)
+    if (gagal.length) zip.file('GAGAL-diunduh.txt', gagal.join('\n'))
+    const isi = await zip.generateAsync({ type: 'blob' })
+    const url = URL.createObjectURL(isi)
+    const a = document.createElement('a')
+    a.href = url; a.download = `berkas-surat-masuk-${new Date().toISOString().slice(0, 10)}.zip`
+    a.click(); URL.revokeObjectURL(url)
+    setZipProg(null)
+    if (gagal.length) alert(`${gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
+  }
 
   function exportCSV() {
     const header = ['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat','Petugas'].join(';')
@@ -174,7 +265,10 @@ function SuratMasukInner() {
         <div className="panel">
           <div className="panel-head">
             <input placeholder="Cari nomor surat / asal / perihal..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:280}} />
-            <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            </div>
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
@@ -261,7 +355,7 @@ function SuratMasukInner() {
                 return (
                   <div key={idx} style={{border:'1px solid var(--line)',borderRadius:12,padding:14,opacity: belumSampai ? 0.45 : 1}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,flexWrap:'wrap',gap:6}}>
-                      <strong>{idx+1}. {t.nama_tahap}</strong>
+                      <strong>{idx+1}. {labelTahap(t.nama_tahap)}</strong>
                       {tertahan !== null && tertahan >= 2 && <span style={{background:'#FBE7E7',color:'#B3261E',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>⚠ Tertahan {tertahan} hari</span>}
                       {tertahan !== null && tertahan < 2 && <span style={{background:'var(--gold-bg)',color:'var(--gold)',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>Sedang di sini</span>}
                       {t.tanggal_diteruskan && <span style={{background:'var(--stock-bg)',color:'var(--stock)',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>✓ Selesai diteruskan</span>}
@@ -283,7 +377,8 @@ function SuratMasukInner() {
                         {isAdmin && (
                           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                             {!t.tanggal_diterima && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>terimaSekarang(idx)}>Tandai Diterima Sekarang</button>}
-                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>Teruskan ke Tahap Berikutnya</button>}
+                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? '✅ Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? '✅ Proses Selesai → Pengarsipan' : isPengarsipan(t.nama_tahap) ? 'Arsip Selesai → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}
+                            {canTambah(idx) && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>tambahTahapLain(idx)}>+ Teruskan ke tahap lain dulu</button>}
                             <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>saveTahap(idx)}>Simpan</button>
                           </div>
                         )}

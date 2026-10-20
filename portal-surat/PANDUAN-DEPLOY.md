@@ -65,3 +65,14 @@ Sebelum itu dijalankan, halaman barunya akan menampilkan pesan bahwa tabel belum
 - Upload dokumen memakai bucket `bukti-surat` yang sudah ada (sama seperti Surat Masuk/Keluar).
 - Hanya admin yang bisa menambah, mengubah, dan menghapus. Akun lain hanya bisa melihat.
 - Backup Data (Excel) otomatis ikut memuat tiga data ini.
+
+---
+
+## Tambahan: Divisi/Biro, alur baru, unduh berkas
+
+- **Jalankan sekali** `supabase/migrasi-divisi-biro.sql` di Supabase SQL Editor (menambah kolom `divisi`
+  ke `surat_keluar` dan `arsip_dokumen`). Sebelum itu, menyimpan Surat Keluar / Perjanjian Kerja Sama /
+  Surat Keputusan baru akan menampilkan pesan kolom belum ada.
+- Alur surat masuk (default surat baru): Biro Umum → Sekretaris → Kepala Markas → Ketua / Ketua Bidang →
+  Bidang / Divisi Tujuan → Pengarsipan → Biro Umum (Arsip Kembali). Daftar tahap ada di `lib/tahap.js`.
+- Tombol "Unduh Semua Berkas (ZIP)" di Surat Masuk mengunduh semua berkas sesuai hasil pencarian.

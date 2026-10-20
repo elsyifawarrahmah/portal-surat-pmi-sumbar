@@ -38,7 +38,7 @@ export default function BackupPage() {
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetTahapan), 'Alur Surat Masuk')
 
       const sheetSuratKeluar = (suratKeluar.data || []).map(r => ({
-        'Tanggal': r.tanggal_surat, 'Nomor Surat': r.nomor_surat, 'Tujuan': r.tujuan_surat,
+        'Tanggal': r.tanggal_surat, 'Nomor Surat': r.nomor_surat, 'Divisi/Biro': r.divisi || '', 'Tujuan': r.tujuan_surat,
         'Perihal': r.perihal, 'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': r.file_bukti_url || '',
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSuratKeluar), 'Surat Keluar')
@@ -47,7 +47,7 @@ export default function BackupPage() {
       // kalau tabelnya belum dibuat, sheet-nya kosong dan backup lain tetap jalan)
       const arsipRows = arsip.data || []
       const sheetPks = arsipRows.filter(r => r.jenis === 'pks').map(r => ({
-        'Tanggal': r.tanggal, 'Nomor Perjanjian': r.nomor, 'Pihak Kedua / Mitra': r.pihak, 'Tentang': r.judul,
+        'Tanggal': r.tanggal, 'Nomor Perjanjian': r.nomor, 'Bidang/Divisi/Biro': r.divisi || '', 'Pihak Kedua / Mitra': r.pihak, 'Tentang': r.judul,
         'Berlaku Mulai': r.tanggal_mulai || '', 'Berlaku Sampai': r.tanggal_berakhir || '', 'Keterangan': r.keterangan || '',
         'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
       }))
@@ -55,13 +55,13 @@ export default function BackupPage() {
 
       const sheetSertifikat = arsipRows.filter(r => r.jenis === 'sertifikat').map(r => ({
         'Tanggal Terbit': r.tanggal, 'Jenis': r.kategori || '', 'Nomor': r.nomor, 'Penerima': r.pihak,
-        'Dalam Rangka': r.judul, 'Diterbitkan Oleh': r.penerbit || '', 'Catatan': r.keterangan || '',
+        'Nama Kegiatan': r.judul, 'Diterbitkan Oleh': r.penerbit || '', 'Catatan': r.keterangan || '',
         'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSertifikat), 'Sertifikat & Piagam')
 
       const sheetSk = arsipRows.filter(r => r.jenis === 'sk').map(r => ({
-        'Tanggal': r.tanggal, 'Nomor SK': r.nomor, 'Tentang': r.judul, 'Ditetapkan Oleh': r.penerbit || '',
+        'Tanggal': r.tanggal, 'Nomor SK': r.nomor, 'Bidang/Divisi/Biro': r.divisi || '', 'Tentang': r.judul, 'Ditetapkan Oleh': r.penerbit || '',
         'Berlaku Mulai': r.tanggal_mulai || '', 'Berlaku Sampai': r.tanggal_berakhir || '', 'Keterangan': r.keterangan || '',
         'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
       }))

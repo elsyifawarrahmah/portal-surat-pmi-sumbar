@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
+import { labelTahap } from '@/lib/tahap'
 import NotifikasiButton from '@/components/NotifikasiButton'
 
 export default function Dashboard() {
@@ -89,7 +90,7 @@ export default function Dashboard() {
                     <td data-label="No. Surat" className="mono">{t.surat_masuk?.nomor_surat}</td>
                     <td data-label="Perihal">{t.surat_masuk?.perihal}</td>
                     <td data-label="Asal">{t.surat_masuk?.asal_surat}</td>
-                    <td data-label="Tertahan di Tahap">{t.nama_tahap}</td>
+                    <td data-label="Tertahan di Tahap">{labelTahap(t.nama_tahap)}</td>
                     <td data-label="Dipegang Oleh">{t.penerima_nama || '-'}</td>
                     <td data-label="Sudah Berapa Hari"><span className="tag" style={{background:'#FBE7E7',color:'#B3261E'}}>{t.hari} hari</span></td>
                     <td style={{color:'var(--ink-soft)',textAlign:'right'}}>→</td>

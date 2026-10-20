@@ -13,6 +13,7 @@ const config = {
   fields: [
     { k: 'tanggal', label: 'Tanggal Penetapan', type: 'date', req: true },
     { k: 'nomor', label: 'Nomor SK', type: 'text', req: true, ph: '001/SK/PMI-SB/X/2026' },
+    { k: 'divisi', label: 'Bidang / Divisi / Biro', type: 'text', req: true, saran: true, ph: 'Biro Umum / nama bidang' },
     { k: 'judul', label: 'Tentang', type: 'text', req: true },
     { k: 'penerbit', label: 'Ditetapkan Oleh', type: 'text', ph: 'Ketua PMI Provinsi Sumatera Barat' },
     { k: 'tanggal_mulai', label: 'Berlaku Mulai', type: 'date' },
@@ -22,6 +23,7 @@ const config = {
   columns: [
     { label: 'Tanggal', render: r => tgl(r.tanggal) },
     { label: 'No. SK', k: 'nomor' },
+    { label: 'Bidang/Divisi/Biro', k: 'divisi' },
     { label: 'Tentang', k: 'judul' },
     { label: 'Ditetapkan Oleh', k: 'penerbit' },
     { label: 'Masa Berlaku', render: r => (r.tanggal_mulai || r.tanggal_berakhir) ? `${tgl(r.tanggal_mulai)} – ${tgl(r.tanggal_berakhir)}` : '-' },

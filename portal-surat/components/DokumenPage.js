@@ -66,6 +66,13 @@ export default function DokumenPage({ config }) {
     setLoading(false)
   }
 
+  function pesanError(error) {
+    return /divisi/i.test(error.message || '')
+      ? 'Kolom Divisi/Biro belum ada di database. Jalankan file supabase/migrasi-divisi-biro.sql di Supabase (SQL Editor) satu kali.'
+      : error.message
+  }
+  const saranDivisi = [...new Set(['Biro Umum', ...rows.map(r => r.divisi).filter(Boolean)])]
+
   function nilaiAwal() {
     const f = {}
     fields.forEach(x => { if (x.type === 'select') f[x.k] = x.opts[0] })
@@ -96,12 +103,12 @@ export default function DokumenPage({ config }) {
     if (form.file_bukti_url) payload.file_bukti_url = form.file_bukti_url
     if (editing) {
       const { error } = await supabase.from('arsip_dokumen').update(payload).eq('id', editing.id)
-      if (error) { setError(error.message); return }
+      if (error) { setError(pesanError(error)); return }
     } else {
       const { data: userData } = await supabase.auth.getUser()
       payload.petugas_id = userData.user.id
       const { error } = await supabase.from('arsip_dokumen').insert(payload)
-      if (error) { setError(error.message); return }
+      if (error) { setError(pesanError(error)); return }
     }
     setShowModal(false); load()
   }
@@ -219,6 +226,11 @@ export default function DokumenPage({ config }) {
                     </select>
                   ) : f.type === 'textarea' ? (
                     <textarea rows={3} value={form[f.k] || ''} placeholder={f.ph || ''} onChange={e => setForm({ ...form, [f.k]: e.target.value })} />
+                  ) : f.saran ? (
+                    <>
+                      <input list={'saran-' + f.k} value={form[f.k] || ''} placeholder={f.ph || ''} onChange={e => setForm({ ...form, [f.k]: e.target.value })} />
+                      <datalist id={'saran-' + f.k}>{saranDivisi.map(d => <option key={d} value={d} />)}</datalist>
+                    </>
                   ) : f.k === 'nomor' ? (
                     <div style={{display:'flex',gap:6}}>
                       <input type="text" value={form[f.k] || ''} placeholder={f.ph || ''} onChange={e => setForm({ ...form, [f.k]: e.target.value })} />

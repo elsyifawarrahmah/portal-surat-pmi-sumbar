@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
+import { kodeDivisi } from '@/lib/divisi'
 
 export default function SuratKeluarPage() {
   const supabase = createClient()
@@ -19,7 +20,8 @@ export default function SuratKeluarPage() {
 
   const fields = [
     { k:'tanggal_surat', label:'Tanggal Surat', type:'date', req:true },
-    { k:'nomor_surat', label:'Nomor Surat', type:'text', req:true, ph:'005/PMI-SB/VIII/2026' },
+    { k:'divisi', label:'Divisi / Biro yang Mengeluarkan Surat', type:'text', ph:'Biro Umum / nama bidang' },
+    { k:'nomor_surat', label:'Nomor Surat', type:'text', req:true, ph:'005/BU/PMI-SB/VIII/2026' },
     { k:'tujuan_surat', label:'Tujuan Surat', type:'text', req:true, ph:'PMI Pusat / Dinas Sosial / dll' },
     { k:'perihal', label:'Perihal', type:'text', req:true },
     { k:'sifat', label:'Sifat Surat', type:'select', opts:['Biasa','Penting','Segera','Rahasia'] },
@@ -27,6 +29,7 @@ export default function SuratKeluarPage() {
   const columns = [
     { k:'tanggal_surat', label:'Tanggal' },
     { k:'nomor_surat', label:'No. Surat' },
+    { k:'divisi', label:'Divisi/Biro' },
     { k:'tujuan_surat', label:'Tujuan' },
     { k:'perihal', label:'Perihal' },
     { k:'sifat', label:'Sifat' },
@@ -63,17 +66,18 @@ export default function SuratKeluarPage() {
 
   async function handleSave() {
     for (const f of fields) if (f.req && !form[f.k]) { setError('Lengkapi field wajib: ' + f.label); return }
+    if (!editing && !form.divisi) { setError('Lengkapi field wajib: Divisi / Biro yang Mengeluarkan Surat'); return }
     const payload = {}
     fields.forEach(f => payload[f.k] = form[f.k] ?? null)
     if (form.file_bukti_url) payload.file_bukti_url = form.file_bukti_url
     if (editing) {
       const { error } = await supabase.from('surat_keluar').update(payload).eq('id', editing.id)
-      if (error) { setError(error.message); return }
+      if (error) { setError(pesanError(error)); return }
     } else {
       const { data: userData } = await supabase.auth.getUser()
       payload.petugas_id = userData.user.id
       const { error } = await supabase.from('surat_keluar').insert(payload)
-      if (error) { setError(error.message); return }
+      if (error) { setError(pesanError(error)); return }
     }
     setShowModal(false); load()
   }
@@ -88,8 +92,8 @@ export default function SuratKeluarPage() {
   const filtered = rows.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
 
   function exportCSV() {
-    const header = ['Tanggal','Nomor Surat','Tujuan','Perihal','Sifat','Petugas'].join(';')
-    const csvRows = filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.tujuan_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
+    const header = ['Tanggal','Nomor Surat','Divisi/Biro','Tujuan','Perihal','Sifat','Petugas'].join(';')
+    const csvRows = filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.divisi||'', r.tujuan_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
     const csv = '\uFEFF' + [header, ...csvRows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -98,11 +102,19 @@ export default function SuratKeluarPage() {
     a.click(); URL.revokeObjectURL(url)
   }
 
+  function pesanError(error) {
+    return /divisi/i.test(error.message || '')
+      ? 'Kolom Divisi/Biro belum ada di database. Jalankan file supabase/migrasi-divisi-biro.sql di Supabase (SQL Editor) satu kali.'
+      : error.message
+  }
+  const saranDivisi = [...new Set(['Biro Umum', ...rows.map(r => r.divisi).filter(Boolean)])]
+
   function generateNomorOtomatis() {
     const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
     const now = new Date()
     const nomorUrut = String(rows.length + 1).padStart(3, '0')
-    const nomor = `${nomorUrut}/PMI-SB/${bulanRomawi[now.getMonth()]}/${now.getFullYear()}`
+    const kode = kodeDivisi(form.divisi)
+    const nomor = `${nomorUrut}/${kode ? kode + '/' : ''}PMI-SB/${bulanRomawi[now.getMonth()]}/${now.getFullYear()}`
     setForm(f => ({ ...f, nomor_surat: nomor }))
   }
 
@@ -167,6 +179,11 @@ export default function SuratKeluarPage() {
                     <select value={form[f.k]||''} onChange={e=>setForm({...form,[f.k]:e.target.value})}>
                       {f.opts.map(o=><option key={o}>{o}</option>)}
                     </select>
+                  ) : f.k === 'divisi' ? (
+                    <>
+                      <input list="saran-divisi" value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
+                      <datalist id="saran-divisi">{saranDivisi.map(d => <option key={d} value={d} />)}</datalist>
+                    </>
                   ) : f.k === 'nomor_surat' ? (
                     <div style={{display:'flex',gap:6}}>
                       <input type={f.type} value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
