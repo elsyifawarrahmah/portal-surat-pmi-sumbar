@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
 import { kodeDivisi } from '@/lib/divisi'
+import { unduhBerkasZip } from '@/lib/zip'
 
 export default function SuratKeluarPage() {
   const supabase = createClient()
@@ -15,6 +16,7 @@ export default function SuratKeluarPage() {
   const [error, setError] = useState('')
   const [myRole, setMyRole] = useState('viewer')
   const [uploading, setUploading] = useState(false)
+  const [zipProg, setZipProg] = useState(null)
 
   const isAdmin = myRole === 'admin'
 
@@ -91,6 +93,22 @@ export default function SuratKeluarPage() {
 
   const filtered = rows.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
 
+  // Unduh semua berkas surat keluar (sesuai hasil pencarian) dalam satu file ZIP
+  async function unduhSemuaBerkas() {
+    const adaBerkas = filtered.filter(r => r.file_bukti_url).length
+    if (adaBerkas === 0) { alert('Belum ada berkas surat yang bisa diunduh.'); return }
+    const tanpa = filtered.length - adaBerkas
+    if (!confirm(`Unduh ${adaBerkas} berkas surat keluar dalam satu file ZIP?` + (tanpa ? `\n(${tanpa} surat lain tidak punya berkas terunggah.)` : ''))) return
+    const hasil = await unduhBerkasZip({
+      rows: filtered, namaZip: 'berkas-surat-keluar', onProgress: setZipProg,
+      namaFile: r => `${r.tanggal_surat || 'tanpa-tanggal'}_${r.nomor_surat || 'tanpa-nomor'}`,
+      daftarHeader: ['Tanggal','Nomor Surat','Divisi/Biro','Tujuan','Perihal','Sifat'],
+      daftarBaris: filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.divisi || '', r.tujuan_surat, r.perihal, r.sifat]),
+    })
+    setZipProg(null)
+    if (hasil.gagal.length) alert(`${hasil.gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
+  }
+
   function exportCSV() {
     const header = ['Tanggal','Nomor Surat','Divisi/Biro','Tujuan','Perihal','Sifat','Petugas'].join(';')
     const csvRows = filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.divisi||'', r.tujuan_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
@@ -136,7 +154,10 @@ export default function SuratKeluarPage() {
         <div className="panel">
           <div className="panel-head">
             <input placeholder="Cari..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:260}} />
-            <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            </div>
           </div>
           <div style={{overflowX:'auto'}}>
             <table>

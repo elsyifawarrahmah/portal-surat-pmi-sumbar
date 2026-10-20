@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
+import { unduhBerkasZip } from '@/lib/zip'
 
 const BULAN_ROMAWI = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
 
@@ -35,6 +36,7 @@ export default function DokumenPage({ config }) {
   const [loadError, setLoadError] = useState('')
   const [myRole, setMyRole] = useState('viewer')
   const [uploading, setUploading] = useState(false)
+  const [zipProg, setZipProg] = useState(null)
 
   const isAdmin = myRole === 'admin'
   const { fields } = config
@@ -138,6 +140,22 @@ export default function DokumenPage({ config }) {
     a.click(); URL.revokeObjectURL(url)
   }
 
+  // Unduh semua berkas dokumen (sesuai hasil pencarian) dalam satu file ZIP
+  async function unduhSemuaBerkas() {
+    const adaBerkas = filtered.filter(r => r.file_bukti_url).length
+    if (adaBerkas === 0) { alert('Belum ada berkas dokumen yang bisa diunduh.'); return }
+    const tanpa = filtered.length - adaBerkas
+    if (!confirm(`Unduh ${adaBerkas} berkas ${config.judul} dalam satu file ZIP?` + (tanpa ? `\n(${tanpa} data lain tidak punya berkas terunggah.)` : ''))) return
+    const hasil = await unduhBerkasZip({
+      rows: filtered, namaZip: 'berkas-' + config.csvPrefix, onProgress: setZipProg,
+      namaFile: r => `${r.tanggal || 'tanpa-tanggal'}_${r.nomor || 'tanpa-nomor'}`,
+      daftarHeader: fields.map(f => f.label),
+      daftarBaris: filtered.map(r => fields.map(f => f.type === 'date' ? tgl(r[f.k]) : (r[f.k] ?? ''))),
+    })
+    setZipProg(null)
+    if (hasil.gagal.length) alert(`${hasil.gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
+  }
+
   function generateNomorOtomatis() {
     const now = new Date()
     const urut = String(rows.length + 1).padStart(3, '0')
@@ -169,7 +187,10 @@ export default function DokumenPage({ config }) {
         <div className="panel">
           <div className="panel-head">
             <input placeholder={config.cari || 'Cari...'} value={search} onChange={e => setSearch(e.target.value)} style={{maxWidth:260}} />
-            <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+            </div>
           </div>
           <div style={{overflowX:'auto'}}>
             <table>

@@ -75,4 +75,4 @@ Sebelum itu dijalankan, halaman barunya akan menampilkan pesan bahwa tabel belum
   Surat Keputusan baru akan menampilkan pesan kolom belum ada.
 - Alur surat masuk (default surat baru): Biro Umum → Sekretaris → Kepala Markas → Ketua / Ketua Bidang →
   Bidang / Divisi Tujuan → Pengarsipan → Biro Umum (Arsip Kembali). Daftar tahap ada di `lib/tahap.js`.
-- Tombol "Unduh Semua Berkas (ZIP)" di Surat Masuk mengunduh semua berkas sesuai hasil pencarian.
+- Tombol "Unduh Semua Berkas (ZIP)" ada di Surat Masuk, Surat Keluar, Perjanjian Kerja Sama, Sertifikat & Piagam, dan Surat Keputusan; mengunduh semua berkas sesuai hasil pencarian (kode di `lib/zip.js`).

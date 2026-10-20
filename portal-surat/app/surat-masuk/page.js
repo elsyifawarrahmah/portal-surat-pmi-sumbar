@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
 
+import { unduhBerkasZip } from '@/lib/zip'
 import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isPengarsipan } from '@/lib/tahap'
 
 export default function SuratMasukPage() {
@@ -186,46 +187,18 @@ function SuratMasukInner() {
   // Unduh semua berkas surat masuk (sesuai hasil pencarian) sekaligus dalam satu file ZIP
   async function unduhSemuaBerkas() {
     const boleh = filtered.filter(r => !(r.sifat === 'Rahasia' && !isAdmin))
-    const target = boleh.filter(r => r.file_bukti_url)
-    if (target.length === 0) { alert('Belum ada berkas surat yang bisa diunduh.'); return }
-    const tanpaBerkas = boleh.length - target.length
-    if (!confirm(`Unduh ${target.length} berkas surat masuk dalam satu file ZIP?` + (tanpaBerkas ? `\n(${tanpaBerkas} surat lain tidak punya berkas terunggah.)` : ''))) return
-    const JSZip = (await import('jszip')).default
-    const zip = new JSZip()
-    const dipakai = new Set()
-    const gagal = []
-    let selesai = 0
-    setZipProg({ n: 0, total: target.length })
-    const kerjakan = async (r) => {
-      try {
-        const res = await fetch(r.file_bukti_url)
-        if (!res.ok) throw new Error('HTTP ' + res.status)
-        const blob = await res.blob()
-        const ext = (r.file_bukti_url.split('?')[0].split('.').pop() || 'pdf').toLowerCase().slice(0, 5)
-        let nama = `${r.tanggal_diterima_kantor || 'tanpa-tanggal'}_${String(r.nomor_surat || 'tanpa-nomor').replace(/[^a-zA-Z0-9]+/g, '-')}`
-        let unik = nama, i = 2
-        while (dipakai.has(unik)) unik = `${nama}-${i++}`
-        dipakai.add(unik)
-        zip.file(`${unik}.${ext}`, blob)
-      } catch (e) {
-        gagal.push(`${r.nomor_surat} (${r.file_bukti_url})`)
-      }
-      selesai++
-      setZipProg({ n: selesai, total: target.length })
-    }
-    for (let i = 0; i < target.length; i += 4) await Promise.all(target.slice(i, i + 4).map(kerjakan))
-    const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const csv = '\uFEFF' + [['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat'].map(esc).join(';'),
-      ...boleh.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat].map(esc).join(';'))].join('\n')
-    zip.file('daftar-surat-masuk.csv', csv)
-    if (gagal.length) zip.file('GAGAL-diunduh.txt', gagal.join('\n'))
-    const isi = await zip.generateAsync({ type: 'blob' })
-    const url = URL.createObjectURL(isi)
-    const a = document.createElement('a')
-    a.href = url; a.download = `berkas-surat-masuk-${new Date().toISOString().slice(0, 10)}.zip`
-    a.click(); URL.revokeObjectURL(url)
+    const adaBerkas = boleh.filter(r => r.file_bukti_url).length
+    if (adaBerkas === 0) { alert('Belum ada berkas surat yang bisa diunduh.'); return }
+    const tanpa = boleh.length - adaBerkas
+    if (!confirm(`Unduh ${adaBerkas} berkas surat masuk dalam satu file ZIP?` + (tanpa ? `\n(${tanpa} surat lain tidak punya berkas terunggah.)` : ''))) return
+    const hasil = await unduhBerkasZip({
+      rows: boleh, namaZip: 'berkas-surat-masuk', onProgress: setZipProg,
+      namaFile: r => `${r.tanggal_diterima_kantor || 'tanpa-tanggal'}_${r.nomor_surat || 'tanpa-nomor'}`,
+      daftarHeader: ['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat'],
+      daftarBaris: boleh.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat]),
+    })
     setZipProg(null)
-    if (gagal.length) alert(`${gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
+    if (hasil.gagal.length) alert(`${hasil.gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
   }
 
   function exportCSV() {
