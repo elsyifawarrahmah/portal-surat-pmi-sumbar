@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import Sidebar from '@/components/Sidebar'
 
 import { unduhBerkasZip } from '@/lib/zip'
-import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isPengarsipan } from '@/lib/tahap'
+import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isSelesai, isPengarsipan, statusSurat } from '@/lib/tahap'
 
 export default function SuratMasukPage() {
   return (
@@ -24,6 +24,7 @@ function SuratMasukInner() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [showTahapModal, setShowTahapModal] = useState(null)
   const [zipProg, setZipProg] = useState(null)
+  const [tahapMap, setTahapMap] = useState({})
   const [tahapanList, setTahapanList] = useState([])
   const [form, setForm] = useState({})
   const [error, setError] = useState('')
@@ -48,6 +49,10 @@ function SuratMasukInner() {
     }
     const { data } = await supabase.from('surat_masuk').select('*, profiles(nama_lengkap)').order('tanggal_diterima_kantor', { ascending: false })
     setSurat(data || [])
+    const { data: semuaTahap } = await supabase.from('surat_tahapan').select('surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan')
+    const peta = {}
+    ;(semuaTahap || []).forEach(t => { (peta[t.surat_id] = peta[t.surat_id] || []).push(t) })
+    setTahapMap(peta)
     setLoading(false)
   }
 
@@ -55,15 +60,17 @@ function SuratMasukInner() {
     setShowTahapModal(suratId)
     const { data } = await supabase.from('surat_tahapan').select('*').eq('surat_id', suratId).order('urutan')
     if (data && data.length > 0) {
-      let list = data
-      // Surat lama belum punya tahap Pengarsipan -> tampilkan, tersimpan saat tombol Simpan/Teruskan ditekan
-      if (!data.some(t => isPengarsipan(t.nama_tahap))) {
-        const maks = Math.max(...data.map(t => t.urutan || 0))
-        const kosong = { penerima_nama: '', tanggal_diterima: null, tanggal_diteruskan: null, catatan: '', _new: true }
-        list = [...data,
-          { ...kosong, nama_tahap: 'Pengarsipan', urutan: maks + 1 },
-          { ...kosong, nama_tahap: 'Biro Umum (Arsip Kembali)', urutan: maks + 2 },
-        ]
+      // Surat lama: tampilkan tahap Selesai & Pengarsipan yang belum ada (tersimpan saat tombol Simpan/Teruskan ditekan)
+      const kosong = { penerima_nama: '', tanggal_diterima: null, tanggal_diteruskan: null, catatan: '', _new: true, urutan: 0 }
+      const list = [...data]
+      if (!list.some(t => isSelesai(t.nama_tahap))) {
+        const tj = list.findIndex(t => isTujuan(t.nama_tahap))
+        const sel = { ...kosong, nama_tahap: 'Selesai' }
+        if (tj >= 0 && list[tj].tanggal_diteruskan) { sel.tanggal_diterima = list[tj].tanggal_diteruskan; sel.tanggal_diteruskan = list[tj].tanggal_diteruskan }
+        list.splice(tj >= 0 ? tj + 1 : list.length, 0, sel)
+      }
+      if (!list.some(t => isPengarsipan(t.nama_tahap))) {
+        list.push({ ...kosong, nama_tahap: 'Pengarsipan' }, { ...kosong, nama_tahap: 'Biro Umum (Arsip Kembali)' })
       }
       setTahapanList(list)
     } else {
@@ -123,9 +130,21 @@ function SuratMasukInner() {
     }).select().single()
     return data ? { ...data } : t
   }
+  // Samakan nomor urut tahap di database dengan urutan yang tampil
+  async function rapikanUrutan(list) {
+    const hasil = []
+    for (let i = 0; i < list.length; i++) {
+      const t = { ...list[i] }
+      if (t.id && t.urutan !== i + 1) await supabase.from('surat_tahapan').update({ urutan: i + 1 }).eq('id', t.id)
+      t.urutan = i + 1
+      hasil.push(t)
+    }
+    return hasil
+  }
   async function saveTahap(idx) {
-    const hasil = await simpanSatu(tahapanList[idx])
-    const updated = [...tahapanList]; updated[idx] = hasil; setTahapanList(updated)
+    const rapi = await rapikanUrutan(tahapanList)
+    const hasil = await simpanSatu(rapi[idx])
+    const updated = [...rapi]; updated[idx] = hasil; setTahapanList(updated)
     load()
   }
 
@@ -139,15 +158,21 @@ function SuratMasukInner() {
   // Teruskan ke tahap berikutnya, langsung tersimpan (tahap ini + tahap berikutnya)
   async function teruskanSekarang(idx) {
     const t = tahapanList[idx]
-    if (isTujuan(t.nama_tahap) && !confirm('Apakah proses surat di bidang/divisi tujuan sudah SELESAI?\n\nKlik OK jika sudah selesai — surat akan diteruskan ke Pengarsipan.')) return
+    if (isTujuan(t.nama_tahap) && !confirm('Apakah proses surat di bidang/divisi tujuan sudah SELESAI?\n\nKlik OK jika sudah selesai — surat akan ditandai SELESAI lalu diserahkan ke Biro Umum untuk diarsip.')) return
     const now = new Date().toISOString()
-    const list = tahapanList.map(x => ({ ...x }))
+    const list = (await rapikanUrutan(tahapanList)).map(x => ({ ...x }))
     list[idx].tanggal_diteruskan = now
+    const diubah = [idx]
     const next = idx + 1
-    if (next < list.length && !list[next].tanggal_diterima) list[next].tanggal_diterima = now
+    if (next < list.length && !list[next].tanggal_diterima) { list[next].tanggal_diterima = now; diubah.push(next) }
+    // Tahap "Selesai" tercatat otomatis, lalu langsung ke Biro Umum untuk diarsip
+    if (next < list.length && isSelesai(list[next].nama_tahap)) {
+      list[next].tanggal_diteruskan = list[next].tanggal_diteruskan || now
+      const n2 = next + 1
+      if (n2 < list.length && !list[n2].tanggal_diterima) { list[n2].tanggal_diterima = now; diubah.push(n2) }
+    }
     const hasil = [...list]
-    hasil[idx] = await simpanSatu(list[idx])
-    if (next < list.length) hasil[next] = await simpanSatu(list[next])
+    for (const i of [...new Set(diubah)]) hasil[i] = await simpanSatu(list[i])
     setTahapanList(hasil)
     load()
   }
@@ -245,10 +270,10 @@ function SuratMasukInner() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Tgl Diterima Kantor</th><th>No. Surat</th><th>Asal</th><th>Perihal</th><th>Sifat</th><th>Bukti</th><th>Petugas</th><th>Alur</th></tr></thead>
+              <thead><tr><th>Tgl Diterima Kantor</th><th>No. Surat</th><th>Asal</th><th>Perihal</th><th>Sifat</th><th>Status</th><th>Bukti</th><th>Petugas</th><th>Alur</th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={8} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
-                filtered.length === 0 ? <tr><td colSpan={8} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada surat tercatat.</td></tr> :
+                {loading ? <tr><td colSpan={9} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
+                filtered.length === 0 ? <tr><td colSpan={9} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada surat tercatat.</td></tr> :
                 filtered.map(s => {
                   const isRahasia = s.sifat === 'Rahasia' && !isAdmin
                   return (
@@ -258,6 +283,7 @@ function SuratMasukInner() {
                     <td data-label="Asal">{isRahasia ? '🔒 Rahasia' : s.asal_surat}</td>
                     <td data-label="Perihal">{isRahasia ? 'Hanya admin yang bisa lihat' : s.perihal}</td>
                     <td data-label="Sifat"><span className="tag" style={sifatStyle(s.sifat)}>{s.sifat}</span></td>
+                    <td data-label="Status">{isRahasia ? '-' : (() => { const st = statusSurat(tahapMap[s.id]); return st ? <span className="tag" style={st.tone === 'ok' ? { background: 'var(--stock-bg)', color: 'var(--stock)' } : { background: 'var(--gold-bg)', color: 'var(--gold)' }}>{st.label}</span> : '-' })()}</td>
                     <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <a href={s.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
                     <td data-label="Petugas">{s.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right'}}>{isRahasia ? '' : 'Lihat Alur →'}</td>
@@ -343,6 +369,7 @@ function SuratMasukInner() {
                         ) : (
                           <div style={{fontSize:13,marginBottom:8}}>Penerima: <strong>{t.penerima_nama || '-'}</strong></div>
                         )}
+                        {isSelesai(t.nama_tahap) && <div style={{fontSize:12.5,color:'var(--stock)',marginBottom:8}}>Tercatat otomatis saat bidang/divisi tujuan menyatakan proses selesai, sebelum diarsip oleh Biro Umum.</div>}
                         <div style={{display:'flex',gap:8,marginBottom:8,fontSize:12.5,color:'var(--ink-soft)',flexWrap:'wrap'}}>
                           <div>Diterima: <strong>{t.tanggal_diterima ? new Date(t.tanggal_diterima).toLocaleString('id-ID') : 'Belum'}</strong></div>
                           <div>Diteruskan: <strong>{t.tanggal_diteruskan ? new Date(t.tanggal_diteruskan).toLocaleString('id-ID') : 'Belum'}</strong></div>
@@ -350,7 +377,7 @@ function SuratMasukInner() {
                         {isAdmin && (
                           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                             {!t.tanggal_diterima && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>terimaSekarang(idx)}>Tandai Diterima Sekarang</button>}
-                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? '✅ Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? '✅ Proses Selesai → Pengarsipan' : isPengarsipan(t.nama_tahap) ? 'Arsip Selesai → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}
+                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? '✅ Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? '✅ Proses Selesai' : isSelesai(t.nama_tahap) ? 'Serahkan ke Biro Umum untuk Diarsip' : isPengarsipan(t.nama_tahap) ? 'Sudah Diarsip → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}
                             {canTambah(idx) && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>tambahTahapLain(idx)}>+ Teruskan ke tahap lain dulu</button>}
                             <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>saveTahap(idx)}>Simpan</button>
                           </div>
