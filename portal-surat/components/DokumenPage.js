@@ -3,7 +3,6 @@
 // Pola sama dengan Surat Keluar: tabel, cari, export CSV, upload bukti, hanya admin yang bisa tambah/ubah/hapus.
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 import { unduhBerkasZip } from '@/lib/zip'
 
 const BULAN_ROMAWI = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
@@ -167,7 +166,6 @@ export default function DokumenPage({ config }) {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>{config.judul}</h1><p className="desc">{config.deskripsi}</p></div>

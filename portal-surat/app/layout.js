@@ -1,4 +1,5 @@
 import './globals.css'
+import AppShell from '@/components/AppShell'
 
 export const metadata = {
   title: 'Portal Surat — PMI Sumatera Barat',
@@ -21,7 +22,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
         <meta name="color-scheme" content="light only" />
       </head>
-      <body>{children}</body>
+      <body><AppShell>{children}</AppShell></body>
     </html>
   )
 }

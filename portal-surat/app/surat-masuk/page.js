@@ -2,7 +2,6 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 
 import { unduhBerkasZip } from '@/lib/zip'
 import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isSelesai, isPengarsipan, statusSurat } from '@/lib/tahap'
@@ -247,7 +246,6 @@ function SuratMasukInner() {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>Surat Masuk</h1><p className="desc">Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.</p></div>

@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 import { labelTahap } from '@/lib/tahap'
 import NotifikasiButton from '@/components/NotifikasiButton'
 
@@ -62,7 +61,6 @@ export default function Dashboard() {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>Ringkasan Surat</h1><p className="desc">Ringkasan surat masuk dan keluar PMI Sumatera Barat.</p></div>

@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 
 export default function LogAktivitasPage() {
   const supabase = createClient()
@@ -28,7 +27,6 @@ export default function LogAktivitasPage() {
   if (!isAdmin && !loading) {
     return (
       <div className="app">
-        <Sidebar />
         <div className="main">
           <div className="topbar"><div><h1>Log Aktivitas</h1><p className="desc">Halaman ini khusus admin.</p></div></div>
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'12px 16px',borderRadius:10,fontSize:13,fontWeight:600}}>
@@ -43,7 +41,6 @@ export default function LogAktivitasPage() {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>Log Aktivitas</h1><p className="desc">Jejak siapa menambah, mengubah, atau menghapus data — untuk akuntabilitas.</p></div>

@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 
 export default function BackupPage() {
   const supabase = createClient()
@@ -98,7 +97,6 @@ export default function BackupPage() {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>Backup Data</h1><p className="desc">Unduh semua data sekaligus dalam satu file Excel, sebagai arsip cadangan.</p></div>

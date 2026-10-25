@@ -2,7 +2,6 @@
 // Arsip Biro Umum: satu tempat untuk mengarsipkan semua jenis dokumen + mencatat lokasi simpannya.
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 import { statusSurat, isPengarsipan, labelTahap } from '@/lib/tahap'
 import { unduhBerkasZip } from '@/lib/zip'
 
@@ -199,7 +198,6 @@ export default function ArsipPage() {
 
   return (
     <div className="app">
-      <Sidebar />
       <div className="main">
         <div className="topbar">
           <div><h1>Arsip Biro Umum</h1><p className="desc">Register arsip semua dokumen: catat lokasi simpan, tandai sudah diarsip, dan cari dengan cepat.</p></div>

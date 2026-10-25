@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -41,6 +42,16 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  // Ingat menu tertutup/terbuka, dan tandai di <body> supaya isi halaman ikut menyesuaikan
+  useEffect(() => { try { if (sessionStorage.getItem('menuTutup') === '1') setCollapsed(true) } catch (e) {} }, [])
+  useEffect(() => {
+    document.body.classList.toggle('menu-tutup', collapsed)
+    try { sessionStorage.setItem('menuTutup', collapsed ? '1' : '0') } catch (e) {}
+    return () => document.body.classList.remove('menu-tutup')
+  }, [collapsed])
+  // Laci menu di HP menutup sendiri setelah pindah halaman
+  useEffect(() => { setMobileOpen(false) }, [pathname])
+
   useEffect(() => {
     async function ping() {
       const { data: userData } = await supabase.auth.getUser()
@@ -79,9 +90,9 @@ export default function Sidebar() {
         </div>
         <div className="nav">
           {LINKS.map(l => (
-            <a key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
+            <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
               {ICONS[l.icon]}{l.label}
-            </a>
+            </Link>
           ))}
         </div>
         <div className="sidebar-foot">
