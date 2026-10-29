@@ -1,11 +1,25 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import { kodeDivisi } from '@/lib/divisi'
 import { unduhBerkasZip } from '@/lib/zip'
+import { usePeran, useUnits } from '@/lib/peran'
+import RiwayatModal from '@/components/RiwayatModal'
+import { PESAN_MIGRASI } from '@/lib/format'
 
 export default function SuratKeluarPage() {
+  return <Suspense fallback={null}><SuratKeluarInner /></Suspense>
+}
+
+function SuratKeluarInner() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const peran = usePeran()
+  const { units } = useUnits()
+  const [suratMasukList, setSuratMasukList] = useState([])
+  const [modalRiwayat, setModalRiwayat] = useState(null)
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -13,11 +27,14 @@ export default function SuratKeluarPage() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [error, setError] = useState('')
-  const [myRole, setMyRole] = useState('viewer')
   const [uploading, setUploading] = useState(false)
   const [zipProg, setZipProg] = useState(null)
 
-  const isAdmin = myRole === 'admin'
+  const isAdmin = peran.isAdmin
+  const bolehCatat = peran.bisaCatatKeluar
+  // unit biasa (bukan admin) mengeluarkan surat atas nama unitnya sendiri
+  const unitSaya = !peran.isAdmin && peran.unit ? peran.unit : null
+  const bisaUbah = r => isAdmin || (bolehCatat && (r.petugas_id === peran.userId || (peran.unitId && r.unit_id === peran.unitId)))
 
   const fields = [
     { k:'tanggal_surat', label:'Tanggal Surat', type:'date', req:true },
@@ -36,21 +53,21 @@ export default function SuratKeluarPage() {
     { k:'sifat', label:'Sifat' },
   ]
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { if (!peran.loading) load() }, [peran.loading])
 
   async function load() {
     setLoading(true)
-    const { data: userData } = await supabase.auth.getUser()
-    if (userData?.user) {
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userData.user.id).single()
-      if (profile) setMyRole(profile.role)
-    }
-    const { data } = await supabase.from('surat_keluar').select('*, profiles(nama_lengkap)').order('tanggal_surat', { ascending: false })
-    setRows(data || [])
+    let r = await supabase.from('surat_keluar').select('*, profiles(nama_lengkap), jawab:surat_masuk(nomor_surat)').order('tanggal_surat', { ascending: false })
+    if (r.error) r = await supabase.from('surat_keluar').select('*, profiles(nama_lengkap)').order('tanggal_surat', { ascending: false })  // database belum diperbarui
+    setRows(r.data || [])
+    const { data: sm } = await supabase.from('surat_masuk').select('id, nomor_surat, perihal, asal_surat, sifat').order('created_at', { ascending: false }).limit(300)
+    setSuratMasukList((sm || []).filter(x => x.sifat !== 'Rahasia' || isAdmin))
     setLoading(false)
   }
 
-  function openAdd() { setEditing(null); setForm({}); setError(''); setShowModal(true) }
+  function openAdd(jawabId) { setEditing(null); setForm({ ...(unitSaya ? { divisi: unitSaya.nama } : {}), ...(jawabId ? { surat_masuk_id: jawabId } : {}) }); setError(''); setShowModal(true) }
+  // dari tombol "Buat surat jawaban" di Disposisi: ?jawab=<id surat masuk>
+  useEffect(() => { const j = searchParams.get('jawab'); if (j && !peran.loading && bolehCatat) openAdd(j) }, [searchParams, peran.loading])
   function openEdit(row) { setEditing(row); setForm(row); setError(''); setShowModal(true) }
 
   async function handleUploadBukti(e) {
@@ -71,6 +88,11 @@ export default function SuratKeluarPage() {
     const payload = {}
     fields.forEach(f => payload[f.k] = form[f.k] ?? null)
     if (form.file_bukti_url) payload.file_bukti_url = form.file_bukti_url
+    payload.surat_masuk_id = form.surat_masuk_id || null
+    // kaitkan dengan unit: unit sendiri (akun bidang), atau cocokkan nama divisi (admin)
+    const norm = x => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim()
+    const cocok = units.find(u => norm(u.nama) === norm(form.divisi) || norm(u.nama.replace(/^bidang /i, '')) === norm(form.divisi))
+    if (unitSaya) { payload.unit_id = unitSaya.id; payload.divisi = unitSaya.nama } else if (cocok) payload.unit_id = cocok.id
     if (editing) {
       const { error } = await supabase.from('surat_keluar').update(payload).eq('id', editing.id)
       if (error) { setError(pesanError(error)); return }
@@ -120,6 +142,7 @@ export default function SuratKeluarPage() {
   }
 
   function pesanError(error) {
+    if (/unit_id|surat_masuk_id|nomor_agenda/.test(error.message || '')) return PESAN_MIGRASI
     return /divisi/i.test(error.message || '')
       ? 'Kolom Divisi/Biro belum ada di database. Jalankan file supabase/migrasi-divisi-biro.sql di Supabase (SQL Editor) satu kali.'
       : error.message
@@ -140,14 +163,15 @@ export default function SuratKeluarPage() {
       <div className="main">
         <div className="topbar">
           <div><h1>Surat Keluar</h1><p className="desc">Catatan surat yang dikirim keluar dari PMI Sumatera Barat.</p></div>
-          {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ Tambah Data</button>}
+          {bolehCatat && <button className="btn btn-primary" onClick={() => openAdd()}>+ Tambah Data</button>}
         </div>
 
-        {!isAdmin && (
+        {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat data. Untuk menambah atau mengubah, hubungi admin (Kabid).
+            👁 {peran.isBiroUmum ? 'Biro Umum hanya memantau: surat keluar dicatat oleh tiap bidang / Sekretariat.' : 'Akun kamu hanya bisa melihat data. Minta admin mengatur unit/bidang kamu di menu Data User agar bisa mencatat surat keluar.'}
           </div>
         )}
+        {peran.migrasiBelum && <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>{PESAN_MIGRASI}</div>}
 
         <div className="panel">
           <div className="panel-head">
@@ -159,21 +183,22 @@ export default function SuratKeluarPage() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr>{columns.map(c=><th key={c.k}>{c.label}</th>)}<th>Bukti</th><th>Petugas</th>{isAdmin && <th></th>}</tr></thead>
+              <thead><tr><th>Agenda</th>{columns.map(c=><th key={c.k}>{c.label}</th>)}<th>Jawaban untuk</th><th>Bukti</th><th>Petugas</th><th></th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={columns.length+3} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
-                filtered.length===0 ? <tr><td colSpan={columns.length+3} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada data.</td></tr> :
+                {loading ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
+                filtered.length===0 ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada data.</td></tr> :
                 filtered.map(r => (
                   <tr key={r.id}>
+                    <td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
                     {columns.map(c => <td key={c.k} data-label={c.label}>{r[c.k] ?? '-'}</td>)}
+                    <td data-label="Jawaban untuk" className="mono">{r.jawab?.nomor_surat || '-'}</td>
                     <td data-label="Bukti">{r.file_bukti_url ? <a href={r.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
                     <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
-                    {isAdmin && (
-                      <td data-label="">
-                        <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>openEdit(r)}>Edit</button>
-                        <button className="btn btn-ghost" style={{padding:'4px 8px'}} onClick={()=>handleDelete(r.id)}>Hapus</button>
-                      </td>
-                    )}
+                    <td data-label="" style={{whiteSpace:'nowrap'}}>
+                      <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>setModalRiwayat(r)}>Riwayat</button>
+                      {bisaUbah(r) && <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>openEdit(r)}>Edit</button>}
+                      {isAdmin && <button className="btn btn-ghost" style={{padding:'4px 8px'}} onClick={()=>handleDelete(r.id)}>Hapus</button>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -198,6 +223,8 @@ export default function SuratKeluarPage() {
                     <select value={form[f.k]||''} onChange={e=>setForm({...form,[f.k]:e.target.value})}>
                       {f.opts.map(o=><option key={o}>{o}</option>)}
                     </select>
+                  ) : f.k === 'divisi' && unitSaya ? (
+                    <input value={unitSaya.nama} disabled />
                   ) : f.k === 'divisi' ? (
                     <>
                       <input list="saran-divisi" value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
@@ -214,6 +241,14 @@ export default function SuratKeluarPage() {
                 </div>
               ))}
               <div className="field">
+                <label>Surat jawaban untuk surat masuk (opsional)</label>
+                <select value={form.surat_masuk_id||''} onChange={e=>setForm({...form,surat_masuk_id:e.target.value})}>
+                  <option value="">— bukan surat jawaban —</option>
+                  {suratMasukList.map(m => <option key={m.id} value={m.id}>{m.nomor_surat} — {m.asal_surat}: {m.perihal}</option>)}
+                </select>
+                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Nomor agenda surat keluar terisi otomatis. Setelah tersimpan, catat pengirimannya di menu <Link href="/ekspedisi" style={{color:'var(--pmi-red)',fontWeight:700}}>Ekspedisi</Link>.</div>
+              </div>
+              <div className="field">
                 <label>File Bukti (PDF/Foto Surat) — opsional</label>
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleUploadBukti} />
                 {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
@@ -228,6 +263,7 @@ export default function SuratKeluarPage() {
           </div>
         </div>
       )}
+      {modalRiwayat && <RiwayatModal supabase={supabase} jenis="keluar" surat={modalRiwayat} peran={peran} onClose={() => setModalRiwayat(null)} />}
     </div>
   )
 }

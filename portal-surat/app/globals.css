@@ -127,3 +127,13 @@ td{padding:13px 12px;border-bottom:1px solid var(--line);}
   td[data-label=""]:before{content:none;}
   td:not([data-label]){justify-content:center;}
 }
+
+
+/* ===== Tambahan: lencana menu, info pengguna, tumpuk di HP ===== */
+.nav-badge{background:#fff;color:var(--pmi-red-dark);border-radius:999px;font-size:12px;font-weight:800;min-width:22px;height:22px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;}
+.nav a.active .nav-badge{background:var(--pmi-red);color:#fff;}
+.sidebar-user{font-size:13px;margin-bottom:10px;line-height:1.3;}
+.sidebar-user b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sidebar-user span{opacity:.75;font-size:12px;}
+@media (max-width: 768px){ .stack-hp-saran{grid-template-columns:1fr !important;} .stack-hp{grid-template-columns:1fr !important;} }
+@media (max-width: 600px){ .btn.btn-ghost,.btn.btn-primary{min-height:44px;} }

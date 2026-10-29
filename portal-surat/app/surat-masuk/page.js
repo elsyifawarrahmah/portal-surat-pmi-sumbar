@@ -4,6 +4,11 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
 import { unduhBerkasZip } from '@/lib/zip'
+import { usePeran, useUnits } from '@/lib/peran'
+import Modal from '@/components/Modal'
+import DisposisiPanel from '@/components/DisposisiPanel'
+import RiwayatModal from '@/components/RiwayatModal'
+import { fmtTgl, PESAN_MIGRASI, STATUS_DISPOSISI } from '@/lib/format'
 import { TAHAP_DEFAULT, labelTahap, isKepalaMarkas, isTujuan, isSelesai, isPengarsipan, statusSurat } from '@/lib/tahap'
 
 export default function SuratMasukPage() {
@@ -27,7 +32,11 @@ function SuratMasukInner() {
   const [tahapanList, setTahapanList] = useState([])
   const [form, setForm] = useState({})
   const [error, setError] = useState('')
-  const [myRole, setMyRole] = useState('viewer')
+  const peran = usePeran()
+  const { units } = useUnits()
+  const [disposisiMap, setDisposisiMap] = useState({})
+  const [modalDisposisi, setModalDisposisi] = useState(null)
+  const [modalRiwayat, setModalRiwayat] = useState(null)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => { load() }, [])
@@ -35,23 +44,27 @@ function SuratMasukInner() {
   useEffect(() => {
     const openId = searchParams.get('open')
     if (openId) openTahap(openId)
+    const dispId = searchParams.get('disposisi')
+    if (dispId) supabase.from('surat_masuk').select('*').eq('id', dispId).maybeSingle().then(({ data }) => { if (data) setModalDisposisi(data) })
   }, [searchParams])
 
-  const isAdmin = myRole === 'admin'
+  const isAdmin = peran.isAdmin            // admin: boleh lihat surat Rahasia
+  const bolehCatat = peran.bisaCatatMasuk  // admin / Sekretariat: mencatat surat masuk
+  const bolehAlur = peran.bisaAlur         // admin / Sekretariat / pimpinan / Biro Umum: mengurus alur & pengarsipan
 
   async function load() {
     setLoading(true)
-    const { data: userData } = await supabase.auth.getUser()
-    if (userData?.user) {
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', userData.user.id).single()
-      if (profile) setMyRole(profile.role)
-    }
     const { data } = await supabase.from('surat_masuk').select('*, profiles(nama_lengkap)').order('tanggal_diterima_kantor', { ascending: false })
     setSurat(data || [])
     const { data: semuaTahap } = await supabase.from('surat_tahapan').select('surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan')
     const peta = {}
     ;(semuaTahap || []).forEach(t => { (peta[t.surat_id] = peta[t.surat_id] || []).push(t) })
     setTahapMap(peta)
+    // ringkasan disposisi per surat (kosong bila migrasi belum dijalankan)
+    const { data: tj, error: errTj } = await supabase.from('surat_disposisi_tujuan').select('status, disposisi:surat_disposisi(surat_id)')
+    const dm = {}
+    if (!errTj) (tj || []).forEach(t => { const id = t.disposisi?.surat_id; if (!id) return; const d = (dm[id] = dm[id] || { total: 0, selesai: 0 }); d.total++; if (t.status === 'selesai') d.selesai++ })
+    setDisposisiMap(dm)
     setLoading(false)
   }
 
@@ -100,10 +113,12 @@ function SuratMasukInner() {
     }
     const { data: userData } = await supabase.auth.getUser()
     const { file_bukti_nama, ...payload } = form
+    if (!payload.macam_surat) delete payload.macam_surat
+    if (!payload.lampiran) delete payload.lampiran
     const { data: newSurat, error: err } = await supabase.from('surat_masuk').insert({
       ...payload, petugas_id: userData.user.id
     }).select().single()
-    if (err) { setError(err.message); return }
+    if (err) { setError(/macam_surat|lampiran|nomor_agenda/.test(err.message) ? PESAN_MIGRASI : err.message); return }
     const tahapRows = TAHAP_DEFAULT.map((nama, i) => ({
       surat_id: newSurat.id, nama_tahap: nama, urutan: i + 1,
       tanggal_diterima: i === 0 ? new Date().toISOString() : null,
@@ -249,13 +264,16 @@ function SuratMasukInner() {
       <div className="main">
         <div className="topbar">
           <div><h1>Surat Masuk</h1><p className="desc">Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.</p></div>
-          {isAdmin && <button className="btn btn-primary" onClick={() => { setForm({}); setError(''); setShowAddModal(true) }}>+ Catat Surat Masuk</button>}
+          {bolehCatat && <button className="btn btn-primary" onClick={() => { setForm({}); setError(''); setShowAddModal(true) }}>+ Catat Surat Masuk</button>}
         </div>
 
-        {!isAdmin && (
+        {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat data. Untuk menambah atau mengubah, hubungi admin (Kabid).
+            👁 Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretariat. Buka kolom “Disposisi” untuk melihat disposisi surat.
           </div>
+        )}
+        {peran.migrasiBelum && (
+          <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>{PESAN_MIGRASI}</div>
         )}
 
         <div className="panel">
@@ -268,23 +286,25 @@ function SuratMasukInner() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Tgl Diterima Kantor</th><th>No. Surat</th><th>Asal</th><th>Perihal</th><th>Sifat</th><th>Status</th><th>Bukti</th><th>Petugas</th><th>Alur</th></tr></thead>
+              <thead><tr><th>Tgl Diterima Kantor</th><th>Agenda</th><th>No. Surat</th><th>Asal</th><th>Perihal</th><th>Sifat</th><th>Status</th><th>Disposisi</th><th>Bukti</th><th>Petugas</th><th></th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={9} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
-                filtered.length === 0 ? <tr><td colSpan={9} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada surat tercatat.</td></tr> :
+                {loading ? <tr><td colSpan={11} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
+                filtered.length === 0 ? <tr><td colSpan={11} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada surat tercatat.</td></tr> :
                 filtered.map(s => {
                   const isRahasia = s.sifat === 'Rahasia' && !isAdmin
                   return (
                   <tr key={s.id} className="row-click" onClick={()=>{ if (!isRahasia) openTahap(s.id) }}>
                     <td data-label="Tgl Diterima">{s.tanggal_diterima_kantor}</td>
-                    <td data-label="No. Surat" className="mono">{isRahasia ? '••••••' : s.nomor_surat}</td>
+                    <td data-label="Agenda" className="mono">{s.nomor_agenda || '-'}</td>
+                    <td data-label="No. Surat" className="mono">{isRahasia ? '••••••' : s.nomor_surat}{!isRahasia && s.macam_surat && <div style={{fontSize:11.5,color:'var(--ink-soft)',fontFamily:'inherit'}}>{s.macam_surat}</div>}</td>
                     <td data-label="Asal">{isRahasia ? '🔒 Rahasia' : s.asal_surat}</td>
                     <td data-label="Perihal">{isRahasia ? 'Hanya admin yang bisa lihat' : s.perihal}</td>
                     <td data-label="Sifat"><span className="tag" style={sifatStyle(s.sifat)}>{s.sifat}</span></td>
                     <td data-label="Status">{isRahasia ? '-' : (() => { const st = statusSurat(tahapMap[s.id]); return st ? <span className="tag" style={st.tone === 'ok' ? { background: 'var(--stock-bg)', color: 'var(--stock)' } : { background: 'var(--gold-bg)', color: 'var(--gold)' }}>{st.label}</span> : '-' })()}</td>
+                    <td data-label="Disposisi" onClick={e=>e.stopPropagation()}>{isRahasia ? '-' : (() => { const d = disposisiMap[s.id]; return <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>setModalDisposisi(s)}>{d ? <span style={{color: d.selesai === d.total ? 'var(--stock)' : 'var(--gold)',fontWeight:700}}>{d.total} tujuan · {d.selesai} selesai</span> : (peran.bisaDisposisi ? '+ Disposisi' : 'Belum')}</button> })()}</td>
                     <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <a href={s.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
                     <td data-label="Petugas">{s.profiles?.nama_lengkap || '-'}</td>
-                    <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right'}}>{isRahasia ? '' : 'Lihat Alur →'}</td>
+                    <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right',whiteSpace:'nowrap'}} onClick={e=>e.stopPropagation()}>{isRahasia ? '' : <><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,marginRight:6}} onClick={()=>setModalRiwayat(s)}>Riwayat</button><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>openTahap(s.id)}>Alur →</button></>}</td>
                   </tr>
                 )})}
               </tbody>
@@ -302,7 +322,7 @@ function SuratMasukInner() {
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:50}} onClick={e=>{if(e.target===e.currentTarget)setShowAddModal(false)}}>
           <div style={{background:'#fff',borderRadius:16,width:'100%',maxWidth:460,maxHeight:'90vh',overflowY:'auto'}}>
             <div style={{padding:'18px 22px',borderBottom:'1px solid var(--line)',display:'flex',justifyContent:'space-between'}}>
-              <h3 style={{margin:0}}>Catat Surat Masuk Baru</h3>
+              <h3 style={{margin:0}}>Catat Surat Masuk Baru <span style={{fontSize:12,fontWeight:400,color:'var(--ink-soft)'}}>· nomor agenda terisi otomatis</span></h3>
               <button onClick={()=>setShowAddModal(false)} style={{border:'none',background:'none',cursor:'pointer',fontSize:16}}>✕</button>
             </div>
             <div style={{padding:'20px 22px'}}>
@@ -318,6 +338,11 @@ function SuratMasukInner() {
               <div className="field"><label>Tanggal Diterima di Kantor</label><input type="date" value={form.tanggal_diterima_kantor||''} onChange={e=>setForm({...form,tanggal_diterima_kantor:e.target.value})} /></div>
               <div className="field"><label>Asal Surat</label><input value={form.asal_surat||''} onChange={e=>setForm({...form,asal_surat:e.target.value})} placeholder="PMI Pusat / Dinas Sosial / dll" /></div>
               <div className="field"><label>Perihal</label><input value={form.perihal||''} onChange={e=>setForm({...form,perihal:e.target.value})} placeholder="Undangan rapat koordinasi" /></div>
+              <div className="field"><label>Macam Surat</label>
+                <input list="macam-surat" value={form.macam_surat||''} onChange={e=>setForm({...form,macam_surat:e.target.value})} placeholder="Undangan / Permohonan / Pemberitahuan / ..." />
+                <datalist id="macam-surat">{['Undangan','Permohonan','Pemberitahuan','Surat Edaran','Laporan','Surat Tugas','Balasan','Lain-lain'].map(m=><option key={m} value={m} />)}</datalist>
+              </div>
+              <div className="field"><label>Lampiran</label><input value={form.lampiran||''} onChange={e=>setForm({...form,lampiran:e.target.value})} placeholder="mis. 1 berkas / 2 lembar / -" /></div>
               <div className="field"><label>Sifat Surat</label>
                 <select value={form.sifat||'Biasa'} onChange={e=>setForm({...form,sifat:e.target.value})}>
                   <option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option>
@@ -337,6 +362,18 @@ function SuratMasukInner() {
           </div>
         </div>
       )}
+
+      {modalDisposisi && (
+        <Modal judul={`Disposisi — ${modalDisposisi.nomor_surat}`} onClose={() => setModalDisposisi(null)} lebar={760}>
+          <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, marginBottom: 14 }}>
+            <b>{modalDisposisi.asal_surat}</b> — {modalDisposisi.perihal}<br />
+            <span style={{ color: 'var(--ink-soft)' }}>Agenda {modalDisposisi.nomor_agenda || '-'} · diterima {fmtTgl(modalDisposisi.tanggal_diterima_kantor)}</span>
+            {modalDisposisi.file_bukti_url && <> · <a href={modalDisposisi.file_bukti_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</a></>}
+          </div>
+          <DisposisiPanel supabase={supabase} surat={modalDisposisi} units={units} peran={peran} onChanged={load} />
+        </Modal>
+      )}
+      {modalRiwayat && <RiwayatModal supabase={supabase} jenis="masuk" surat={modalRiwayat} peran={peran} onClose={() => setModalRiwayat(null)} />}
 
       {showTahapModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:50}} onClick={e=>{if(e.target===e.currentTarget)setShowTahapModal(null)}}>
@@ -359,7 +396,7 @@ function SuratMasukInner() {
                     </div>
                     {!belumSampai && (
                       <>
-                        {isAdmin ? (
+                        {bolehAlur ? (
                           <div className="field" style={{marginBottom:8}}>
                             <label>Nama Penerima di Tahap Ini</label>
                             <input value={t.penerima_nama||''} onChange={e=>updateTahapField(idx,'penerima_nama',e.target.value)} placeholder="Nama orangnya" />
@@ -372,7 +409,7 @@ function SuratMasukInner() {
                           <div>Diterima: <strong>{t.tanggal_diterima ? new Date(t.tanggal_diterima).toLocaleString('id-ID') : 'Belum'}</strong></div>
                           <div>Diteruskan: <strong>{t.tanggal_diteruskan ? new Date(t.tanggal_diteruskan).toLocaleString('id-ID') : 'Belum'}</strong></div>
                         </div>
-                        {isAdmin && (
+                        {bolehAlur && (
                           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                             {!t.tanggal_diterima && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>terimaSekarang(idx)}>Tandai Diterima Sekarang</button>}
                             {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? '✅ Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? '✅ Proses Selesai' : isSelesai(t.nama_tahap) ? 'Serahkan ke Biro Umum untuk Diarsip' : isPengarsipan(t.nama_tahap) ? 'Sudah Diarsip → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}

@@ -85,3 +85,7 @@ Sebelum itu dijalankan, halaman barunya akan menampilkan pesan bahwa tabel belum
 - Menu **Arsip Biro Umum** menampilkan semua dokumen (surat masuk, surat keluar, PKS, sertifikat/piagam, SK) dengan status
   *Siap diarsip / Sudah diarsip / Masih berjalan*, lokasi simpan fisik, filter jenis/status/tahun, register CSV, dan unduh berkas ZIP.
 - Hanya admin yang bisa mengarsipkan. Mengarsipkan surat masuk otomatis menutup alurnya (Pengarsipan selesai).
+
+---
+## Pembaruan: Disposisi, Pemantauan Biro Umum, Riwayat, Ekspedisi, Kotak Saran
+Jalankan `supabase/migrasi-disposisi-pemantauan.sql` di SQL Editor, lalu baca `PANDUAN-DISPOSISI.md`.

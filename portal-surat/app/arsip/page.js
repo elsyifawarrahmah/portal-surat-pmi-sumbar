@@ -2,6 +2,7 @@
 // Arsip Biro Umum: satu tempat untuk mengarsipkan semua jenis dokumen + mencatat lokasi simpannya.
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { usePeran } from '@/lib/peran'
 import { statusSurat, isPengarsipan, labelTahap } from '@/lib/tahap'
 import { unduhBerkasZip } from '@/lib/zip'
 
@@ -31,6 +32,8 @@ export default function ArsipPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+  const peran = usePeran()
+  const bisaArsip = peran.bisaArsip   // admin atau Biro Umum
   const [fJenis, setFJenis] = useState('semua')
   const [fStatus, setFStatus] = useState('semua')
   const [fTahun, setFTahun] = useState('semua')
@@ -203,9 +206,9 @@ export default function ArsipPage() {
           <div><h1>Arsip Biro Umum</h1><p className="desc">Register arsip semua dokumen: catat lokasi simpan, tandai sudah diarsip, dan cari dengan cepat.</p></div>
         </div>
 
-        {!isAdmin && (
+        {!bisaArsip && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat arsip. Untuk mengarsipkan, hubungi admin (Kabid/Biro Umum).
+            👁 Akun kamu hanya bisa melihat arsip. Pengarsipan dilakukan oleh Biro Umum.
           </div>
         )}
         {loadError && <div className="error-box" style={{marginBottom:18}}>{loadError}</div>}
@@ -240,7 +243,7 @@ export default function ArsipPage() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Jenis</th><th>Tanggal</th><th>Nomor</th><th>Perihal / Judul</th><th>Asal / Tujuan</th><th>Status</th><th>Lokasi Arsip</th><th>Berkas</th>{isAdmin && <th></th>}</tr></thead>
+              <thead><tr><th>Jenis</th><th>Tanggal</th><th>Nomor</th><th>Perihal / Judul</th><th>Asal / Tujuan</th><th>Status</th><th>Lokasi Arsip</th><th>Berkas</th>{bisaArsip && <th></th>}</tr></thead>
               <tbody>
                 {loading ? <tr><td colSpan={9} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
                 filtered.length === 0 ? <tr><td colSpan={9} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Tidak ada dokumen yang cocok.</td></tr> :
@@ -260,7 +263,7 @@ export default function ArsipPage() {
                       </td>
                       <td data-label="Lokasi Arsip">{r.catat?.lokasi_arsip || '-'}{r.catat?.catatan ? <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{r.catat.catatan}</div> : null}</td>
                       <td data-label="Berkas">{!tutup && r.file ? <a href={r.file} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
-                      {isAdmin && (
+                      {bisaArsip && (
                         <td data-label="">
                           {r.status === 'siap' && <button className="btn btn-primary" style={{padding:'4px 10px',fontSize:12}} onClick={() => bukaArsip(r)}>Arsipkan</button>}
                           {r.status === 'arsip' && (

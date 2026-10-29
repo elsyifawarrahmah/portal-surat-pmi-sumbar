@@ -12,7 +12,7 @@ export default function BackupPage() {
     try {
       const XLSX = await import('xlsx')
 
-      const [suratMasuk, suratTahapan, suratKeluar, users, logAktivitas, arsip, catatanArsip] = await Promise.all([
+      const [suratMasuk, suratTahapan, suratKeluar, users, logAktivitas, arsip, catatanArsip, disposisi, tujuanDisp, panggilan, riwayat, ekspedisi, saran, unitData] = await Promise.all([
         supabase.from('surat_masuk').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal_diterima_kantor', { ascending: false }),
         supabase.from('surat_tahapan').select('*'),
         supabase.from('surat_keluar').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal_surat', { ascending: false }),
@@ -20,13 +20,20 @@ export default function BackupPage() {
         supabase.from('log_aktivitas').select('*, profiles:dilakukan_oleh(nama_lengkap)').order('waktu', { ascending: false }).limit(1000),
         supabase.from('arsip_dokumen').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal', { ascending: false }),
         supabase.from('arsip_catatan').select('*, profiles:diarsip_oleh(nama_lengkap)').order('tanggal_arsip', { ascending: false }),
+        supabase.from('surat_disposisi').select('*, surat:surat_masuk(nomor_surat, nomor_agenda, perihal)').order('created_at', { ascending: false }),
+        supabase.from('surat_disposisi_tujuan').select('*, unit:surat_unit(nama), disposisi:surat_disposisi(surat_id, dari_nama, tanggal_diteruskan, surat:surat_masuk(nomor_surat, nomor_agenda, perihal))').order('created_at', { ascending: false }),
+        supabase.from('surat_panggilan').select('*, unit:surat_unit(nama)').order('created_at', { ascending: false }),
+        supabase.from('surat_riwayat').select('*').order('waktu', { ascending: false }).limit(20000),
+        supabase.from('surat_ekspedisi').select('*, surat:surat_keluar(nomor_surat, nomor_agenda, tujuan_surat, perihal)').order('created_at', { ascending: false }),
+        supabase.from('surat_saran').select('*').order('created_at', { ascending: false }),
+        supabase.from('surat_unit').select('*').order('urut'),
       ])
 
       const wb = XLSX.utils.book_new()
 
       const sheetSuratMasuk = (suratMasuk.data || []).map(r => ({
         'Tanggal Diterima': r.tanggal_diterima_kantor, 'Tanggal Surat': r.tanggal_surat,
-        'Nomor Surat': r.nomor_surat, 'Asal': r.asal_surat, 'Perihal': r.perihal,
+        'Nomor Agenda': r.nomor_agenda || '', 'Macam Surat': r.macam_surat || '', 'Lampiran': r.lampiran || '', 'Nomor Surat': r.nomor_surat, 'Asal': r.asal_surat, 'Perihal': r.perihal,
         'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': r.file_bukti_url || '',
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSuratMasuk), 'Surat Masuk')
@@ -38,7 +45,7 @@ export default function BackupPage() {
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetTahapan), 'Alur Surat Masuk')
 
       const sheetSuratKeluar = (suratKeluar.data || []).map(r => ({
-        'Tanggal': r.tanggal_surat, 'Nomor Surat': r.nomor_surat, 'Divisi/Biro': r.divisi || '', 'Tujuan': r.tujuan_surat,
+        'Tanggal': r.tanggal_surat, 'Nomor Agenda': r.nomor_agenda || '', 'Nomor Surat': r.nomor_surat, 'Divisi/Biro': r.divisi || '', 'Tujuan': r.tujuan_surat,
         'Perihal': r.perihal, 'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': r.file_bukti_url || '',
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSuratKeluar), 'Surat Keluar')
@@ -87,6 +94,17 @@ export default function BackupPage() {
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetLog), 'Log Aktivitas')
 
       const filename = `Backup-Portal-Surat-PMI-Sumbar-${new Date().toISOString().slice(0,10)}.xlsx`
+
+      // Disposisi, panggilan, riwayat, ekspedisi, kotak saran, unit (kosong bila database belum diperbarui)
+      const sheet = (rows, nama) => XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), nama)
+      sheet((tujuanDisp.data || []).map(t => ({ 'Tgl Diteruskan': t.disposisi?.tanggal_diteruskan || '', 'No. Agenda': t.disposisi?.surat?.nomor_agenda || '', 'No. Surat': t.disposisi?.surat?.nomor_surat || '', 'Perihal': t.disposisi?.surat?.perihal || '', 'Dari': t.disposisi?.dari_nama || '', 'Kepada': t.unit?.nama || '', 'Disposisi': t.instruksi || '', 'Perlu Jawaban': t.perlu_jawaban ? 'Ya' : 'Tidak', 'Batas Waktu': t.batas_waktu || '', 'Status': t.status, 'Dibaca': t.dibaca_pada || '', 'Selesai/Diarsipkan': t.selesai_pada || '', 'Tanggapan': t.tanggapan || '' })), 'Disposisi')
+      sheet((disposisi.data || []).filter(d => d.file_scan_url).map(d => ({ 'No. Surat': d.surat?.nomor_surat || '', 'Tgl Diteruskan': d.tanggal_diteruskan, 'Dari': d.dari_nama || '', 'Link Scan Lembar Disposisi': d.file_scan_url })), 'Scan Disposisi')
+      sheet((panggilan.data || []).map(p => ({ 'Waktu': p.created_at, 'Unit': p.unit?.nama || '', 'Jenis': p.jenis, 'Pesan': p.pesan || '', 'Dibaca': p.dibaca_pada || '', 'Selesai': p.selesai_pada || '', 'Balasan': p.balasan || '' })), 'Panggilan Biro Umum')
+      sheet((riwayat.data || []).map(r => ({ 'Waktu': r.waktu, 'Jenis Surat': r.surat_jenis, 'Surat ID': r.surat_id, 'Kejadian': r.aksi, 'Keterangan': r.keterangan || '', 'Oleh': r.oleh_nama || '', 'Unit': r.unit_nama || '' })), 'Riwayat Surat')
+      sheet((ekspedisi.data || []).map(e => ({ 'No. Surat': e.surat?.nomor_surat || '', 'No. Agenda': e.surat?.nomor_agenda || '', 'Tujuan': e.surat?.tujuan_surat || '', 'Tgl Kirim': e.tanggal_kirim, 'Via': e.dikirim_via, 'Penerima': e.penerima || '', 'Pengantar': e.pengantar || '', 'Status': e.status, 'Tgl Diterima': e.tanggal_diterima || '', 'Link Tanda Terima': e.tanda_terima_url || '', 'Catatan': e.catatan || '' })), 'Ekspedisi')
+      sheet((saran.data || []).map(r => ({ 'Waktu': r.created_at, 'Kategori': r.kategori, 'Isi': r.isi, 'Pengirim': r.anonim ? 'Anonim' : (r.nama_pengirim || ''), 'Unit': r.unit_pengirim || '', 'Sumber': r.sumber, 'Status': r.status, 'Tanggapan': r.tanggapan || '' })), 'Kotak Saran')
+      sheet((unitData.data || []).map(u => ({ 'Kode': u.kode, 'Nama Unit': u.nama, 'Jenis': u.tipe, 'Aktif': u.aktif ? 'Ya' : 'Tidak' })), 'Unit')
+
       XLSX.writeFile(wb, filename)
       setLastBackup(new Date())
     } catch (e) {
