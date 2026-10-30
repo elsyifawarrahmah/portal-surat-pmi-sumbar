@@ -25,7 +25,7 @@ export const STATUS_DISPOSISI = {
 export const statusTampil = t => (t.status === 'selesai' && t.diarsipkan_pada ? 'diarsip' : t.status)
 
 export const tabelBelumAda = err => !!err && (err.code === '42P01' || err.code === 'PGRST205' || err.code === 'PGRST200' || err.code === '42703' || /does not exist|schema cache|relationship/i.test(err.message || ''))
-export const PESAN_MIGRASI = 'Fitur ini butuh pembaruan database. Jalankan file supabase/migrasi-disposisi-pemantauan.sql di Supabase (SQL Editor) satu kali.'
+export const PESAN_MIGRASI = 'Fitur ini butuh pembaruan database. Jalankan file supabase/migrasi-disposisi-pemantauan.sql dan supabase/migrasi-alur-berjenjang.sql di Supabase (SQL Editor) satu kali. Sudah dijalankan tapi pesan ini tetap muncul? Buka menu Cek Database (alamat /diagnosa) untuk melihat penyebab pastinya.'
 
 export function unduhCsv(namaFile, header, baris) {
   const esc = v => { const s = String(v ?? '').replace(/"/g, '""'); return /[;"\n]/.test(s) ? `"${s}"` : s }

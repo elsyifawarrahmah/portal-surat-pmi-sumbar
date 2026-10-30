@@ -46,6 +46,7 @@ const LINKS = [
   { href: '/data-user', label: 'Data User', icon: 'user', admin: true },
   { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'log', admin: true },
   { href: '/backup', label: 'Backup Data', icon: 'backup', admin: true },
+  { href: '/diagnosa', label: 'Cek Database', icon: 'log', admin: true },
 ]
 
 export default function Sidebar() {
