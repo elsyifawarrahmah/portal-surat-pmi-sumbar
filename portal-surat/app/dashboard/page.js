@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { labelTahap } from '@/lib/tahap'
 import NotifikasiButton from '@/components/NotifikasiButton'
 import { usePeran } from '@/lib/peran'
-import { fmtTgl, fmtWaktu, sudahLewat, STATUS_DISPOSISI } from '@/lib/format'
+import { fmtTgl, fmtWaktu, sudahLewat, STATUS_DISPOSISI, statusTampil } from '@/lib/format'
 import Link from 'next/link'
 
 export default function Dashboard() {
@@ -110,7 +110,7 @@ export default function Dashboard() {
             <div style={{overflowX:'auto'}}><table>
               <thead><tr><th>Diteruskan</th><th>Surat</th><th>Disposisi</th><th>Batas</th><th>Status</th></tr></thead>
               <tbody>{dispSaya.length === 0 ? <tr><td colSpan={5} style={{textAlign:'center',padding:22,color:'var(--ink-soft)'}}>Tidak ada disposisi yang menunggu. 👍</td></tr> : dispSaya.map(d => {
-                const s = d.disposisi?.surat, st = STATUS_DISPOSISI[d.status], rahasia = s?.sifat === 'Rahasia'
+                const s = d.disposisi?.surat, st = STATUS_DISPOSISI[statusTampil(d)], rahasia = s?.sifat === 'Rahasia'
                 return <tr key={d.id} className="row-click" onClick={()=>router.push('/disposisi')}>
                   <td data-label="Diteruskan">{fmtTgl(d.disposisi?.tanggal_diteruskan)}</td>
                   <td data-label="Surat">{rahasia ? '🔒 Rahasia' : `${s?.nomor_surat} — ${s?.perihal}`}</td>

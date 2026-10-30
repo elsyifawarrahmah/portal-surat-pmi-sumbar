@@ -1,5 +1,6 @@
 // Cetak dokumen kantor (lembar disposisi, buku agenda, riwayat surat) lewat jendela cetak browser.
 import { fmtTgl, fmtWaktu } from './format'
+import { NAMA_APLIKASI } from './config'
 
 const h = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -47,7 +48,7 @@ function buka(judul, bodyHtml, orientasi = 'portrait') {
   if (img && !img.complete) { img.onload = siap; img.onerror = siap } else setTimeout(siap, 250)
 }
 
-const jejakCetak = nama => `<div class="foot">Dicetak ${h(fmtWaktu(new Date()))}${nama ? ' oleh ' + h(nama) : ''} · Portal Surat Digital PMI Sumatera Barat</div>`
+const jejakCetak = nama => `<div class="foot">Dicetak ${h(fmtWaktu(new Date()))}${nama ? ' oleh ' + h(nama) : ''} · ${h(NAMA_APLIKASI)} PMI Sumatera Barat</div>`
 
 // Lembar disposisi — mengikuti format kertas yang dipakai di kantor. Tanpa data disposisi = formulir kosong (isi tangan).
 export function cetakLembarDisposisi({ surat, disposisi, tujuan = [], namaPencetak }) {

@@ -1,8 +1,10 @@
 import './globals.css'
 import AppShell from '@/components/AppShell'
 
+import { NAMA_LENGKAP } from '@/lib/config'
+
 export const metadata = {
-  title: 'Portal Surat — PMI Sumatera Barat',
+  title: NAMA_LENGKAP,
   description: 'Sistem digital surat masuk dan keluar PMI Sumatera Barat',
 }
 

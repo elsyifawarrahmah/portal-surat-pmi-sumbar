@@ -1,9 +1,12 @@
 # Panduan: Disposisi, Pemantauan, Riwayat, Ekspedisi & Kotak Saran
 
-## Langkah awal (sekali saja)
-1. Supabase → SQL Editor → New query → tempel isi `supabase/migrasi-disposisi-pemantauan.sql` → Run. (Aman dijalankan ulang.)
-2. Buka menu **Data User** → atur **Unit / Bidang** tiap akun (kolom "Unit / Bidang").
-3. Selesai. Surat lama otomatis mendapat Nomor Agenda dan riwayat awal.
+## Langkah awal (sekali saja, urut)
+1. Supabase → SQL Editor → New query → tempel isi `supabase/migrasi-disposisi-pemantauan.sql` → Run.
+2. Query baru lagi → tempel isi `supabase/migrasi-alur-berjenjang.sql` → Run. (Keduanya aman dijalankan ulang.)
+3. Menu **Data User** → atur **Unit / Bidang** dan **Telepon / WA** tiap akun. Tiap orang juga bisa mengisi nomor HP-nya sendiri lewat tautan "📞 Isi nomor HP saya" di menu samping.
+4. Selesai. Surat lama otomatis mendapat Nomor Agenda dan riwayat awal.
+
+Nama aplikasi (tampil di menu, login, judul tab, cetakan) diubah di satu tempat: `lib/config.js`.
 
 ## Siapa boleh apa
 | Unit | Boleh |
@@ -11,18 +14,23 @@
 | **Admin** | Semua |
 | **Sekretariat** | Catat surat masuk, buat disposisi, kelola alur surat, catat surat keluar & ekspedisi |
 | **Pimpinan** (Ketua, Kepala Markas) | Buat disposisi, kelola alur, catat surat keluar |
-| **Bidang** (PB, Yankessos, Donor Darah, dst.) | Menerima disposisi (dibaca → proses → selesai), mencatat surat keluar bidangnya sendiri, ekspedisi |
-| **Biro Umum** | **Hanya memantau**: lihat semua, cetak, memanggil bidang, mengarsipkan, menanggapi Kotak Saran. Tidak punya kotak disposisi. |
+| **Bidang** (PB, Yankessos, Donor Darah, dst.) | Menerima disposisi, **meneruskan lagi**, menulis kata-kata & catatan, menandai selesai, mencatat surat keluar bidangnya sendiri, ekspedisi |
+| **Biro Umum** | **Memantau**: lihat semua, cetak, memanggil bidang, **mengarsipkan** surat yang sudah selesai, menanggapi Kotak Saran. Tidak punya kotak disposisi dan tidak mengubah status bidang lain. |
 
 Semua akun bisa melihat data dan mengirim Kotak Saran.
 
 ## Alur kerja
 1. **Sekretariat** mencatat surat masuk → Nomor Agenda terisi otomatis.
 2. Surat difoto/dibawa ke pimpinan → **Disposisi** dibuat di portal (Surat Masuk → kolom Disposisi, atau menu Disposisi). Cetak **Lembar Disposisi** bila perlu ditandatangani; foto/scan lembar yang sudah ditandatangani diunggah ke disposisi tersebut (tersimpan di Ruang Disposisi).
-3. **Bidang tujuan** melihat disposisi di menu Disposisi (lencana angka di menu), menandai *dibaca → diproses → selesai*. Saat **selesai**, disposisi **diarsipkan otomatis** dan waktunya tercatat.
+3. **Bidang tujuan** melihat disposisi di menu Disposisi (lencana angka di menu). Begitu surat sampai ia menekan *Surat sudah sampai di saya*, lalu bisa:
+   - **↪ Teruskan ke bidang lain** dengan kata-katanya sendiri (berjenjang, seperti Srikandi; tidak terbatas satu kali), atau
+   - **✅ Selesai + tulis kata-kata**: tanggapan/hasil tindak lanjut.
+   Siapa pun yang punya unit juga bisa menulis **Catatan** pada surat (terlihat semua orang) — untuk bertanya, membalas, atau memberi arahan.
+   Setelah selesai, surat **menunggu diarsipkan**: **Biro Umum** menekan **🗄 Arsipkan** (di menu Disposisi atau Pemantauan, ada juga "Arsipkan semua").
 4. Bila disposisi meminta **surat jawaban**: bidang membuat surat keluar lewat tombol "Buat surat jawaban" → tertaut ke surat masuk. Surat jawaban yang belum ada muncul di Pemantauan.
 5. **Surat keluar**: tiap bidang mencatat suratnya sendiri, lalu mencatat pengiriman di **Ekspedisi** (via, penerima, tanda terima).
-6. **Biro Umum** memantau di menu **Pemantauan**: bidang yang tidak input surat dalam N hari berstatus "Perlu dipanggil". Klik **Panggil** (atau "Panggil Semua"). Bidang melihat panggilan di Dashboard/Pemantauan dan membalas "sudah ditindaklanjuti".
+6. **Surat menumpuk?** Di **Pemantauan → Posisi surat** terlihat surat sedang tertahan di siapa dan sudah berapa hari. Tombol **📞 Hubungi** menampilkan **Telepon** dan **WhatsApp** orang di unit itu (misalnya Sekretaris yang belum masuk kantor).
+7. **Biro Umum** memantau di menu **Pemantauan**: bidang yang tidak input surat dalam N hari berstatus "Perlu dipanggil". Klik **Panggil** (atau "Panggil Semua"). Bidang melihat panggilan di Dashboard/Pemantauan dan membalas "sudah ditindaklanjuti".
 
 ## Riwayat & cetak
 - Setiap kejadian (surat masuk, diterima/diteruskan, disposisi, status disposisi, surat jawaban, pengiriman, panggilan) **dicatat otomatis oleh database** lengkap dengan waktu pasti dan nama pelaku; riwayat tidak bisa diubah/dihapus dari aplikasi.

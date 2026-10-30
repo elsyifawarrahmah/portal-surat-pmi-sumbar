@@ -38,6 +38,13 @@ export default function DataUserPage() {
     load()
   }
 
+  async function simpanTelepon(id, nilai, lama) {
+    const baru = nilai.trim()
+    if (baru === (lama || '')) return
+    const { error } = await supabase.from('profiles').update({ telepon: baru || null }).eq('id', id)
+    if (error) { alert('Gagal menyimpan telepon: ' + (/telepon/.test(error.message) ? 'jalankan supabase/migrasi-alur-berjenjang.sql dulu.' : error.message)); return }
+    load()
+  }
   async function ubahUnit(id, unitId) {
     const { error } = await supabase.from('profiles').update({ unit_id: unitId || null }).eq('id', id)
     if (error) { alert('Gagal mengubah unit: ' + error.message); return }
@@ -97,10 +104,10 @@ export default function DataUserPage() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Status</th><th>Nama</th><th>Email</th><th>Role</th><th>Unit / Bidang</th><th>Terakhir Aktif</th><th>Ubah Role</th></tr></thead>
+              <thead><tr><th>Status</th><th>Nama</th><th>Email</th><th>Role</th><th>Unit / Bidang</th><th>Telepon / WA</th><th>Terakhir Aktif</th><th>Ubah Role</th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={7} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
-                filtered.length===0 ? <tr><td colSpan={7} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Tidak ada user ditemukan.</td></tr> :
+                {loading ? <tr><td colSpan={8} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
+                filtered.length===0 ? <tr><td colSpan={8} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Tidak ada user ditemukan.</td></tr> :
                 filtered.map(u => {
                   const online = isOnline(u.last_seen)
                   return (
@@ -120,6 +127,7 @@ export default function DataUserPage() {
                           {units.map(x => <option key={x.id} value={x.id}>{x.nama}</option>)}
                         </select>
                       </td>
+                      <td><input defaultValue={u.telepon || ''} placeholder="08xxxxxxxxxx" inputMode="tel" onBlur={e=>simpanTelepon(u.id, e.target.value, u.telepon)} style={{padding:'5px 8px',fontSize:12.5,minWidth:130}} /></td>
                       <td style={{fontSize:12.5,color:'var(--ink-soft)'}}>{u.last_seen ? new Date(u.last_seen).toLocaleString('id-ID') : 'Belum pernah'}</td>
                       <td>
                         <select value={u.role} onChange={e=>ubahRole(u.id, e.target.value)} style={{padding:'5px 8px',fontSize:12.5}}>

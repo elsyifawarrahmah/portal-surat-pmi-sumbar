@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import { bunyiNotif } from '@/lib/bunyi'
+import { NAMA_APLIKASI } from '@/lib/config'
 
 const Svg = ({ children }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>{children}</svg>
@@ -55,6 +56,15 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const peran = usePeran()
   const [badge, setBadge] = useState({ disposisi: 0, panggilan: 0 })
+
+  const [nomorHp, setNomorHp] = useState('')
+  async function isiNomorHp() {
+    const baru = window.prompt('Nomor HP / WhatsApp kamu (supaya bisa dihubungi bila ada surat yang menunggu):', nomorHp || peran.telepon || '')
+    if (baru === null) return
+    const { error } = await supabase.from('profiles').update({ telepon: baru.trim() || null }).eq('id', peran.userId)
+    if (error) { alert('Gagal menyimpan: ' + (/telepon/.test(error.message) ? 'database belum diperbarui (migrasi-alur-berjenjang.sql).' : error.message)); return }
+    setNomorHp(baru.trim())
+  }
 
   // Lencana angka: disposisi yang menunggu untuk unit saya & panggilan yang belum ditindaklanjuti
   async function hitungBadge() {
@@ -123,7 +133,7 @@ export default function Sidebar() {
             <div className="brand-vline" />
             <div className="brand-prov">Provinsi<br />Sumatera Barat</div>
           </div>
-          <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>Portal Surat Digital</div>
+          <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>{NAMA_APLIKASI}</div>
         </div>
         <div className="nav">
           {LINKS.filter(l => !(l.admin && !peran.isAdmin && !peran.loading)).map(l => (
@@ -134,7 +144,7 @@ export default function Sidebar() {
           ))}
         </div>
         <div className="sidebar-foot">
-          {peran.nama && <div className="sidebar-user"><b>{peran.nama}</b><span>{peran.isAdmin ? 'Admin' : peran.unit?.nama || (peran.migrasiBelum ? '' : 'Belum ada unit')}</span></div>}
+          {peran.nama && <div className="sidebar-user"><b>{peran.nama}</b><span>{peran.isAdmin ? 'Admin' : peran.unit?.nama || (peran.migrasiBelum ? '' : 'Belum ada unit')}</span>{!peran.migrasiBelum && <button type="button" onClick={isiNomorHp} style={{display:'block',background:'none',border:'none',color:'inherit',opacity:.85,fontSize:12,padding:'4px 0 0',cursor:'pointer',textDecoration:'underline',textAlign:'left'}}>📞 {nomorHp || peran.telepon || 'Isi nomor HP saya'}</button>}</div>}
           <button onClick={handleLogout} className="btn btn-ghost" style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>{ICONS.logout}Keluar</button>
         </div>
       </div>

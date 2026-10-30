@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
+import KontakModal from '@/components/KontakModal'
+import { labelTahap } from '@/lib/tahap'
 import { fmtTgl, fmtWaktu, hariSejak, sudahLewat, tabelBelumAda, PESAN_MIGRASI } from '@/lib/format'
 
 const JENIS = {
@@ -13,6 +15,7 @@ const JENIS = {
   tindak_lanjut: 'Disposisi belum ditindaklanjuti',
   lainnya: 'Lainnya',
 }
+const KODE_TAHAP = [[/biro umum/i, 'BU'], [/sekretaris/i, 'SEK'], [/kepala markas|ketua markas/i, 'KM'], [/ketua/i, 'KT']]
 const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim()
 const cocokUnit = (r, u) => r.unit_id === u.id || norm(r.divisi) === norm(u.nama) || norm(r.divisi) === norm(u.nama.replace(/^bidang /i, ''))
 
@@ -30,7 +33,9 @@ export default function PemantauanPage() {
   const supabase = createClient()
   const peran = usePeran()
   const { units } = useUnits()
-  const [data, setData] = useState({ keluar: [], tujuan: [], panggilan: [], masuk: [], disposisiSurat: new Set() })
+  const [data, setData] = useState({ keluar: [], tujuan: [], panggilan: [], masuk: [], disposisiSurat: new Set(), tahap: [] })
+  const [kontak, setKontak] = useState(null)
+  const [tertahanHari, setTertahanHari] = useState(2)
   const [loading, setLoading] = useState(true)
   const [pesan, setPesan] = useState('')
   const [batas, setBatas] = useState(7)
@@ -47,17 +52,18 @@ export default function PemantauanPage() {
 
   async function load() {
     setLoading(true)
-    const [k, t, p, m, d] = await Promise.all([
+    const [k, t, p, m, d, th] = await Promise.all([
       supabase.from('surat_keluar').select('id, unit_id, divisi, created_at, nomor_surat').order('created_at', { ascending: false }).limit(3000),
-      supabase.from('surat_disposisi_tujuan').select('id, unit_id, status, batas_waktu, perlu_jawaban, surat_jawaban_id, created_at, disposisi:surat_disposisi(surat_id, surat:surat_masuk(id, nomor_surat, perihal, asal_surat, sifat))').limit(2000),
+      supabase.from('surat_disposisi_tujuan').select('id, unit_id, status, batas_waktu, perlu_jawaban, surat_jawaban_id, created_at, dibaca_pada, selesai_pada, diarsipkan_pada, disposisi:surat_disposisi(surat_id, surat:surat_masuk(id, nomor_surat, perihal, asal_surat, sifat))').limit(2000),
       supabase.from('surat_panggilan').select('*, unit:surat_unit(nama), pembuat:profiles!surat_panggilan_dibuat_oleh_fkey(nama_lengkap), surat:surat_masuk(nomor_surat)').order('created_at', { ascending: false }).limit(300),
       supabase.from('surat_masuk').select('id, nomor_surat, nomor_agenda, asal_surat, perihal, created_at, sifat').order('created_at', { ascending: false }).limit(1000),
       supabase.from('surat_disposisi').select('surat_id').limit(3000),
+      supabase.from('surat_tahapan').select('surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan, penerima_nama').limit(10000),
     ])
-    const gagal = [k, t, p, m, d].find(r => r.error)
+    const gagal = [k, t, p, m, d, th].find(r => r.error)
     if (gagal) { setPesan(tabelBelumAda(gagal.error) ? PESAN_MIGRASI : 'Gagal memuat data: ' + gagal.error.message); setLoading(false); return }
     setPesan('')
-    setData({ keluar: k.data || [], tujuan: t.data || [], panggilan: p.data || [], masuk: m.data || [], disposisiSurat: new Set((d.data || []).map(x => x.surat_id)) })
+    setData({ keluar: k.data || [], tujuan: t.data || [], panggilan: p.data || [], masuk: m.data || [], disposisiSurat: new Set((d.data || []).map(x => x.surat_id)), tahap: th.data || [] })
     setLoading(false)
   }
 
@@ -70,8 +76,9 @@ export default function PemantauanPage() {
     const terakhir = kel[0]?.created_at || null
     const hari = hariSejak(terakhir)
     const terbuka = data.panggilan.filter(p => p.unit_id === u.id && !p.selesai_pada).length
+    const tertua = tj.filter(r => r.status === 'menunggu').map(r => hariSejak(r.created_at)).sort((a, b) => b - a)[0]
     return {
-      u, bulanIni: kel.filter(r => r.created_at >= awalBulan).length, total: kel.length, terakhir, hari,
+      tertua, u, bulanIni: kel.filter(r => r.created_at >= awalBulan).length, total: kel.length, terakhir, hari,
       menunggu: tj.filter(r => r.status === 'menunggu').length, proses: tj.filter(r => ['dibaca', 'diproses'].includes(r.status)).length,
       lewat: tj.filter(r => r.status !== 'selesai' && sudahLewat(r.batas_waktu)).length, terbuka,
       tidakAktif: terakhir === null || hari >= batas,
@@ -80,6 +87,31 @@ export default function PemantauanPage() {
 
   const belumDisposisi = data.masuk.filter(m => !data.disposisiSurat.has(m.id) && hariSejak(m.created_at) >= 1)
   const menungguJawaban = data.tujuan.filter(t => t.perlu_jawaban && !t.surat_jawaban_id).map(t => ({ ...t, unit: units.find(u => u.id === t.unit_id), surat: t.disposisi?.surat }))
+  const menungguArsip = data.tujuan.filter(t => t.status === 'selesai' && !t.diarsipkan_pada).map(t => ({ ...t, unit: units.find(u => u.id === t.unit_id), surat: t.disposisi?.surat }))
+
+  // Posisi surat: tahap yang sedang memegang surat (sudah diterima, belum diteruskan) dan sudah berapa hari
+  const tertahan = useMemo(() => {
+    const peta = new Map()
+    data.tahap.forEach(x => { if (!peta.has(x.surat_id)) peta.set(x.surat_id, []); peta.get(x.surat_id).push(x) })
+    const hasil = []
+    data.masuk.forEach(m => {
+      const daftar = (peta.get(m.id) || []).sort((a, b) => (a.urutan || 0) - (b.urutan || 0))
+      if (daftar.length === 0 || daftar.every(x => x.tanggal_diteruskan)) return
+      const sedang = daftar.find(x => x.tanggal_diterima && !x.tanggal_diteruskan)
+      if (!sedang) return
+      const hari = hariSejak(sedang.tanggal_diterima)
+      if (hari === null || hari < tertahanHari) return
+      let unitList = []
+      const kode = KODE_TAHAP.find(([re]) => re.test(sedang.nama_tahap))?.[1]
+      if (kode) { const u = units.find(x => x.kode === kode); if (u) unitList = [u] }
+      else { // tahap "Bidang / Divisi Tujuan": ambil bidang yang disposisinya belum selesai
+        const ids = [...new Set(data.tujuan.filter(t => t.disposisi?.surat_id === m.id && t.status !== 'selesai').map(t => t.unit_id))]
+        unitList = ids.map(id => units.find(x => x.id === id)).filter(Boolean)
+      }
+      hasil.push({ m, tahap: sedang.nama_tahap, sejak: sedang.tanggal_diterima, hari, unitList })
+    })
+    return hasil.sort((a, b) => b.hari - a.hari)
+  }, [data, units, tertahanHari])
   const panggilanSaya = data.panggilan.filter(p => peran.unitId && p.unit_id === peran.unitId)
 
   function bukaPanggil(unit, jenis = 'belum_input') {
@@ -110,6 +142,17 @@ export default function PemantauanPage() {
     setSibuk(false)
     if (err) { alert('Gagal: ' + err.message); return }
     setBalas(null); load()
+  }
+  async function arsipkan(id) {
+    const { error: err } = await supabase.from('surat_disposisi_tujuan').update({ diarsipkan_pada: new Date().toISOString() }).eq('id', id)
+    if (err) { alert('Gagal mengarsipkan: ' + err.message); return }
+    load()
+  }
+  async function arsipkanSemua() {
+    if (!confirm(`Arsipkan ${menungguArsip.length} disposisi yang sudah selesai?`)) return
+    const { error: err } = await supabase.from('surat_disposisi_tujuan').update({ diarsipkan_pada: new Date().toISOString() }).in('id', menungguArsip.map(t => t.id))
+    if (err) { alert('Gagal mengarsipkan: ' + err.message); return }
+    load()
   }
   async function tandaiBaca(p) {
     await supabase.from('surat_panggilan').update({ dibaca_pada: new Date().toISOString() }).eq('id', p.id)
@@ -170,16 +213,55 @@ export default function PemantauanPage() {
                           <td data-label="Unit"><b>{b.u.nama}</b></td>
                           <td data-label="Bulan ini">{b.bulanIni}</td>
                           <td data-label="Terakhir input">{b.terakhir ? <>{fmtTgl(b.terakhir)}<span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}> ({b.hari === 0 ? 'hari ini' : b.hari + ' hari lalu'})</span></> : <span style={{ color: '#B3261E' }}>Belum pernah</span>}</td>
-                          <td data-label="Menunggu">{b.menunggu}</td>
+                          <td data-label="Menunggu">{b.menunggu}{b.tertua >= 1 && <span style={{ color: '#B3261E', fontSize: 12 }}> (terlama {b.tertua} hr)</span>}</td>
                           <td data-label="Diproses">{b.proses}</td>
                           <td data-label="Lewat batas" style={b.lewat ? { color: '#B3261E', fontWeight: 700 } : null}>{b.lewat}</td>
                           <td data-label="Status">{b.tidakAktif ? <span className="tag" style={{ background: '#FBE7E7', color: '#B3261E' }}>Perlu dipanggil</span> : <span className="tag" style={{ background: 'var(--stock-bg)', color: 'var(--stock)' }}>Aktif</span>}{b.terbuka > 0 && <span style={{ fontSize: 12, color: 'var(--ink-soft)', marginLeft: 6 }}>{b.terbuka} panggilan terbuka</span>}</td>
-                          <td data-label=""><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => bukaPanggil(b.u)}>📣 Panggil</button></td>
+                          <td data-label="" style={{ whiteSpace: 'nowrap' }}><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaPanggil(b.u)}>📣 Panggil</button><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => setKontak(b.u)}>📞</button></td>
                         </tr>
                       ))}
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-head">
+              <h3>📍 Posisi surat — tertahan di siapa?</h3>
+              <label style={{ textTransform: 'none', margin: 0, display: 'flex', gap: 8, alignItems: 'center', fontSize: 13.5 }}>Tertahan ≥
+                <select value={tertahanHari} onChange={e => setTertahanHari(Number(e.target.value))} style={{ width: 'auto', padding: '5px 8px' }}>{[1, 2, 3, 5, 7].map(n => <option key={n} value={n}>{n} hari</option>)}</select>
+              </label>
+            </div>
+            <div style={{ overflowX: 'auto' }}><table>
+              <thead><tr><th>Surat</th><th>Sedang di</th><th>Sejak</th><th>Lama</th><th>Hubungi</th></tr></thead>
+              <tbody>{tertahan.length === 0 ? <tr><td colSpan={5} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada surat yang tertahan. 👍</td></tr> : tertahan.slice(0, 60).map(x => (
+                <tr key={x.m.id}>
+                  <td data-label="Surat">{x.m.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{x.m.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{x.m.asal_surat} — {x.m.perihal}</span></>}</td>
+                  <td data-label="Sedang di"><b>{labelTahap(x.tahap)}</b></td>
+                  <td data-label="Sejak">{fmtTgl(x.sejak)}</td>
+                  <td data-label="Lama"><span className="tag" style={{ background: x.hari >= 5 ? '#FBE7E7' : 'var(--gold-bg)', color: x.hari >= 5 ? '#B3261E' : 'var(--gold)' }}>{x.hari} hari</span></td>
+                  <td data-label="Hubungi">{x.unitList.length === 0 ? <span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>-</span> : x.unitList.map(u => <button key={u.id} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: 34, fontSize: 12.5, marginRight: 4, marginBottom: 4 }} onClick={() => setKontak(u)}>📞 {u.nama.replace(/^Bidang /, '')}</button>)}</td>
+                </tr>))}</tbody>
+            </table></div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-head">
+              <h3>🗄 Selesai — menunggu diarsipkan Biro Umum</h3>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span className="tag" style={{ background: menungguArsip.length ? 'var(--gold-bg)' : 'var(--stock-bg)', color: menungguArsip.length ? 'var(--gold)' : 'var(--stock)' }}>{menungguArsip.length}</span>
+                {menungguArsip.length > 0 && <button className="btn btn-primary" style={{ minHeight: 36, padding: '6px 14px', fontSize: 13 }} onClick={arsipkanSemua}>Arsipkan semua</button>}
+              </div>
+            </div>
+            <div style={{ overflowX: 'auto' }}><table>
+              <thead><tr><th>Selesai</th><th>Unit</th><th>Surat</th><th></th></tr></thead>
+              <tbody>{menungguArsip.length === 0 ? <tr><td colSpan={4} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada yang menunggu diarsipkan.</td></tr> : menungguArsip.slice(0, 80).map(t => (
+                <tr key={t.id}>
+                  <td data-label="Selesai">{fmtWaktu(t.selesai_pada)}</td><td data-label="Unit"><b>{t.unit?.nama}</b></td>
+                  <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>
+                  <td data-label=""><button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 34, fontSize: 13 }} onClick={() => arsipkan(t.id)}>🗄 Arsipkan</button></td>
+                </tr>))}</tbody>
+            </table></div>
           </div>
 
           <div className="panel">
@@ -225,6 +307,8 @@ export default function PemantauanPage() {
           </table></div>
         </div>
       )}
+
+      {kontak && <KontakModal supabase={supabase} unit={kontak} onClose={() => setKontak(null)} />}
 
       {panggil && (
         <Modal judul={`Panggil ${panggil.unit.nama}`} onClose={() => setPanggil(null)} lebar={520}

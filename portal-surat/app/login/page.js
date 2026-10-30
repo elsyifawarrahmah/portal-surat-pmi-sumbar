@@ -1,4 +1,5 @@
 'use client'
+import { NAMA_APLIKASI } from '@/lib/config'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
@@ -36,7 +37,7 @@ export default function LoginPage() {
             <div className="brand-vline" style={{color:'#000'}} />
             <div className="brand-prov" style={{color:'#000',fontSize:16}}>Provinsi<br />Sumatera Barat</div>
           </div>
-          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:10}}>Portal Surat Digital</div>
+          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:10}}>{NAMA_APLIKASI}</div>
         </div>
         <h1 style={{fontSize:19,margin:'0 0 4px'}}>{mode==='signin' ? 'Masuk Akun Petugas' : 'Daftar Akun Petugas Baru'}</h1>
         <p style={{fontSize:13,color:'var(--ink-soft)',margin:'0 0 18px'}}>

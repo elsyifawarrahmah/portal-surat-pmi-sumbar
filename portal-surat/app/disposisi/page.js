@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
 import DisposisiPanel from '@/components/DisposisiPanel'
-import { fmtTgl, sudahLewat, STATUS_DISPOSISI, tabelBelumAda, PESAN_MIGRASI, unduhCsv } from '@/lib/format'
+import { fmtTgl, sudahLewat, STATUS_DISPOSISI, statusTampil, tabelBelumAda, PESAN_MIGRASI, unduhCsv } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 
 export default function DisposisiPage() {
@@ -64,12 +64,17 @@ function Isi() {
   const tampil = useMemo(() => rows.filter(r => {
     if (unitAktif !== 'semua' && r.unit_id !== unitAktif) return false
     if (fStatus === 'aktif' && r.status === 'selesai') return false
-    if (fStatus !== 'aktif' && fStatus !== 'semua' && r.status !== fStatus) return false
+    if (fStatus !== 'aktif' && fStatus !== 'semua' && statusTampil(r) !== fStatus) return false
     if (search) { const s = r.disposisi.surat; const teks = rahasia(r) ? '' : `${s.nomor_surat} ${s.nomor_agenda} ${s.asal_surat} ${s.perihal} ${r.instruksi} ${r.unit?.nama} ${r.disposisi.dari_nama}`; if (!teks.toLowerCase().includes(search.toLowerCase())) return false }
     return true
   }), [rows, unitAktif, fStatus, search, peran.unitId, peran.isAdmin])
 
-  const hitung = st => rows.filter(r => (unitAktif === 'semua' || r.unit_id === unitAktif) && r.status === st).length
+  const hitung = st => rows.filter(r => (unitAktif === 'semua' || r.unit_id === unitAktif) && statusTampil(r) === st).length
+  async function arsipkan(r) {
+    const { error } = await supabase.from('surat_disposisi_tujuan').update({ diarsipkan_pada: new Date().toISOString() }).eq('id', r.id)
+    if (error) { alert('Gagal mengarsipkan: ' + error.message); return }
+    load()
+  }
   const lewat = rows.filter(r => (unitAktif === 'semua' || r.unit_id === unitAktif) && r.status !== 'selesai' && sudahLewat(r.batas_waktu)).length
   const namaUnit = unitAktif === 'semua' ? 'Semua Unit' : (units.find(u => u.id === unitAktif)?.nama || 'Unit Saya')
 
@@ -77,24 +82,24 @@ function Isi() {
     { judul: 'Tgl Diteruskan', k: 'tgl' }, { judul: 'No. Agenda', k: 'agenda' }, { judul: 'No. Surat', k: 'nomor' }, { judul: 'Asal', k: 'asal' }, { judul: 'Perihal', k: 'perihal' },
     { judul: 'Dari', k: 'dari' }, { judul: 'Kepada', k: 'kepada' }, { judul: 'Disposisi', k: 'isi' }, { judul: 'Batas', k: 'batas' }, { judul: 'Status', k: 'status' },
   ]
-  const barisCetak = () => tampil.filter(r => !rahasia(r)).map(r => { const s = r.disposisi.surat; return { tgl: fmtTgl(r.disposisi.tanggal_diteruskan), agenda: s.nomor_agenda || '', nomor: s.nomor_surat, asal: s.asal_surat, perihal: s.perihal, dari: r.disposisi.dari_nama || '', kepada: r.unit?.nama || '', isi: r.instruksi || '', batas: r.batas_waktu ? fmtTgl(r.batas_waktu) : '', status: STATUS_DISPOSISI[r.status]?.label || r.status } })
+  const barisCetak = () => tampil.filter(r => !rahasia(r)).map(r => { const s = r.disposisi.surat; return { tgl: fmtTgl(r.disposisi.tanggal_diteruskan), agenda: s.nomor_agenda || '', nomor: s.nomor_surat, asal: s.asal_surat, perihal: s.perihal, dari: r.disposisi.dari_nama || '', kepada: r.unit?.nama || '', isi: r.instruksi || '', batas: r.batas_waktu ? fmtTgl(r.batas_waktu) : '', status: STATUS_DISPOSISI[statusTampil(r)]?.label || r.status } })
 
   return (
     <div className="app"><div className="main">
       <div className="topbar">
-        <div><h1>Disposisi</h1><p className="desc">Disposisi surat masuk ke tiap bidang. Semua tujuan disposisi tercatat dan diarsipkan otomatis saat selesai.</p></div>
+        <div><h1>Disposisi</h1><p className="desc">Surat diteruskan berjenjang antar bidang. Tiap penerima menulis kata-katanya sendiri, lalu Biro Umum mengarsipkan setelah selesai.</p></div>
         {peran.bisaDisposisi && <button className="btn btn-primary" onClick={bukaPilih}>+ Buat Disposisi</button>}
       </div>
 
       {peran.migrasiBelum && <Info warna="gold">Pembaruan database belum dijalankan. {PESAN_MIGRASI}</Info>}
-      {peran.isBiroUmum && <Info warna="gold">👁 Biro Umum hanya memantau: semua disposisi bisa dilihat dan dicetak, tetapi tindak lanjut dilakukan oleh bidang tujuan.</Info>}
+      {peran.isBiroUmum && <Info warna="gold">👁 Biro Umum memantau semua disposisi dan bertugas mengarsipkan yang sudah selesai (tombol “Arsipkan”). Tindak lanjut dilakukan oleh bidang tujuan.</Info>}
       {pesan && <div className="error-box">{pesan}</div>}
 
       <div className="grid4">
         <div className="stat" style={{ '--accent': '#B3261E' }}><div className="lbl">Menunggu</div><div className="val">{hitung('menunggu')}</div></div>
         <div className="stat" style={{ '--accent': 'var(--gold)' }}><div className="lbl">Dibaca / Diproses</div><div className="val">{hitung('dibaca') + hitung('diproses')}</div></div>
         <div className="stat" style={{ '--accent': '#7B2CBF' }}><div className="lbl">Lewat Batas Waktu</div><div className="val">{lewat}</div></div>
-        <div className="stat" style={{ '--accent': 'var(--stock)' }}><div className="lbl">Selesai · Diarsipkan</div><div className="val">{hitung('selesai')}</div></div>
+        <div className="stat" style={{ '--accent': '#2E7D32' }}><div className="lbl">Selesai · Menunggu Arsip</div><div className="val">{hitung('selesai')}</div></div>
       </div>
 
       <div className="panel">
@@ -105,11 +110,11 @@ function Isi() {
               <option value="semua">Semua unit</option>{units.filter(u => u.tipe !== 'biro_umum').map(u => <option key={u.id} value={u.id}>{u.nama}</option>)}
             </select>
             <select value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ maxWidth: 200 }}>
-              <option value="aktif">Belum selesai</option><option value="semua">Semua status</option><option value="menunggu">Menunggu</option><option value="dibaca">Sudah dibaca</option><option value="diproses">Sedang diproses</option><option value="selesai">Selesai · diarsipkan</option>
+              <option value="aktif">Belum selesai</option><option value="semua">Semua status</option><option value="menunggu">Menunggu</option><option value="dibaca">Sudah dibaca</option><option value="diproses">Sedang diproses</option><option value="selesai">Selesai · menunggu arsip</option><option value="diarsip">Diarsipkan</option>
             </select>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Disposisi', subjudul: `${namaUnit} · ${fStatus === 'aktif' ? 'belum selesai' : fStatus === 'semua' ? 'semua status' : STATUS_DISPOSISI[fStatus]?.label}`, kolom: kolomCetak, baris: barisCetak(), namaPencetak: peran.nama })}>🖨 Cetak Buku Disposisi</button>
+            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Disposisi', subjudul: `${namaUnit} · ${fStatus === 'aktif' ? 'belum selesai' : fStatus === 'semua' ? 'semua status' : (STATUS_DISPOSISI[fStatus]?.label || fStatus)}`, kolom: kolomCetak, baris: barisCetak(), namaPencetak: peran.nama })}>🖨 Cetak Buku Disposisi</button>
             <button className="btn btn-ghost" onClick={() => unduhCsv('disposisi', kolomCetak.map(k => k.judul), barisCetak().map(b => kolomCetak.map(k => b[k.k])))}>⬇ CSV</button>
           </div>
         </div>
@@ -120,7 +125,7 @@ function Isi() {
               {loading ? <tr><td colSpan={9} style={{ textAlign: 'center', padding: 30 }}>Memuat...</td></tr> :
                 tampil.length === 0 ? <tr><td colSpan={9} style={{ textAlign: 'center', padding: 30, color: 'var(--ink-soft)' }}>{rows.length === 0 ? 'Belum ada disposisi.' : 'Tidak ada disposisi yang cocok dengan filter.'}</td></tr> :
                   tampil.map(r => {
-                    const s = r.disposisi.surat, st = STATUS_DISPOSISI[r.status], sembunyi = rahasia(r), telat = r.status !== 'selesai' && sudahLewat(r.batas_waktu)
+                    const s = r.disposisi.surat, st = STATUS_DISPOSISI[statusTampil(r)], sembunyi = rahasia(r), telat = r.status !== 'selesai' && sudahLewat(r.batas_waktu)
                     return (
                       <tr key={r.id} className="row-click" onClick={() => { if (!sembunyi) setDetail(s) }}>
                         <td data-label="Diteruskan">{fmtTgl(r.disposisi.tanggal_diteruskan)}</td>
@@ -130,7 +135,7 @@ function Isi() {
                         <td data-label="Kepada"><b>{r.unit?.nama}</b></td>
                         <td data-label="Disposisi">{sembunyi ? '-' : (r.instruksi || '-')}{r.perlu_jawaban && !sembunyi && <span className="tag" style={{ marginLeft: 6, background: 'var(--gold-bg)', color: 'var(--gold)' }}>perlu jawaban</span>}</td>
                         <td data-label="Batas" style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{r.batas_waktu ? fmtTgl(r.batas_waktu) : '-'}</td>
-                        <td data-label="Status"><span className="tag" style={st.style}>{st.label}</span></td>
+                        <td data-label="Status" onClick={e => e.stopPropagation()}><span className="tag" style={st.style}>{st.label}</span>{r.status === 'selesai' && !r.diarsipkan_pada && peran.bisaArsip && <div><button className="btn btn-primary" style={{ padding: '3px 10px', minHeight: 32, fontSize: 12, marginTop: 4 }} onClick={() => arsipkan(r)}>🗄 Arsipkan</button></div>}</td>
                         <td data-label="Scan" onClick={e => e.stopPropagation()}>{r.disposisi.file_scan_url && !sembunyi ? <a href={r.disposisi.file_scan_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat</a> : '-'}</td>
                       </tr>
                     )

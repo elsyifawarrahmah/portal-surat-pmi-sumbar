@@ -18,8 +18,11 @@ export const STATUS_DISPOSISI = {
   menunggu: { label: 'Menunggu', style: { background: '#FBE7E7', color: '#B3261E' } },
   dibaca: { label: 'Sudah dibaca', style: { background: 'var(--gold-bg)', color: 'var(--gold)' } },
   diproses: { label: 'Sedang diproses', style: { background: '#E4EEF9', color: '#1F5E99' } },
-  selesai: { label: 'Selesai · diarsipkan', style: { background: 'var(--stock-bg)', color: 'var(--stock)' } },
+  selesai: { label: 'Selesai · menunggu arsip', style: { background: '#E7F4EA', color: '#2E7D32' } },
+  diarsip: { label: 'Diarsipkan', style: { background: 'var(--stock-bg)', color: 'var(--stock)' } },
 }
+// Status yang ditampilkan: selesai + sudah diarsipkan Biro Umum = "diarsip"
+export const statusTampil = t => (t.status === 'selesai' && t.diarsipkan_pada ? 'diarsip' : t.status)
 
 export const tabelBelumAda = err => !!err && (err.code === '42P01' || err.code === 'PGRST205' || err.code === 'PGRST200' || err.code === '42703' || /does not exist|schema cache|relationship/i.test(err.message || ''))
 export const PESAN_MIGRASI = 'Fitur ini butuh pembaruan database. Jalankan file supabase/migrasi-disposisi-pemantauan.sql di Supabase (SQL Editor) satu kali.'
