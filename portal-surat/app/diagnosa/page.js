@@ -19,6 +19,8 @@ const CEK = [
   ['Tahapan surat (posisi surat)', s => s.from('surat_tahapan').select('surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan, penerima_nama').limit(1)],
   ['Ekspedisi', s => s.from('surat_keluar').select('*, ekspedisi:surat_ekspedisi(*)').limit(1)],
   ['Kotak saran', s => s.from('surat_saran').select('*').limit(1)],
+  ['Lacak surat (migrasi 3: privasi per unit)', s => s.rpc('lacak_surat')],
+  ['Jejak surat (migrasi 3)', s => s.rpc('lacak_riwayat', { p_jenis: 'masuk', p_surat: '00000000-0000-0000-0000-000000000000' })],
 ]
 
 export default function DiagnosaPage() {

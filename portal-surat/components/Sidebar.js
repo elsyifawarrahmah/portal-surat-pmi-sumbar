@@ -30,23 +30,26 @@ const ICONS = {
   logout: <Svg><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Svg>,
 }
 
+// grup: 'utama' = selalu tampil; 'lain' = dilipat di "Menu lain"; 'admin' = khusus admin web
 const LINKS = [
-  { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { href: '/surat-masuk', label: 'Surat Masuk', icon: 'masuk' },
-  { href: '/disposisi', label: 'Disposisi', icon: 'disposisi', badge: 'disposisi' },
-  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar' },
-  { href: '/ekspedisi', label: 'Ekspedisi', icon: 'ekspedisi' },
-  { href: '/riwayat', label: 'Riwayat Surat', icon: 'riwayat' },
-  { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan' },
-  { href: '/perjanjian-kerja-sama', label: 'Perjanjian Kerja Sama', icon: 'pks' },
-  { href: '/sertifikat-piagam', label: 'Sertifikat & Piagam', icon: 'sertifikat' },
-  { href: '/surat-keputusan', label: 'Surat Keputusan', icon: 'sk' },
-  { href: '/arsip', label: 'Arsip Biro Umum', icon: 'arsip' },
-  { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran' },
-  { href: '/data-user', label: 'Data User', icon: 'user', admin: true },
-  { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'log', admin: true },
-  { href: '/backup', label: 'Backup Data', icon: 'backup', admin: true },
-  { href: '/diagnosa', label: 'Cek Database', icon: 'log', admin: true },
+  { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama' },
+  { href: '/surat-masuk', label: 'Surat Masuk', icon: 'masuk', grup: 'utama' },
+  { href: '/disposisi', label: 'Disposisi', icon: 'disposisi', badge: 'disposisi', grup: 'utama' },
+  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama' },
+  { href: '/lacak', label: 'Lacak Surat', icon: 'riwayat', grup: 'utama' },
+  { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'utama' },
+  { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'utama' },
+  { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
+  { href: '/ekspedisi', label: 'Ekspedisi', icon: 'ekspedisi', grup: 'lain', penuh: true },
+  { href: '/riwayat', label: 'Riwayat & Buku Agenda', icon: 'riwayat', grup: 'lain', penuh: true },
+  { href: '/arsip', label: 'Arsip Biro Umum', icon: 'arsip', grup: 'lain' },
+  { href: '/perjanjian-kerja-sama', label: 'Perjanjian Kerja Sama', icon: 'pks', grup: 'lain' },
+  { href: '/sertifikat-piagam', label: 'Sertifikat & Piagam', icon: 'sertifikat', grup: 'lain' },
+  { href: '/surat-keputusan', label: 'Surat Keputusan', icon: 'sk', grup: 'lain' },
+  { href: '/data-user', label: 'Data User & Unit', icon: 'user', grup: 'admin' },
+  { href: '/log-aktivitas', label: 'Log Aktivitas', icon: 'log', grup: 'admin' },
+  { href: '/backup', label: 'Backup Data', icon: 'backup', grup: 'admin' },
+  { href: '/diagnosa', label: 'Cek Database', icon: 'log', grup: 'admin' },
 ]
 
 export default function Sidebar() {
@@ -57,6 +60,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const peran = usePeran()
   const [badge, setBadge] = useState({ disposisi: 0, panggilan: 0 })
+  const [lainBuka, setLainBuka] = useState(false)
 
   const [nomorHp, setNomorHp] = useState('')
   async function isiNomorHp() {
@@ -137,12 +141,23 @@ export default function Sidebar() {
           <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>{NAMA_APLIKASI}</div>
         </div>
         <div className="nav">
-          {LINKS.filter(l => !(l.admin && !peran.isAdmin && !peran.loading)).map(l => (
-            <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
-              {ICONS[l.icon]}<span style={{flex:1}}>{l.label}</span>
-              {l.badge && badge[l.badge] > 0 && <span className="nav-badge">{badge[l.badge] > 99 ? '99+' : badge[l.badge]}</span>}
-            </Link>
-          ))}
+          {(() => {
+            const bisaLihat = l => !(l.grup === 'admin' && !peran.isAdmin && !peran.loading) && !(l.penuh && !peran.aksesPenuh && !peran.loading)
+            const item = l => (
+              <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
+                {ICONS[l.icon]}<span style={{flex:1}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}</span>
+                {l.badge && badge[l.badge] > 0 && <span className="nav-badge">{badge[l.badge] > 99 ? '99+' : badge[l.badge]}</span>}
+              </Link>
+            )
+            const lain = LINKS.filter(l => l.grup === 'lain' && bisaLihat(l)), admin = LINKS.filter(l => l.grup === 'admin' && bisaLihat(l))
+            const lainAktif = lain.some(l => l.href === pathname)
+            return <>
+              {LINKS.filter(l => l.grup === 'utama').map(item)}
+              <button type="button" className="nav-lipat" onClick={() => setLainBuka(o => !o)} aria-expanded={lainBuka || lainAktif}>Menu lain <span>{lainBuka || lainAktif ? '▴' : '▾'}</span>{!(lainBuka || lainAktif) && badge.panggilan > 0 && <span className="nav-badge" style={{marginLeft:6}}>{badge.panggilan}</span>}</button>
+              {(lainBuka || lainAktif) && lain.map(item)}
+              {admin.length > 0 && <><div className="nav-label">Khusus admin web</div>{admin.map(item)}</>}
+            </>
+          })()}
         </div>
         <div className="sidebar-foot">
           {peran.nama && <div className="sidebar-user"><b>{peran.nama}</b><span>{peran.isAdmin ? 'Admin' : peran.unit?.nama || (peran.migrasiBelum ? '' : 'Belum ada unit')}</span>{!peran.migrasiBelum && <button type="button" onClick={isiNomorHp} style={{display:'block',background:'none',border:'none',color:'inherit',opacity:.85,fontSize:12,padding:'4px 0 0',cursor:'pointer',textDecoration:'underline',textAlign:'left'}}>📞 {nomorHp || peran.telepon || 'Isi nomor HP saya'}</button>}</div>}

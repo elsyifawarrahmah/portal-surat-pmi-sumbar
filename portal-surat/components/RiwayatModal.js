@@ -2,7 +2,7 @@
 // Riwayat lengkap satu surat (garis waktu + waktu pasti tiap kejadian) + tombol cetak.
 import { useEffect, useState } from 'react'
 import Modal from '@/components/Modal'
-import { fmtTgl, fmtWaktu, tabelBelumAda, PESAN_MIGRASI } from '@/lib/format'
+import { fmtTgl, fmtWaktu, tabelBelumAda, PESAN_MIGRASI, pesanGalat } from '@/lib/format'
 import { cetakRiwayat } from '@/lib/cetak'
 
 export default function RiwayatModal({ supabase, jenis, surat, peran, onClose }) {
@@ -13,7 +13,7 @@ export default function RiwayatModal({ supabase, jenis, surat, peran, onClose })
 
   useEffect(() => { (async () => {
     const { data, error } = await supabase.from('surat_riwayat').select('*').eq('surat_jenis', jenis).eq('surat_id', surat.id).order('waktu').order('id')
-    if (error) setPesan(tabelBelumAda(error) ? PESAN_MIGRASI : 'Gagal memuat riwayat: ' + error.message)
+    if (error) setPesan(tabelBelumAda(error) ? pesanGalat(error) : 'Gagal memuat riwayat: ' + error.message)
     else setRiwayat(data || [])
     setLoading(false)
   })() }, [surat.id, jenis])

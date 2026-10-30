@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import DisposisiForm from '@/components/DisposisiForm'
 import KontakModal from '@/components/KontakModal'
-import { fmtTgl, fmtWaktu, sudahLewat, STATUS_DISPOSISI, statusTampil, tabelBelumAda, PESAN_MIGRASI, unggahBerkas } from '@/lib/format'
+import { fmtTgl, fmtWaktu, sudahLewat, STATUS_DISPOSISI, statusTampil, tabelBelumAda, PESAN_MIGRASI, unggahBerkas, pesanGalat } from '@/lib/format'
 import { cetakLembarDisposisi } from '@/lib/cetak'
 
 const kecil = { padding: '5px 12px', minHeight: 36, fontSize: 13 }
@@ -28,7 +28,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
     const { data, error } = await supabase.from('surat_disposisi')
       .select('*, dari:surat_unit(nama), pembuat:profiles(nama_lengkap), tujuan:surat_disposisi_tujuan(*, unit:surat_unit(id, nama, kode, tipe), jawaban:surat_keluar(id, nomor_surat, perihal))')
       .eq('surat_id', surat.id).order('created_at')
-    if (error) { setPesan(tabelBelumAda(error) ? PESAN_MIGRASI : 'Gagal memuat disposisi: ' + error.message); setLoading(false); return }
+    if (error) { setPesan(tabelBelumAda(error) ? pesanGalat(error) : 'Gagal memuat disposisi: ' + error.message); setLoading(false); return }
     setPesan('')
     setDaftar((data || []).map(d => ({ ...d, tujuan: [...(d.tujuan || [])].sort((a, b) => (a.unit?.nama || '').localeCompare(b.unit?.nama || '')) })))
     const c = await supabase.from('surat_catatan').select('*, penulis:profiles(nama_lengkap, unit:surat_unit(nama))').eq('surat_id', surat.id).order('created_at')

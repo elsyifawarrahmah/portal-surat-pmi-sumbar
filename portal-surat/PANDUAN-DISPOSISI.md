@@ -2,7 +2,8 @@
 
 ## Langkah awal (sekali saja, urut)
 1. Supabase → SQL Editor → New query → tempel isi `supabase/migrasi-disposisi-pemantauan.sql` → Run.
-2. Query baru lagi → tempel isi `supabase/migrasi-alur-berjenjang.sql` → Run. (Keduanya aman dijalankan ulang.)
+2. Query baru lagi → tempel isi `supabase/migrasi-alur-berjenjang.sql` → Run.
+2b. Query baru lagi → tempel isi `supabase/migrasi-privasi-lacak.sql` → Run. (Ketiganya aman dijalankan ulang.)
 3. Menu **Data User** → atur **Unit / Bidang** dan **Telepon / WA** tiap akun. Tiap orang juga bisa mengisi nomor HP-nya sendiri lewat tautan "📞 Isi nomor HP saya" di menu samping.
 4. Selesai. Surat lama otomatis mendapat Nomor Agenda dan riwayat awal.
 
@@ -39,3 +40,8 @@ Semua akun bisa melihat data dan mengirim Kotak Saran.
 
 ## Mengubah aturan hak akses
 Aturan ada di database pada fungsi `boleh_catat_masuk`, `boleh_disposisi`, `boleh_catat_keluar`, `boleh_alur`, `boleh_pantau`, `boleh_arsip` (bagian atas file migrasi). Contoh: agar Biro Umum juga boleh mencatat surat keluar, ubah daftar tipe pada `boleh_catat_keluar` menjadi `('sekretariat','pimpinan','bidang','biro_umum')` lalu ubah `bisaCatatKeluar` di `lib/peran.js` dengan cara yang sama.
+
+## Privasi seperti Srikandi (migrasi 3)
+- **Isi surat** (perihal, asal, file, catatan) hanya bisa dibuka oleh: bidang yang dituju / ikut menerima-meneruskan, unit pembuat (surat keluar), Sekretariat, Ketua & Kepala Markas, Biro Umum, dan admin web.
+- **Semua orang** bisa melihat **jejak** surat di menu **Lacak Surat**: nomor agenda, ditujukan ke siapa, sekarang ada di mana, sudah dibaca atau belum, tertahan berapa hari. Perihal, asal, dan file tidak ditampilkan.
+- Menu **Bantuan** menjelaskan langkah tiap peran dengan bahasa sehari-hari.

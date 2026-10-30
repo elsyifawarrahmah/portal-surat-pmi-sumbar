@@ -13,6 +13,7 @@ export function hitungIzin(profil, unit) {
   return {
     isAdmin, tipe, unit, adaUnit,
     isBiroUmum: tipe === 'biro_umum',
+    aksesPenuh: isAdmin || ['sekretariat', 'pimpinan', 'biro_umum'].includes(tipe),   // boleh membaca isi semua surat
     bisaCatatMasuk: isAdmin || tipe === 'sekretariat',
     bisaDisposisi: isAdmin || ['sekretariat', 'pimpinan'].includes(tipe),
     bisaCatatKeluar: isAdmin || ['sekretariat', 'pimpinan', 'bidang'].includes(tipe),

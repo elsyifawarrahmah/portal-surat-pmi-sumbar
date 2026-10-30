@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
-import { fmtTgl, hariIni, tabelBelumAda, PESAN_MIGRASI, unduhCsv, unggahBerkas } from '@/lib/format'
+import { fmtTgl, hariIni, tabelBelumAda, PESAN_MIGRASI, unduhCsv, unggahBerkas, pesanGalat } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 
 const VIA = ['Diantar langsung', 'Kurir', 'Pos', 'Email', 'WhatsApp', 'Lainnya']
@@ -34,7 +34,7 @@ export default function EkspedisiPage() {
   async function load() {
     setLoading(true)
     const { data, error: err } = await supabase.from('surat_keluar').select('*, ekspedisi:surat_ekspedisi(*)').order('tanggal_surat', { ascending: false }).limit(1500)
-    if (err) { setPesan(tabelBelumAda(err) ? PESAN_MIGRASI : 'Gagal memuat: ' + err.message); setRows([]) }
+    if (err) { setPesan(tabelBelumAda(err) ? pesanGalat(err) : 'Gagal memuat: ' + err.message); setRows([]) }
     else {
       setPesan('')
       setRows((data || []).map(r => { const e = [...(r.ekspedisi || [])].sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0] || null; return { ...r, eks: e, st: e ? e.status : 'belum' } }))

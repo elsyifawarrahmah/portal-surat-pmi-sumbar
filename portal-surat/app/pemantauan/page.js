@@ -7,7 +7,7 @@ import { usePeran, useUnits } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
 import KontakModal from '@/components/KontakModal'
 import { labelTahap } from '@/lib/tahap'
-import { fmtTgl, fmtWaktu, hariSejak, sudahLewat, tabelBelumAda, PESAN_MIGRASI } from '@/lib/format'
+import { fmtTgl, fmtWaktu, hariSejak, sudahLewat, tabelBelumAda, PESAN_MIGRASI, pesanGalat } from '@/lib/format'
 
 const JENIS = {
   belum_input: 'Surat belum diinput ke portal',
@@ -61,7 +61,7 @@ export default function PemantauanPage() {
       supabase.from('surat_tahapan').select('surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan, penerima_nama').limit(10000),
     ])
     const gagal = [k, t, p, m, d, th].find(r => r.error)
-    if (gagal) { setPesan(tabelBelumAda(gagal.error) ? PESAN_MIGRASI : 'Gagal memuat data: ' + gagal.error.message); setLoading(false); return }
+    if (gagal) { setPesan(tabelBelumAda(gagal.error) ? pesanGalat(gagal.error) : 'Gagal memuat data: ' + gagal.error.message); setLoading(false); return }
     setPesan('')
     setData({ keluar: k.data || [], tujuan: t.data || [], panggilan: p.data || [], masuk: m.data || [], disposisiSurat: new Set((d.data || []).map(x => x.surat_id)), tahap: th.data || [] })
     setLoading(false)

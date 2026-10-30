@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import RiwayatModal from '@/components/RiwayatModal'
 import { Info } from '@/components/Modal'
-import { fmtTgl, fmtWaktu, tabelBelumAda, PESAN_MIGRASI, unduhCsv } from '@/lib/format'
+import { fmtTgl, fmtWaktu, tabelBelumAda, PESAN_MIGRASI, unduhCsv, pesanGalat } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 
 export default function RiwayatPage() {
@@ -34,7 +34,7 @@ export default function RiwayatPage() {
     if (m.error || k.error) setPesan('Gagal memuat data: ' + (m.error || k.error).message)
     else setPesan('')
     setMasuk(m.data || []); setKeluar(k.data || [])
-    if (r.error) { if (tabelBelumAda(r.error)) setPesan(PESAN_MIGRASI) }
+    if (r.error) { setPesan(pesanGalat(r.error)) }
     else { const peta = {}; (r.data || []).forEach(x => { const key = x.surat_jenis + ':' + x.surat_id; if (!peta[key]) peta[key] = x }); setTerakhir(peta) }
     setLoading(false)
   }
@@ -67,7 +67,7 @@ export default function RiwayatPage() {
   return (
     <div className="app"><div className="main">
       <div className="topbar"><div><h1>Riwayat Surat</h1><p className="desc">Buku agenda digital: semua surat masuk dan keluar beserta waktu masuknya ke sistem. Klik surat untuk melihat riwayat lengkapnya.</p></div></div>
-      {pesan && (pesan === PESAN_MIGRASI ? <Info>{pesan}</Info> : <div className="error-box">{pesan}</div>)}
+      {pesan && <div className="error-box">{pesan}</div>}
 
       <div className="panel">
         <div className="panel-head">

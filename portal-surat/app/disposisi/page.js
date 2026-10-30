@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
 import DisposisiPanel from '@/components/DisposisiPanel'
-import { fmtTgl, sudahLewat, STATUS_DISPOSISI, statusTampil, tabelBelumAda, PESAN_MIGRASI, unduhCsv } from '@/lib/format'
+import { fmtTgl, sudahLewat, STATUS_DISPOSISI, statusTampil, tabelBelumAda, PESAN_MIGRASI, unduhCsv, pesanGalat } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 
 export default function DisposisiPage() {
@@ -44,7 +44,7 @@ function Isi() {
     const { data, error } = await supabase.from('surat_disposisi_tujuan')
       .select('*, unit:surat_unit(id, nama), disposisi:surat_disposisi(id, tanggal_diteruskan, dari_nama, file_scan_url, created_at, surat:surat_masuk(*))')
       .order('created_at', { ascending: false }).limit(1500)
-    if (error) { setPesan(tabelBelumAda(error) ? PESAN_MIGRASI : 'Gagal memuat disposisi: ' + error.message); setRows([]) }
+    if (error) { setPesan(tabelBelumAda(error) ? pesanGalat(error) : 'Gagal memuat disposisi: ' + error.message); setRows([]) }
     else { setPesan(''); setRows((data || []).filter(r => r.disposisi?.surat)) }
     setLoading(false)
   }

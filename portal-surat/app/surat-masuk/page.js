@@ -263,7 +263,7 @@ function SuratMasukInner() {
     <div className="app">
       <div className="main">
         <div className="topbar">
-          <div><h1>Surat Masuk</h1><p className="desc">Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.</p></div>
+          <div><h1>{peran.aksesPenuh || peran.loading ? 'Surat Masuk' : 'Surat untuk Saya'}</h1><p className="desc">{peran.aksesPenuh || peran.loading ? 'Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.' : `Surat yang ditujukan ke ${peran.unit?.nama || 'unit kamu'}. Surat bidang lain tidak ditampilkan di sini — lihat posisinya di menu Lacak Surat.`}</p></div>
           {bolehCatat && <button className="btn btn-primary" onClick={() => { setForm({}); setError(''); setShowAddModal(true) }}>+ Catat Surat Masuk</button>}
         </div>
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
-import { fmtWaktu, tabelBelumAda, PESAN_MIGRASI, unduhCsv } from '@/lib/format'
+import { fmtWaktu, tabelBelumAda, PESAN_MIGRASI, unduhCsv, pesanGalat } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 
 const KATEGORI = ['Saran', 'Pengaduan', 'Apresiasi', 'Lainnya']
@@ -32,7 +32,7 @@ export default function KotakSaranPage() {
   async function load() {
     setLoading(true)
     const { data, error: err } = await supabase.from('surat_saran').select('*').order('created_at', { ascending: false }).limit(1000)
-    if (err) { setPesan(tabelBelumAda(err) ? PESAN_MIGRASI : 'Gagal memuat: ' + err.message); setRows([]) } else { setPesan(''); setRows(data || []) }
+    if (err) { setPesan(tabelBelumAda(err) ? pesanGalat(err) : 'Gagal memuat: ' + err.message); setRows([]) } else { setPesan(''); setRows(data || []) }
     setLoading(false)
   }
 
@@ -44,7 +44,7 @@ export default function KotakSaranPage() {
     if (form.fisik && form.nama.trim()) payload.nama_pengirim = form.nama.trim()
     const { error: err } = await supabase.from('surat_saran').insert(payload)   // tanpa .select(): kiriman anonim memang tidak bisa dibaca balik oleh pengirimnya
     setSaving(false)
-    if (err) { setError(tabelBelumAda(err) ? PESAN_MIGRASI : err.message); return }
+    if (err) { setError(tabelBelumAda(err) ? pesanGalat(err) : err.message); return }
     setForm({ kategori: 'Saran', isi: '', anonim: false, fisik: false, nama: '' })
     setOk(form.anonim && !form.fisik ? 'Terkirim secara anonim. Terima kasih!' : 'Terkirim. Terima kasih atas masukannya!')
     load()
