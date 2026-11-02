@@ -21,7 +21,7 @@ export default function BackupPage() {
         supabase.from('arsip_dokumen').select('*, profiles:petugas_id(nama_lengkap)').order('tanggal', { ascending: false }),
         supabase.from('arsip_catatan').select('*, profiles:diarsip_oleh(nama_lengkap)').order('tanggal_arsip', { ascending: false }),
         supabase.from('surat_disposisi').select('*, surat:surat_masuk(nomor_surat, nomor_agenda, perihal)').order('created_at', { ascending: false }),
-        supabase.from('surat_disposisi_tujuan').select('*, unit:surat_unit(nama), disposisi:surat_disposisi(surat_id, dari_nama, tanggal_diteruskan, surat:surat_masuk(nomor_surat, nomor_agenda, perihal))').order('created_at', { ascending: false }),
+        supabase.from('surat_disposisi_tujuan').select('*, unit:surat_unit(nama), disposisi:surat_disposisi!disposisi_id(surat_id, dari_nama, tanggal_diteruskan, surat:surat_masuk(nomor_surat, nomor_agenda, perihal))').order('created_at', { ascending: false }),
         supabase.from('surat_panggilan').select('*, unit:surat_unit(nama)').order('created_at', { ascending: false }),
         supabase.from('surat_riwayat').select('*').order('waktu', { ascending: false }).limit(20000),
         supabase.from('surat_ekspedisi').select('*, surat:surat_keluar(nomor_surat, nomor_agenda, tujuan_surat, perihal)').order('created_at', { ascending: false }),

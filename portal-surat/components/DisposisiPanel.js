@@ -26,7 +26,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
   async function load() {
     setLoading(true)
     const { data, error } = await supabase.from('surat_disposisi')
-      .select('*, dari:surat_unit(nama), pembuat:profiles(nama_lengkap), tujuan:surat_disposisi_tujuan(*, unit:surat_unit(id, nama, kode, tipe), jawaban:surat_keluar(id, nomor_surat, perihal))')
+      .select('*, dari:surat_unit(nama), pembuat:profiles(nama_lengkap), tujuan:surat_disposisi_tujuan!disposisi_id(*, unit:surat_unit(id, nama, kode, tipe), jawaban:surat_keluar(id, nomor_surat, perihal))')
       .eq('surat_id', surat.id).order('created_at')
     if (error) { setPesan(tabelBelumAda(error) ? pesanGalat(error) : 'Gagal memuat disposisi: ' + error.message); setLoading(false); return }
     setPesan('')

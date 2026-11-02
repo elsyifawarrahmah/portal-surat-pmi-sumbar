@@ -54,7 +54,7 @@ export default function PemantauanPage() {
     setLoading(true)
     const [k, t, p, m, d, th] = await Promise.all([
       supabase.from('surat_keluar').select('id, unit_id, divisi, created_at, nomor_surat').order('created_at', { ascending: false }).limit(3000),
-      supabase.from('surat_disposisi_tujuan').select('id, unit_id, status, batas_waktu, perlu_jawaban, surat_jawaban_id, created_at, dibaca_pada, selesai_pada, diarsipkan_pada, disposisi:surat_disposisi(surat_id, surat:surat_masuk(id, nomor_surat, perihal, asal_surat, sifat))').limit(2000),
+      supabase.from('surat_disposisi_tujuan').select('id, unit_id, status, batas_waktu, perlu_jawaban, surat_jawaban_id, created_at, dibaca_pada, selesai_pada, diarsipkan_pada, disposisi:surat_disposisi!disposisi_id(surat_id, surat:surat_masuk(id, nomor_surat, perihal, asal_surat, sifat))').limit(2000),
       supabase.from('surat_panggilan').select('*, unit:surat_unit(nama), pembuat:profiles!surat_panggilan_dibuat_oleh_fkey(nama_lengkap), surat:surat_masuk(nomor_surat)').order('created_at', { ascending: false }).limit(300),
       supabase.from('surat_masuk').select('id, nomor_surat, nomor_agenda, asal_surat, perihal, created_at, sifat').order('created_at', { ascending: false }).limit(1000),
       supabase.from('surat_disposisi').select('surat_id').limit(3000),

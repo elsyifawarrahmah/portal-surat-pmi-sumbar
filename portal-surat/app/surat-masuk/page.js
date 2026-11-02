@@ -1,4 +1,5 @@
 'use client'
+import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
@@ -61,7 +62,7 @@ function SuratMasukInner() {
     ;(semuaTahap || []).forEach(t => { (peta[t.surat_id] = peta[t.surat_id] || []).push(t) })
     setTahapMap(peta)
     // ringkasan disposisi per surat (kosong bila migrasi belum dijalankan)
-    const { data: tj, error: errTj } = await supabase.from('surat_disposisi_tujuan').select('status, disposisi:surat_disposisi(surat_id)')
+    const { data: tj, error: errTj } = await supabase.from('surat_disposisi_tujuan').select('status, disposisi:surat_disposisi!disposisi_id(surat_id)')
     const dm = {}
     if (!errTj) (tj || []).forEach(t => { const id = t.disposisi?.surat_id; if (!id) return; const d = (dm[id] = dm[id] || { total: 0, selesai: 0 }); d.total++; if (t.status === 'selesai') d.selesai++ })
     setDisposisiMap(dm)
@@ -267,6 +268,7 @@ function SuratMasukInner() {
           {bolehCatat && <button className="btn btn-primary" onClick={() => { setForm({}); setError(''); setShowAddModal(true) }}>+ Catat Surat Masuk</button>}
         </div>
 
+        <PeringatanUnit peran={peran} />
         {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
             👁 Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretariat. Buka kolom “Disposisi” untuk melihat disposisi surat.

@@ -1,4 +1,5 @@
 'use client'
+import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -166,6 +167,7 @@ function SuratKeluarInner() {
           {bolehCatat && <button className="btn btn-primary" onClick={() => openAdd()}>+ Tambah Data</button>}
         </div>
 
+        <PeringatanUnit peran={peran} />
         {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
             👁 {peran.isBiroUmum ? 'Biro Umum hanya memantau: surat keluar dicatat oleh tiap bidang / Sekretariat.' : 'Akun kamu hanya bisa melihat data. Minta admin mengatur unit/bidang kamu di menu Data User agar bisa mencatat surat keluar.'}

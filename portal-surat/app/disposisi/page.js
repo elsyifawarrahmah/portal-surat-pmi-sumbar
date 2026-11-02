@@ -1,4 +1,5 @@
 'use client'
+import PeringatanUnit from '@/components/PeringatanUnit'
 // Disposisi: kotak masuk disposisi per bidang + Ruang Disposisi (buku/arsip semua disposisi).
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -42,7 +43,7 @@ function Isi() {
   async function load() {
     setLoading(true)
     const { data, error } = await supabase.from('surat_disposisi_tujuan')
-      .select('*, unit:surat_unit(id, nama), disposisi:surat_disposisi(id, tanggal_diteruskan, dari_nama, file_scan_url, created_at, surat:surat_masuk(*))')
+      .select('*, unit:surat_unit(id, nama), disposisi:surat_disposisi!disposisi_id(id, tanggal_diteruskan, dari_nama, file_scan_url, created_at, surat:surat_masuk(*))')
       .order('created_at', { ascending: false }).limit(1500)
     if (error) { setPesan(tabelBelumAda(error) ? pesanGalat(error) : 'Gagal memuat disposisi: ' + error.message); setRows([]) }
     else { setPesan(''); setRows((data || []).filter(r => r.disposisi?.surat)) }
@@ -91,6 +92,7 @@ function Isi() {
         {peran.bisaDisposisi && <button className="btn btn-primary" onClick={bukaPilih}>+ Buat Disposisi</button>}
       </div>
 
+      <PeringatanUnit peran={peran} />
       {peran.migrasiBelum && <Info warna="gold">Pembaruan database belum dijalankan. {PESAN_MIGRASI}</Info>}
       {peran.isBiroUmum && <Info warna="gold">👁 Biro Umum memantau semua disposisi dan bertugas mengarsipkan yang sudah selesai (tombol “Arsipkan”). Tindak lanjut dilakukan oleh bidang tujuan.</Info>}
       {pesan && <div className="error-box">{pesan}</div>}

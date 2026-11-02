@@ -1,4 +1,5 @@
 'use client'
+import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
@@ -26,7 +27,7 @@ export default function Dashboard() {
   // Tugas untuk unit saya: disposisi yang belum selesai & panggilan dari Biro Umum (kosong bila migrasi belum dijalankan)
   async function muatTugas() {
     if (peran.unitId && !peran.isBiroUmum) {
-      const d = await supabase.from('surat_disposisi_tujuan').select('id, status, batas_waktu, instruksi, disposisi:surat_disposisi(tanggal_diteruskan, surat:surat_masuk(nomor_surat, perihal, asal_surat, sifat))').eq('unit_id', peran.unitId).neq('status', 'selesai').order('created_at', { ascending: false }).limit(8)
+      const d = await supabase.from('surat_disposisi_tujuan').select('id, status, batas_waktu, instruksi, disposisi:surat_disposisi!disposisi_id(tanggal_diteruskan, surat:surat_masuk(nomor_surat, perihal, asal_surat, sifat))').eq('unit_id', peran.unitId).neq('status', 'selesai').order('created_at', { ascending: false }).limit(8)
       if (!d.error) setDispSaya(d.data || [])
       const p = await supabase.from('surat_panggilan').select('id, jenis, pesan, created_at').eq('unit_id', peran.unitId).is('selesai_pada', null).order('created_at', { ascending: false })
       if (!p.error) setPanggilanSaya(p.data || [])
@@ -97,6 +98,7 @@ export default function Dashboard() {
           <div className="stat row-click" style={{'--accent':'#B3261E'}} onClick={()=>router.push('/surat-masuk')}><div className="lbl">Tertahan ≥2 Hari</div><div className="val">{bermasalah.length}</div></div>
         </div>
 
+        <PeringatanUnit peran={peran} />
         {panggilanSaya.length > 0 && (
           <div className="panel" style={{borderColor:'#B3261E'}}>
             <div className="panel-head"><h3>📣 Panggilan dari Biro Umum untuk {peran.unit?.nama}</h3><Link href="/pemantauan" className="btn btn-primary" style={{textDecoration:'none',minHeight:36,padding:'6px 14px',fontSize:13}}>Tindak lanjuti →</Link></div>
