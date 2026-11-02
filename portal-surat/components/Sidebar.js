@@ -33,13 +33,14 @@ const ICONS = {
 // grup: 'utama' = selalu tampil; 'lain' = dilipat di "Menu lain"; 'admin' = khusus admin web
 const LINKS = [
   { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama' },
-  { href: '/surat-masuk', label: 'Surat Masuk', icon: 'masuk', grup: 'utama' },
-  { href: '/disposisi', label: 'Disposisi', icon: 'disposisi', badge: 'disposisi', grup: 'utama' },
+  { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi' },
   { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama' },
   { href: '/lacak', label: 'Lacak Surat', icon: 'riwayat', grup: 'utama' },
-  { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'utama' },
   { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'utama' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
+  { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'lain' },
+  { href: '/disposisi', label: 'Buku Disposisi', icon: 'disposisi', grup: 'lain', penuh: true },
+  { href: '/surat-masuk', label: 'Buku Surat Masuk (lengkap)', icon: 'masuk', grup: 'lain', penuh: true },
   { href: '/ekspedisi', label: 'Ekspedisi', icon: 'ekspedisi', grup: 'lain', penuh: true },
   { href: '/riwayat', label: 'Riwayat & Buku Agenda', icon: 'riwayat', grup: 'lain', penuh: true },
   { href: '/arsip', label: 'Arsip Biro Umum', icon: 'arsip', grup: 'lain' },
@@ -144,7 +145,7 @@ export default function Sidebar() {
           {(() => {
             const bisaLihat = l => !(l.grup === 'admin' && !peran.isAdmin && !peran.loading) && !(l.penuh && !peran.aksesPenuh && !peran.loading)
             const item = l => (
-              <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>
+              <Link key={l.href} href={l.href} className={pathname === l.href || (l.href === '/surat' && pathname.startsWith('/surat/')) ? 'active' : ''}>
                 {ICONS[l.icon]}<span style={{flex:1}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}</span>
                 {l.badge && badge[l.badge] > 0 && <span className="nav-badge">{badge[l.badge] > 99 ? '99+' : badge[l.badge]}</span>}
               </Link>

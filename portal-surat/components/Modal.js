@@ -2,7 +2,7 @@
 // Kotak dialog seragam (sama tampilannya dengan modal lain di aplikasi)
 export default function Modal({ judul, onClose, children, footer, lebar = 560 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 12 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 120, padding: 12 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: lebar, maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 22px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <h3 style={{ margin: 0, fontSize: 18 }}>{judul}</h3>

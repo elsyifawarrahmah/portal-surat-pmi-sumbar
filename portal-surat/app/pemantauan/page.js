@@ -273,7 +273,7 @@ export default function PemantauanPage() {
                   <td data-label="Dicatat">{fmtWaktu(m.created_at)}</td><td data-label="Agenda" className="mono">{m.nomor_agenda || '-'}</td><td data-label="No. Surat" className="mono">{m.sifat === 'Rahasia' && !peran.isAdmin ? '••••' : m.nomor_surat}</td>
                   <td data-label="Asal">{m.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : m.asal_surat}</td><td data-label="Perihal">{m.sifat === 'Rahasia' && !peran.isAdmin ? '-' : m.perihal}</td>
                   <td data-label="Sudah"><span className="tag" style={{ background: '#FBE7E7', color: '#B3261E' }}>{hariSejak(m.created_at)} hari</span></td>
-                  <td data-label=""><Link href={`/surat-masuk?disposisi=${m.id}`} style={{ color: 'var(--pmi-red)', fontWeight: 700, textDecoration: 'none' }}>Lihat →</Link></td>
+                  <td data-label=""><Link href={`/surat/${m.id}`} style={{ color: 'var(--pmi-red)', fontWeight: 700, textDecoration: 'none' }}>Lihat →</Link></td>
                 </tr>))}</tbody>
             </table></div>
           </div>

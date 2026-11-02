@@ -3,25 +3,23 @@
 import { usePeran } from '@/lib/peran'
 
 const KARTU = [
-  ['Saya di Bidang / Divisi', '🏢', [
-    'Buka menu **Surat Masuk**. Di situ hanya ada surat yang ditujukan ke bidang kamu.',
-    'Klik surat, lalu tekan **“Surat sudah sampai di saya”**. Jadi semua orang tahu surat itu sudah kamu terima.',
-    'Tulis kata-katamu, lalu tekan **Selesai**. Kalau perlu dikerjakan bidang lain, tekan **Teruskan ke bidang lain**.',
-    'Kalau kamu mengirim surat, buka **Surat Keluar** lalu **Tambah Data**.',
+  ['Kalau saya di Bidang / Divisi', '🏢', [
+    'Buka **Beranda**. Kotak merah **“Belum dibaca”** menunjukkan surat baru untuk bidangmu. Klik kotaknya.',
+    'Klik surat yang mau dibuka. Surat otomatis berstatus **sudah dibaca** — kamu tidak perlu menekan apa-apa.',
+    'Baca suratnya (tombol **“Buka / lihat surat”**). Lalu di kotak **Tindak Lanjut** pilih satu: **Selesai**, **Teruskan ke bidang lain**, atau **Balas dengan surat**.',
+    'Kalau kamu mengirim surat sendiri, buka **Surat Keluar** lalu **Tambah Data**.',
   ]],
-  ['Saya Sekretaris (Sekretariat)', '✍️', [
-    'Surat datang? Buka **Surat Masuk → Catat Surat Masuk**. Nomor agenda terisi sendiri.',
-    'Klik **+ Disposisi** pada surat itu, pilih bidang tujuan, tulis perintahnya. Bisa dicetak seperti lembar disposisi kertas.',
-    'Kalau surat menumpuk, orang lain bisa menelepon kamu lewat tombol **Hubungi** di menu **Pemantauan**.',
+  ['Kalau saya Sekretaris', '✍️', [
+    'Surat datang? Klik **Surat Masuk → + Catat Surat Masuk**. Nomor agenda terisi sendiri.',
+    'Buka suratnya, klik **“Teruskan ke bidang lain (Disposisi)”**. Pilih bidang, pilih petunjuk, tulis pesan, lalu **Kirim**.',
+    'Mau melihat surat mana yang tertahan? Klik **Lacak Surat**. Ada tombol telepon / WhatsApp untuk menghubungi orangnya.',
   ]],
-  ['Saya Ketua / Kepala Markas', '⭐', [
-    'Kamu bisa membaca semua surat dan memberi **Disposisi** ke bidang mana pun.',
-    'Tulis kata-katamu di disposisi. Bidang yang dituju langsung melihatnya di menu **Disposisi**.',
+  ['Kalau saya Ketua / Kepala Markas', '⭐', [
+    'Buka surat, klik **“Teruskan ke bidang lain (Disposisi)”**. Pilih bidang dan tulis petunjukmu. Bidang langsung menerimanya.',
   ]],
-  ['Saya Biro Umum', '🗄️', [
-    'Buka **Pemantauan** untuk melihat bidang mana yang surat-suratnya tertahan.',
-    'Surat yang sudah selesai dikerjakan bidang akan menunggu kamu. Tekan **Arsipkan**.',
-    'Bidang yang belum input surat bisa diingatkan lewat tombol **Panggil**.',
+  ['Kalau saya Biro Umum', '🗄️', [
+    'Surat yang sudah selesai dikerjakan menunggu kamu. Buka suratnya lalu klik **Arsipkan**.',
+    'Mau lihat bidang mana yang suratnya tertahan? Buka **Menu lain → Pemantauan**. Bidang yang belum input surat bisa diingatkan dengan tombol **Panggil**.',
   ]],
 ]
 

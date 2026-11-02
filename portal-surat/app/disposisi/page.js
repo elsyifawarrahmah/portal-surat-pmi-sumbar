@@ -2,7 +2,7 @@
 import PeringatanUnit from '@/components/PeringatanUnit'
 // Disposisi: kotak masuk disposisi per bidang + Ruang Disposisi (buku/arsip semua disposisi).
 import { useEffect, useMemo, useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import Modal, { Info } from '@/components/Modal'
@@ -19,6 +19,7 @@ function Isi() {
   const peran = usePeran()
   const { units } = useUnits()
   const params = useSearchParams()
+  const router = useRouter()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [pesan, setPesan] = useState('')
@@ -129,7 +130,7 @@ function Isi() {
                   tampil.map(r => {
                     const s = r.disposisi.surat, st = STATUS_DISPOSISI[statusTampil(r)], sembunyi = rahasia(r), telat = r.status !== 'selesai' && sudahLewat(r.batas_waktu)
                     return (
-                      <tr key={r.id} className="row-click" onClick={() => { if (!sembunyi) setDetail(s) }}>
+                      <tr key={r.id} className="row-click" onClick={() => { if (!sembunyi) router.push(`/surat/${s.id}`) }}>
                         <td data-label="Diteruskan">{fmtTgl(r.disposisi.tanggal_diteruskan)}</td>
                         <td data-label="Agenda" className="mono">{s.nomor_agenda || '-'}</td>
                         <td data-label="Surat">{sembunyi ? '🔒 Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{s.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{s.asal_surat} — {s.perihal}</span></>}</td>

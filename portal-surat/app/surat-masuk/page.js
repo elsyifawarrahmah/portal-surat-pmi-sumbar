@@ -45,6 +45,7 @@ function SuratMasukInner() {
   useEffect(() => {
     const openId = searchParams.get('open')
     if (openId) openTahap(openId)
+    if (searchParams.get('tambah') === '1') { setForm({}); setError(''); setShowAddModal(true) }
     const dispId = searchParams.get('disposisi')
     if (dispId) supabase.from('surat_masuk').select('*').eq('id', dispId).maybeSingle().then(({ data }) => { if (data) setModalDisposisi(data) })
   }, [searchParams])

@@ -90,7 +90,7 @@ export default function LacakPage() {
                         <td data-label="" style={{ whiteSpace: 'nowrap' }}>
                           <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaJejak(r)}>Jejak</button>
                           {r.boleh_baca
-                            ? <Link href={r.jenis === 'masuk' ? `/surat-masuk?disposisi=${r.surat_id}` : '/surat-keluar'} className="btn btn-primary" style={{ padding: '6px 12px', minHeight: 36, fontSize: 13, textDecoration: 'none' }}>Buka surat</Link>
+                            ? <Link href={r.jenis === 'masuk' ? `/surat/${r.surat_id}` : '/surat-keluar'} className="btn btn-primary" style={{ padding: '6px 12px', minHeight: 36, fontSize: 13, textDecoration: 'none' }}>Buka surat</Link>
                             : <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>🔒 isi hanya untuk yang dituju</span>}
                         </td>
                       </tr>
