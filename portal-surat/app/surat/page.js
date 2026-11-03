@@ -55,7 +55,7 @@ function Isi() {
   const TAB = [['belum', penuh ? 'Belum diteruskan' : 'Belum dibaca'], ['proses', penuh ? 'Sedang berjalan' : 'Sedang dikerjakan'], ['selesai', 'Selesai'], ['semua', 'Semua']]
 
   return (
-    <div className="app"><div className="main" style={{ maxWidth: 900 }}>
+    <div className="app"><div className="main kolom" style={{ '--lebar': '900px' }}>
       <div className="topbar">
         <div><h1>{penuh ? 'Surat Masuk' : 'Surat untuk Saya'}</h1><p className="desc">{penuh ? 'Semua surat yang masuk ke PMI Sumatera Barat.' : `Surat yang ditujukan ke ${peran.unit?.nama || 'unit kamu'}.`}</p></div>
         {peran.bisaCatatMasuk && <Link href="/surat-masuk?tambah=1" className="btn btn-primary" style={{ textDecoration: 'none', minHeight: 50, fontSize: 16 }}>+ Catat Surat Masuk</Link>}

@@ -56,7 +56,7 @@ export default function Beranda() {
   const terbaru = daftar.filter(d => ['belum', 'belum_diteruskan'].includes(d.kunci)).slice(0, 5)
 
   return (
-    <div className="app"><div className="main" style={{ maxWidth: 980 }}>
+    <div className="app"><div className="main kolom" style={{ '--lebar': '980px' }}>
       <div className="topbar"><div><h1>Halo, {peran.nama || '...'} 👋</h1><p className="desc">{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''}</p></div></div>
       <PeringatanUnit peran={peran} />
 

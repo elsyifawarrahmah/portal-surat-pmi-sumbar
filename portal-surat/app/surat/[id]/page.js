@@ -110,7 +110,7 @@ export default function DetailSurat() {
   }
 
   return (
-    <div className="app"><div className="main" style={{ maxWidth: 860 }}>
+    <div className="app"><div className="main kolom" style={{ '--lebar': '860px' }}>
       <div style={{ marginBottom: 12 }}><Link href="/surat" style={{ color: 'var(--pmi-red)', fontWeight: 700, textDecoration: 'none', fontSize: 15 }}>← Kembali ke daftar surat</Link></div>
       <PeringatanUnit peran={peran} />
       {galat && <div className="error-box">{galat}</div>}
