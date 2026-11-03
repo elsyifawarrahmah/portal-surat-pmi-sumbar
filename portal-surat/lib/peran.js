@@ -25,7 +25,7 @@ export function hitungIzin(profil, unit) {
   }
 }
 
-const AWAL = { loading: true, userId: null, nama: '', telepon: '', role: 'viewer', unitId: null, migrasiBelum: false, ...hitungIzin(null, null) }
+const AWAL = { loading: true, userId: null, nama: '', telepon: '', fotoUrl: '', jabatan: '', role: 'viewer', unitId: null, migrasiBelum: false, ...hitungIzin(null, null) }
 
 export function usePeran() {
   const [state, setState] = useState(AWAL)
@@ -37,7 +37,8 @@ export function usePeran() {
       if (!u?.user) { if (!batal) setState(s => ({ ...s, loading: false })); return }
       let profil = null, unit = null, migrasiBelum = false
       // bertahap: kolom telepon (migrasi 2) boleh belum ada, unit (migrasi 1) wajib ada agar fitur bidang jalan
-      let r1 = await supabase.from('profiles').select('id, nama_lengkap, role, unit_id, telepon, unit:surat_unit(id, kode, nama, tipe)').eq('id', u.user.id).maybeSingle()
+      let r1 = await supabase.from('profiles').select('id, nama_lengkap, role, unit_id, telepon, foto_url, jabatan, unit:surat_unit(id, kode, nama, tipe)').eq('id', u.user.id).maybeSingle()
+      if (r1.error) r1 = await supabase.from('profiles').select('id, nama_lengkap, role, unit_id, telepon, unit:surat_unit(id, kode, nama, tipe)').eq('id', u.user.id).maybeSingle()
       if (r1.error) r1 = await supabase.from('profiles').select('id, nama_lengkap, role, unit_id, unit:surat_unit(id, kode, nama, tipe)').eq('id', u.user.id).maybeSingle()
       if (r1.error) {
         migrasiBelum = true
@@ -45,7 +46,7 @@ export function usePeran() {
         profil = r2.data
       } else { profil = r1.data; unit = r1.data?.unit || null }
       if (batal) return
-      setState({ loading: false, userId: u.user.id, nama: profil?.nama_lengkap || '', telepon: profil?.telepon || '', role: profil?.role || 'viewer', unitId: profil?.unit_id || null, migrasiBelum, ...hitungIzin(profil, unit) })
+      setState({ loading: false, userId: u.user.id, nama: profil?.nama_lengkap || '', telepon: profil?.telepon || '', fotoUrl: profil?.foto_url || '', jabatan: profil?.jabatan || '', role: profil?.role || 'viewer', unitId: profil?.unit_id || null, migrasiBelum, ...hitungIzin(profil, unit) })
     })()
     return () => { batal = true }
   }, [])

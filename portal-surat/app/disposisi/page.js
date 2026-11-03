@@ -1,4 +1,5 @@
 'use client'
+import { LihatBerkas } from '@/components/PratinjauBerkas'
 import PeringatanUnit from '@/components/PeringatanUnit'
 // Disposisi: kotak masuk disposisi per bidang + Ruang Disposisi (buku/arsip semua disposisi).
 import { useEffect, useMemo, useState, Suspense } from 'react'
@@ -139,7 +140,7 @@ function Isi() {
                         <td data-label="Disposisi">{sembunyi ? '-' : (r.instruksi || '-')}{r.perlu_jawaban && !sembunyi && <span className="tag" style={{ marginLeft: 6, background: 'var(--gold-bg)', color: 'var(--gold)' }}>perlu jawaban</span>}</td>
                         <td data-label="Batas" style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{r.batas_waktu ? fmtTgl(r.batas_waktu) : '-'}</td>
                         <td data-label="Status" onClick={e => e.stopPropagation()}><span className="tag" style={st.style}>{st.label}</span>{r.status === 'selesai' && !r.diarsipkan_pada && peran.bisaArsip && <div><button className="btn btn-primary" style={{ padding: '3px 10px', minHeight: 32, fontSize: 12, marginTop: 4 }} onClick={() => arsipkan(r)}>🗄 Arsipkan</button></div>}</td>
-                        <td data-label="Scan" onClick={e => e.stopPropagation()}>{r.disposisi.file_scan_url && !sembunyi ? <a href={r.disposisi.file_scan_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat</a> : '-'}</td>
+                        <td data-label="Scan" onClick={e => e.stopPropagation()}>{r.disposisi.file_scan_url && !sembunyi ? <LihatBerkas url={r.disposisi.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat</LihatBerkas> : '-'}</td>
                       </tr>
                     )
                   })}
@@ -165,7 +166,7 @@ function Isi() {
         <Modal judul={`Disposisi — ${detail.nomor_surat}`} onClose={() => setDetail(null)} lebar={760}>
           <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, marginBottom: 14 }}>
             <b>{detail.asal_surat}</b> — {detail.perihal}<br /><span style={{ color: 'var(--ink-soft)' }}>Agenda {detail.nomor_agenda || '-'} · diterima {fmtTgl(detail.tanggal_diterima_kantor)}{detail.file_bukti_url ? '' : ''}</span>
-            {detail.file_bukti_url && <> · <a href={detail.file_bukti_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</a></>}
+            {detail.file_bukti_url && <> · <LihatBerkas url={detail.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</LihatBerkas></>}
           </div>
           <DisposisiPanel supabase={supabase} surat={detail} units={units} peran={peran} onChanged={load} />
         </Modal>

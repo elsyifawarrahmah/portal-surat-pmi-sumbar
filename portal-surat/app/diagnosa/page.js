@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 const CEK = [
   ['Akun saya + unit (menu, hak akses)', s => s.from('profiles').select('id, nama_lengkap, role, unit_id, unit:surat_unit(id, kode, nama, tipe)').limit(1)],
   ['Kolom telepon pada akun (migrasi 2)', s => s.from('profiles').select('id, telepon').limit(1)],
+  ['Profil: foto & jabatan (migrasi 4)', s => s.from('profiles').select('id, foto_url, jabatan, telepon').limit(1)],
   ['Daftar unit / bidang', s => s.from('surat_unit').select('*').limit(1)],
   ['Surat masuk: nomor agenda, macam surat, lampiran', s => s.from('surat_masuk').select('id, nomor_agenda, macam_surat, lampiran').limit(1)],
   ['Surat keluar: agenda, unit, surat jawaban', s => s.from('surat_keluar').select('id, nomor_agenda, unit_id, surat_masuk_id, jawab:surat_masuk(nomor_surat)').limit(1)],

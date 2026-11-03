@@ -1,4 +1,5 @@
 'use client'
+import { LihatBerkas } from '@/components/PratinjauBerkas'
 // Alur surat seperti Srikandi: disposisi berjenjang (diteruskan lagi oleh penerima), kata-kata tiap orang,
 // catatan bersama, selesai → menunggu Biro Umum mengarsipkan. Plus tombol menghubungi orang yang memegang surat.
 import { useEffect, useState } from 'react'
@@ -126,7 +127,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
             {d.catatan && <div style={{ fontSize: 13.5, marginBottom: 10 }}><b>Catatan:</b> {d.catatan}</div>}
             <div style={{ fontSize: 13.5, marginBottom: 12, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
               {d.file_scan_url
-                ? <a href={d.file_scan_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat scan lembar disposisi{d.file_scan_nama ? ` (${d.file_scan_nama})` : ''}</a>
+                ? <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat scan lembar disposisi{d.file_scan_nama ? ` (${d.file_scan_nama})` : ''}</LihatBerkas>
                 : <span style={{ color: 'var(--ink-soft)' }}>Belum ada scan lembar disposisi.</span>}
               {(peran.bisaDisposisi || d.dibuat_oleh === peran.userId) && <label style={{ textTransform: 'none', fontSize: 13, margin: 0, color: 'var(--pmi-red)', cursor: 'pointer', fontWeight: 600 }}>⬆ {d.file_scan_url ? 'Ganti' : 'Unggah'} scan<input type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => unggahScan(d, e)} /></label>}
             </div>

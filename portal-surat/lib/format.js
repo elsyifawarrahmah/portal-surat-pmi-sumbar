@@ -41,9 +41,7 @@ export function unduhCsv(namaFile, header, baris) {
   a.click(); URL.revokeObjectURL(url)
 }
 
-export async function unggahBerkas(supabase, file) {
-  const nama = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
-  const { error } = await supabase.storage.from('bukti-surat').upload(nama, file)
-  if (error) throw new Error('Gagal unggah file: ' + error.message)
-  return supabase.storage.from('bukti-surat').getPublicUrl(nama).data.publicUrl
+export async function unggahBerkas(supabase, file, jenis = 'surat') {
+  const { unggahSatu } = await import('./berkas')
+  return (await unggahSatu(supabase, [file], jenis)).url
 }

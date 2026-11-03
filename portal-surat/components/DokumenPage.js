@@ -1,4 +1,6 @@
 'use client'
+import { unggahSatu, ketHint } from '@/lib/berkas'
+import { LihatBerkas } from '@/components/PratinjauBerkas'
 // Halaman arsip dokumen serbaguna: dipakai Perjanjian Kerja Sama, Sertifikat & Piagam, dan Surat Keputusan.
 // Pola sama dengan Surat Keluar: tabel, cari, export CSV, upload bukti, hanya admin yang bisa tambah/ubah/hapus.
 import { useEffect, useState } from 'react'
@@ -83,15 +85,15 @@ export default function DokumenPage({ config }) {
   function openEdit(row) { setEditing(row); setForm(row); setError(''); setShowModal(true) }
 
   async function handleUploadBukti(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
-    const { error: uploadErr } = await supabase.storage.from('bukti-surat').upload(filename, file)
-    if (uploadErr) { setError('Gagal upload file: ' + uploadErr.message); setUploading(false); return }
-    const { data: urlData } = supabase.storage.from('bukti-surat').getPublicUrl(filename)
-    setForm(f => ({ ...f, file_bukti_url: urlData.publicUrl, file_bukti_nama: file.name }))
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploading(true); setError('')
+    try {
+      const r = await unggahSatu(supabase, files, 'surat')
+      setForm(f => ({ ...f, file_bukti_url: r.url, file_bukti_nama: r.nama }))
+    } catch (err) { setError(err.message) }
     setUploading(false)
+    e.target.value = ''
   }
 
   async function handleSave() {
@@ -210,7 +212,7 @@ export default function DokumenPage({ config }) {
                       {config.masaBerlaku && (
                         <td data-label="Status">{st ? <span className="tag" style={st.style}>{st.label}</span> : '-'}</td>
                       )}
-                      <td data-label="Bukti">{r.file_bukti_url ? <a href={r.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
+                      <td data-label="Bukti">{r.file_bukti_url ? <LihatBerkas url={r.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</LihatBerkas> : '-'}</td>
                       <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
                       {isAdmin && (
                         <td data-label="">
@@ -262,7 +264,8 @@ export default function DokumenPage({ config }) {
               ))}
               <div className="field">
                 <label>File Dokumen (PDF/Foto) — opsional</label>
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleUploadBukti} />
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleUploadBukti} />
+                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('surat')}</div>
                 {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
                 {form.file_bukti_nama && <div style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {form.file_bukti_nama} terunggah</div>}
                 {!form.file_bukti_nama && form.file_bukti_url && <div style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ File sudah terpasang sebelumnya</div>}

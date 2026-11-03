@@ -1,4 +1,5 @@
 'use client'
+import { LihatBerkas } from '@/components/PratinjauBerkas'
 // Halaman SATU surat (gaya Srikandi): isi surat, tombol Tindak Lanjut, ke mana diteruskan, perjalanan surat, catatan.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -138,7 +139,7 @@ export default function DetailSurat() {
               {surat.sifat && surat.sifat !== 'Biasa' && <div><span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Sifat</span><br /><b>{surat.sifat}</b></div>}
             </div>
             {surat.file_bukti_url
-              ? <a href={surat.file_bukti_url} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ textDecoration: 'none', minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', gap: 8 }}>📄 Buka / lihat surat</a>
+              ? <LihatBerkas url={surat.file_bukti_url} className="btn btn-primary" style={{ textDecoration: 'none', minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', gap: 8 }}>📄 Buka / lihat surat</LihatBerkas>
               : <div style={{ fontSize: 14, color: 'var(--ink-soft)' }}>File surat belum diunggah.</div>}
           </div>
 
@@ -227,7 +228,7 @@ export default function DetailSurat() {
               {disposisi.map(d => (
                 <span key={d.id} style={{ marginRight: 14 }}>
                   <a href="#" style={{ color: 'var(--pmi-red)', fontWeight: 600 }} onClick={e => { e.preventDefault(); cetakLembarDisposisi({ surat, disposisi: d, tujuan: d.tujuan, namaPencetak: peran.nama }) }}>🖨 Cetak ({fmtTgl(d.tanggal_diteruskan)})</a>
-                  {d.file_scan_url && <> · <a href={d.file_scan_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 scan</a></>}
+                  {d.file_scan_url && <> · <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 scan</LihatBerkas></>}
                   {peran.bisaDisposisi && <> · <label style={{ textTransform: 'none', display: 'inline', fontSize: 14, color: 'var(--pmi-red)', cursor: 'pointer', fontWeight: 600 }}>⬆ unggah scan<input type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => unggahScan(d, e)} /></label></>}
                 </span>
               ))}

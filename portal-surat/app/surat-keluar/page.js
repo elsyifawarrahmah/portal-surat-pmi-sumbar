@@ -1,4 +1,6 @@
 'use client'
+import { unggahSatu, ketHint } from '@/lib/berkas'
+import { LihatBerkas } from '@/components/PratinjauBerkas'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -72,15 +74,15 @@ function SuratKeluarInner() {
   function openEdit(row) { setEditing(row); setForm(row); setError(''); setShowModal(true) }
 
   async function handleUploadBukti(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploading(true)
-    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
-    const { error: uploadErr } = await supabase.storage.from('bukti-surat').upload(filename, file)
-    if (uploadErr) { setError('Gagal upload file: ' + uploadErr.message); setUploading(false); return }
-    const { data: urlData } = supabase.storage.from('bukti-surat').getPublicUrl(filename)
-    setForm(f => ({ ...f, file_bukti_url: urlData.publicUrl, file_bukti_nama: file.name }))
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploading(true); setError('')
+    try {
+      const r = await unggahSatu(supabase, files, 'surat')
+      setForm(f => ({ ...f, file_bukti_url: r.url, file_bukti_nama: r.nama }))
+    } catch (err) { setError(err.message) }
     setUploading(false)
+    e.target.value = ''
   }
 
   async function handleSave() {
@@ -194,7 +196,7 @@ function SuratKeluarInner() {
                     <td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
                     {columns.map(c => <td key={c.k} data-label={c.label}>{r[c.k] ?? '-'}</td>)}
                     <td data-label="Jawaban untuk" className="mono">{r.jawab?.nomor_surat || '-'}</td>
-                    <td data-label="Bukti">{r.file_bukti_url ? <a href={r.file_bukti_url} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
+                    <td data-label="Bukti">{r.file_bukti_url ? <LihatBerkas url={r.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</LihatBerkas> : '-'}</td>
                     <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{whiteSpace:'nowrap'}}>
                       <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>setModalRiwayat(r)}>Riwayat</button>
@@ -252,7 +254,8 @@ function SuratKeluarInner() {
               </div>
               <div className="field">
                 <label>File Bukti (PDF/Foto Surat) — opsional</label>
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleUploadBukti} />
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleUploadBukti} />
+                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('surat')}</div>
                 {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
                 {form.file_bukti_nama && <div style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {form.file_bukti_nama} terunggah</div>}
                 {!form.file_bukti_nama && form.file_bukti_url && <div style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ File sudah terpasang sebelumnya</div>}

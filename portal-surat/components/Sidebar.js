@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import { bunyiNotif } from '@/lib/bunyi'
 import { NAMA_APLIKASI } from '@/lib/config'
+import Avatar from '@/components/Avatar'
 
 const Svg = ({ children }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>{children}</svg>
@@ -161,7 +162,12 @@ export default function Sidebar() {
           })()}
         </div>
         <div className="sidebar-foot">
-          {peran.nama && <div className="sidebar-user"><b>{peran.nama}</b><span>{peran.isAdmin ? 'Admin' : peran.unit?.nama || (peran.migrasiBelum ? '' : 'Belum ada unit')}</span>{!peran.migrasiBelum && <button type="button" onClick={isiNomorHp} style={{display:'block',background:'none',border:'none',color:'inherit',opacity:.85,fontSize:12,padding:'4px 0 0',cursor:'pointer',textDecoration:'underline',textAlign:'left'}}>📞 {nomorHp || peran.telepon || 'Isi nomor HP saya'}</button>}</div>}
+          {peran.nama && (
+            <Link href="/profil" className="sidebar-user" style={{ display: 'flex', gap: 10, alignItems: 'center', textDecoration: 'none', color: 'inherit', marginBottom: 10 }}>
+              <Avatar url={peran.fotoUrl} nama={peran.nama} ukuran={42} />
+              <span style={{ minWidth: 0 }}><b style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{peran.nama}</b><span style={{ opacity: .8, fontSize: 12 }}>{peran.isAdmin ? 'Admin web' : peran.unit?.nama || (peran.migrasiBelum ? '' : 'Belum ada unit')} · Profil saya</span></span>
+            </Link>
+          )}
           <button onClick={handleLogout} className="btn btn-ghost" style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>{ICONS.logout}Keluar</button>
         </div>
       </div>
