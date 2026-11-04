@@ -67,6 +67,7 @@ export function cetakLembarDisposisi({ surat, disposisi, tujuan = [], namaPencet
     <tr><th style="width:30%;text-align:center">Kepada</th><th style="text-align:center">Disposisi</th></tr></thead>
     <tbody>${baris.map((b, i) => `<tr>${i === 0 ? `<td rowspan="${baris.length}">${h(dari)}${disposisi?.catatan ? '<br><br><i>' + h(disposisi.catatan) + '</i>' : ''}</td>` : ''}<td>${h(b.kepada)}</td><td>${h(b.isi)}</td></tr>`).join('')}</tbody>
   </table>
+  ${disposisi?.ttd_url ? `<div class="ttd"><div><div>${h(dari)}</div><img src="${h(disposisi.ttd_url)}" style="height:70px;margin:6px 0" alt="TTD"><div style="font-size:11px">Ditandatangani digital · ${h(fmtWaktu(disposisi.ttd_pada))}</div></div></div>` : ''}
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Disposisi', body)
 }

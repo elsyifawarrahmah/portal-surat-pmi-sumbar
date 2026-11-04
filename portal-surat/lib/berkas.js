@@ -8,7 +8,7 @@ const BATAS_ASLI = 30 * 1024 * 1024   // foto mentah di atas ini ditolak sebelum
 
 export const ketHint = (jenis = 'surat') => {
   const b = BATAS[jenis]
-  return `Hanya 1 file (${b.nama}) · minimal ${Math.round(b.min / 1024)} KB, maksimal ${Math.round(b.maks / 1048576)} MB.` + (jenis === 'surat' ? ' Surat beberapa halaman? Gabungkan jadi 1 file PDF. Foto yang besar dikecilkan otomatis.' : ' Foto dipotong persegi dan dikecilkan otomatis.')
+  return `Boleh lebih dari 1 file (${b.nama}) · tiap file minimal ${Math.round(b.min / 1024)} KB, maksimal ${Math.round(b.maks / 1048576)} MB.` + (jenis === 'surat' ? ' Foto yang besar dikecilkan otomatis.' : ' Foto dipotong persegi dan dikecilkan otomatis.')
 }
 const ukuran = n => (n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB')
 const ekstensi = f => ((f.name || '').split('.').pop() || '').toLowerCase()
@@ -75,4 +75,25 @@ export async function hapusBerkasLama(supabase, url) {
     const m = String(url || '').match(/\/bukti-surat\/(.+)$/)
     if (m) await supabase.storage.from('bukti-surat').remove([decodeURIComponent(m[1])])
   } catch (e) { /* tidak apa-apa bila gagal */ }
+}
+
+// ---- Banyak file sekaligus (lampiran surat). Tiap file divalidasi sendiri-sendiri; yang gagal dilaporkan, yang lolos tetap terunggah. ----
+export const MAKS_LAMPIRAN = 10
+export async function unggahBanyak(supabase, daftar, jenis = 'surat', awalan = '') {
+  const files = Array.from(daftar || [])
+  if (files.length === 0) throw new Error('Belum ada file yang dipilih.')
+  if (files.length > MAKS_LAMPIRAN) throw new Error(`Maksimal ${MAKS_LAMPIRAN} file sekali pilih.`)
+  const berhasil = [], gagal = []
+  for (const f of files) {
+    try { berhasil.push(await unggahSatu(supabase, [f], jenis, awalan)) }
+    catch (e) { gagal.push(`${f.name}: ${e.message}`) }
+  }
+  return { berhasil, gagal }
+}
+
+// Simpan hasil unggah ke tabel surat_lampiran. Mengembalikan galat (atau null).
+export async function simpanLampiran(supabase, jenis, suratId, hasil) {
+  if (!hasil.length) return null
+  const { error } = await supabase.from('surat_lampiran').insert(hasil.map(h => ({ jenis, surat_id: suratId, url: h.url, nama: h.nama, ukuran: h.ukuran })))
+  return error || null
 }

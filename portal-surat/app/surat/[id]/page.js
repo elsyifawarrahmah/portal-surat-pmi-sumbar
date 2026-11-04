@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import Modal from '@/components/Modal'
 import TeruskanForm from '@/components/TeruskanForm'
+import DaftarLampiran from '@/components/DaftarLampiran'
 import KontakModal from '@/components/KontakModal'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { fmtTgl, fmtWaktu, pesanGalat, unggahBerkas } from '@/lib/format'
@@ -39,6 +40,9 @@ export default function DetailSurat() {
   const [teksCatatan, setTeksCatatan] = useState('')
   const [kontak, setKontak] = useState(null)
   const [sibuk, setSibuk] = useState(false)
+  const [editTujuan, setEditTujuan] = useState(null)   // { t, instruksi, batas }
+  const [editSurat, setEditSurat] = useState(null)     // form data surat
+  const [editCat, setEditCat] = useState(null)         // { id, isi }
 
   useEffect(() => { if (!peran.loading) muat(true) }, [peran.loading, id])
 
@@ -99,6 +103,48 @@ export default function DetailSurat() {
     if (error) { alert('Belum bisa dikirim: ' + error.message); return }
     setTeksCatatan(''); muat(false)
   }
+  async function simpanEditTujuan() {
+    if (!editTujuan.instruksi.trim()) { alert('Isi disposisi tidak boleh kosong.'); return }
+    setSibuk(true)
+    const { error } = await supabase.from('surat_disposisi_tujuan').update({ instruksi: editTujuan.instruksi.trim(), batas_waktu: editTujuan.batas || null }).eq('id', editTujuan.t.id)
+    setSibuk(false)
+    if (error) { alert('Belum bisa disimpan: ' + error.message); return }
+    setEditTujuan(null); muat(false)
+  }
+  async function tarikTujuan(t) {
+    if (!confirm(`Tarik kembali disposisi ke ${t.unit?.nama}? Surat hilang dari unit itu dan kamu bisa meneruskannya ulang dengan benar.`)) return
+    const { error } = await supabase.from('surat_disposisi_tujuan').delete().eq('id', t.id)
+    if (error) { alert('Belum bisa ditarik: ' + error.message); return }
+    // bila disposisi tidak punya tujuan lagi, hapus juga kepalanya
+    const sisa = await supabase.from('surat_disposisi_tujuan').select('id', { count: 'exact', head: true }).eq('disposisi_id', t.disposisi_id)
+    if (!sisa.error && (sisa.count || 0) === 0) await supabase.from('surat_disposisi').delete().eq('id', t.disposisi_id)
+    muat(false)
+  }
+  async function simpanEditSurat() {
+    const f = editSurat
+    if (!f.nomor_surat?.trim() || !f.perihal?.trim() || !f.asal_surat?.trim()) { alert('Nomor surat, asal, dan perihal wajib diisi.'); return }
+    setSibuk(true)
+    const { error } = await supabase.from('surat_masuk').update({
+      nomor_surat: f.nomor_surat.trim(), asal_surat: f.asal_surat.trim(), perihal: f.perihal.trim(),
+      tanggal_surat: f.tanggal_surat || null, tanggal_diterima_kantor: f.tanggal_diterima_kantor || null, sifat: f.sifat || 'Biasa',
+      macam_surat: f.macam_surat || null, lampiran: f.lampiran || null,
+    }).eq('id', id)
+    setSibuk(false)
+    if (error) { alert('Belum bisa disimpan: ' + error.message); return }
+    setEditSurat(null); muat(false)
+  }
+  async function simpanEditCatatan() {
+    if (!editCat.isi.trim()) return
+    const { error } = await supabase.from('surat_catatan').update({ isi: editCat.isi.trim(), diubah_pada: new Date().toISOString() }).eq('id', editCat.id)
+    if (error) { alert('Belum bisa disimpan: ' + error.message); return }
+    setEditCat(null); muat(false)
+  }
+  async function hapusCatatan(c) {
+    if (!confirm('Hapus catatan ini?')) return
+    const { error } = await supabase.from('surat_catatan').delete().eq('id', c.id)
+    if (error) { alert('Belum bisa dihapus: ' + error.message); return }
+    muat(false)
+  }
   async function unggahScan(d, e) {
     const file = e.target.files[0]; if (!file) return
     try {
@@ -138,9 +184,13 @@ export default function DetailSurat() {
               <div><span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Diterima</span><br /><b>{fmtTgl(surat.tanggal_diterima_kantor)}</b></div>
               {surat.sifat && surat.sifat !== 'Biasa' && <div><span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Sifat</span><br /><b>{surat.sifat}</b></div>}
             </div>
-            {surat.file_bukti_url
-              ? <LihatBerkas url={surat.file_bukti_url} className="btn btn-primary" style={{ textDecoration: 'none', minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', gap: 8 }}>📄 Buka / lihat surat</LihatBerkas>
-              : <div style={{ fontSize: 14, color: 'var(--ink-soft)' }}>File surat belum diunggah.</div>}
+            {(peran.bisaCatatMasuk && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)) && <button className="btn btn-ghost" style={{ minHeight: 44 }} onClick={() => setEditSurat({ ...surat })}>✏️ Ubah data surat</button>}
+          </div>
+
+          {/* Berkas / lampiran (boleh banyak) */}
+          <div style={kartu}>
+            <h3 style={judulKartu}>📎 Berkas surat</h3>
+            <DaftarLampiran supabase={supabase} jenis="masuk" suratId={surat.id} fileUtamaUrl={surat.file_bukti_url} fileUtamaNama={surat.file_bukti_nama} boleh={peran.bisaCatatMasuk || milik.length > 0 || peran.isAdmin} peran={peran} />
           </div>
 
           {/* Tindak Lanjut */}
@@ -162,6 +212,7 @@ export default function DetailSurat() {
             {disposisi.map(d => (
               <div key={d.id} style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 13.5, color: 'var(--ink-soft)', marginBottom: 6 }}>{d.dari_nama || d.dari?.nama || '-'} · {fmtTgl(d.tanggal_diteruskan)}{d.induk_tujuan_id ? ' (diteruskan lagi)' : ''}</div>
+                {d.ttd_url && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 12.5, color: 'var(--ink-soft)' }}><img src={d.ttd_url} alt="Tanda tangan digital" style={{ height: 56, background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 3 }} /><span>✔ Ditandatangani digital oleh <b style={{ color: 'var(--ink)' }}>{d.ttd_nama || d.dari_nama}</b><br />{fmtWaktu(d.ttd_pada)}</span></div>}
                 {d.tujuan.map(t => {
                   const kunci = t.status === 'selesai' ? (t.diarsipkan_pada ? 'arsip' : 'selesai') : t.status === 'menunggu' ? 'belum' : 'proses'
                   const s2 = STATUS_SURAT[kunci]
@@ -174,6 +225,10 @@ export default function DetailSurat() {
                       <div style={{ fontSize: 15, margin: '4px 0' }}>{t.instruksi}</div>
                       {t.tanggapan && <div style={{ fontSize: 14.5, background: 'var(--stock-bg)', borderRadius: 10, padding: '8px 12px', marginTop: 6 }}><b>Hasil dari {t.unit?.nama}:</b> {t.tanggapan}</div>}
                       {t.jawaban && <div style={{ fontSize: 13.5, marginTop: 6 }}>✉️ Surat jawaban: <b>{t.jawaban.nomor_surat}</b></div>}
+                      {(d.dibuat_oleh === peran.userId || peran.isAdmin) && ['menunggu', 'dibaca'].includes(t.status) && <span style={{ display: 'inline-flex', gap: 8, marginRight: 8 }}>
+                        <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setEditTujuan({ t, instruksi: t.instruksi || '', batas: t.batas_waktu || '' })}>✏️ Ubah</button>
+                        <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14, color: '#B3261E' }} onClick={() => tarikTujuan(t)}>↩ Tarik kembali</button>
+                      </span>}
                       {t.status !== 'selesai' && t.unit && t.unit_id !== peran.unitId && <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setKontak(t.unit)}>📞 Hubungi {t.unit.nama.replace(/^Bidang /, '')}</button>}
                     </div>
                   )
@@ -210,7 +265,10 @@ export default function DetailSurat() {
             {catatan.map(c => (
               <div key={c.id} style={{ background: 'var(--cream)', borderRadius: 12, padding: '10px 14px', marginBottom: 8 }}>
                 <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}><b style={{ color: 'var(--ink)' }}>{c.penulis?.nama_lengkap || '-'}</b>{c.penulis?.unit?.nama ? ` (${c.penulis.unit.nama})` : ''} · {fmtWaktu(c.created_at)}</div>
-                <div style={{ fontSize: 15.5, whiteSpace: 'pre-wrap' }}>{c.isi}</div>
+                {editCat?.id === c.id
+                  ? <div><textarea rows={3} style={{ fontSize: 16 }} value={editCat.isi} onChange={e => setEditCat({ ...editCat, isi: e.target.value })} /><div style={{ display: 'flex', gap: 8, marginTop: 6 }}><button className="btn btn-primary" style={{ minHeight: 40 }} onClick={simpanEditCatatan}>Simpan</button><button className="btn btn-ghost" style={{ minHeight: 40 }} onClick={() => setEditCat(null)}>Batal</button></div></div>
+                  : <div style={{ fontSize: 15.5, whiteSpace: 'pre-wrap' }}>{c.isi}{c.diubah_pada && <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}> (diedit)</span>}</div>}
+                {(c.dibuat_oleh === peran.userId || peran.isAdmin) && editCat?.id !== c.id && <div style={{ marginTop: 4 }}><button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => setEditCat({ id: c.id, isi: c.isi })}>✏️ Ubah</button> <button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => hapusCatatan(c)}>Hapus</button></div>}
               </div>
             ))}
             {peran.bisaCatatan && (
@@ -248,6 +306,23 @@ export default function DetailSurat() {
               <select style={{ fontSize: 16 }} value={selesai.jawabanId} onChange={e => setSelesai({ ...selesai, jawabanId: e.target.value })}><option value="">— tidak ada —</option>{selesai.opsi.map(o => <option key={o.id} value={o.id}>{o.nomor_surat} — {o.perihal}</option>)}</select></div>
           )}
           <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>Setelah ini surat diserahkan ke Biro Umum untuk diarsipkan.</div>
+        </Modal>
+      )}
+      {editTujuan && (
+        <Modal judul={`Ubah disposisi ke ${editTujuan.t.unit?.nama}`} onClose={() => setEditTujuan(null)} lebar={520}
+          footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={() => setEditTujuan(null)}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16 }} disabled={sibuk} onClick={simpanEditTujuan}>Simpan perubahan</button></>}>
+          <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Isi disposisi / petunjuk</label><textarea rows={4} style={{ fontSize: 16 }} value={editTujuan.instruksi} onChange={e => setEditTujuan({ ...editTujuan, instruksi: e.target.value })} autoFocus /></div>
+          <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Batas waktu (boleh kosong)</label><input type="date" value={editTujuan.batas} onChange={e => setEditTujuan({ ...editTujuan, batas: e.target.value })} /></div>
+          <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>Hanya bisa diubah selama penerima belum mulai memproses. Salah penerima? Tutup ini lalu pilih “Tarik kembali”, kemudian teruskan ulang.</div>
+        </Modal>
+      )}
+      {editSurat && (
+        <Modal judul="Ubah data surat" onClose={() => setEditSurat(null)} lebar={560}
+          footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={() => setEditSurat(null)}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16 }} disabled={sibuk} onClick={simpanEditSurat}>Simpan perubahan</button></>}>
+          {[['nomor_surat', 'Nomor surat', 'text'], ['asal_surat', 'Asal surat', 'text'], ['perihal', 'Perihal', 'text'], ['tanggal_surat', 'Tanggal surat', 'date'], ['tanggal_diterima_kantor', 'Tanggal diterima di kantor', 'date'], ['macam_surat', 'Macam surat', 'text'], ['lampiran', 'Lampiran', 'text']].map(([k, label, tipe]) => (
+            <div className="field" key={k}><label>{label}</label><input type={tipe} value={editSurat[k] || ''} onChange={e => setEditSurat({ ...editSurat, [k]: e.target.value })} /></div>
+          ))}
+          <div className="field"><label>Sifat surat</label><select value={editSurat.sifat || 'Biasa'} onChange={e => setEditSurat({ ...editSurat, sifat: e.target.value })}><option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option></select></div>
         </Modal>
       )}
       {kontak && <KontakModal supabase={supabase} unit={kontak} onClose={() => setKontak(null)} />}

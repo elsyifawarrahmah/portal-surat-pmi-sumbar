@@ -1,5 +1,5 @@
 'use client'
-import { unggahSatu, ketHint } from '@/lib/berkas'
+import { unggahBanyak, simpanLampiran, ketHint } from '@/lib/berkas'
 import { LihatBerkas } from '@/components/PratinjauBerkas'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
@@ -99,8 +99,12 @@ function SuratMasukInner() {
     if (!files || files.length === 0) return
     setUploading(true); setError('')
     try {
-      const r = await unggahSatu(supabase, files, 'surat')
-      setForm(f => ({ ...f, file_bukti_url: r.url, file_bukti_nama: r.nama }))
+      const { berhasil, gagal } = await unggahBanyak(supabase, files, 'surat')
+      if (berhasil.length) setForm(f => {
+        const semua = [...(f._berkas || []), ...berhasil]
+        return { ...f, _berkas: semua, file_bukti_url: semua[0].url, file_bukti_nama: semua[0].nama }
+      })
+      if (gagal.length) setError('Sebagian file tidak bisa dipakai:\n' + gagal.join('\n'))
     } catch (err) { setError(err.message) }
     setUploading(false)
     e.target.value = ''
@@ -116,7 +120,7 @@ function SuratMasukInner() {
       setError(`Nomor surat "${form.nomor_surat}" sudah pernah dicatat sebelumnya. Cek lagi di daftar surat masuk.`); return
     }
     const { data: userData } = await supabase.auth.getUser()
-    const { file_bukti_nama, ...payload } = form
+    const { file_bukti_nama, _berkas, ...payload } = form
     if (!payload.macam_surat) delete payload.macam_surat
     if (!payload.lampiran) delete payload.lampiran
     const { data: newSurat, error: err } = await supabase.from('surat_masuk').insert({
@@ -129,6 +133,8 @@ function SuratMasukInner() {
       penerima_nama: i === 0 ? '' : null,
     }))
     await supabase.from('surat_tahapan').insert(tahapRows)
+    // file pertama = berkas utama (kolom lama); file ke-2 dst. disimpan sebagai lampiran
+    if (_berkas && _berkas.length > 1) await simpanLampiran(supabase, 'masuk', newSurat.id, _berkas.slice(1))
     setShowAddModal(false); setForm({}); setError('')
     load()
   }
@@ -331,7 +337,7 @@ function SuratMasukInner() {
               <button onClick={()=>setShowAddModal(false)} style={{border:'none',background:'none',cursor:'pointer',fontSize:16}}>✕</button>
             </div>
             <div style={{padding:'20px 22px'}}>
-              {error && <div className="error-box">{error}</div>}
+              {error && <div className="error-box" style={{whiteSpace:'pre-wrap'}}>{error}</div>}
               <div className="field">
                 <label>Nomor Surat</label>
                 <div style={{display:'flex',gap:6}}>
@@ -354,11 +360,11 @@ function SuratMasukInner() {
                 </select>
               </div>
               <div className="field">
-                <label>File Bukti (PDF/Foto Surat) — opsional</label>
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleUploadBukti} />
+                <label>File Bukti (PDF/Foto Surat) — boleh lebih dari 1</label>
+                <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleUploadBukti} />
                 <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('surat')}</div>
                 {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
-                {form.file_bukti_nama && <div style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {form.file_bukti_nama} terunggah</div>}
+                {(form._berkas || []).map((b, i) => <div key={i} style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {b.nama} terunggah</div>)}
               </div>
             </div>
             <div style={{padding:'14px 22px',borderTop:'1px solid var(--line)',display:'flex',justifyContent:'flex-end',gap:8}}>

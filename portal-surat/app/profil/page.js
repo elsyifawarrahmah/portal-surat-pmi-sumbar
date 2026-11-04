@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Avatar from '@/components/Avatar'
 import GantiSandi from '@/components/GantiSandi'
+import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { unggahSatu, hapusBerkasLama, ketHint } from '@/lib/berkas'
 import { fmtTgl, fmtWaktu, pesanGalat } from '@/lib/format'
 import { NAMA_TIPE } from '@/lib/peran'
@@ -23,6 +24,15 @@ export default function ProfilPage() {
   const [sibuk, setSibuk] = useState(false)
   const [fotoSibuk, setFotoSibuk] = useState(false)
   const [sandi, setSandi] = useState(false)
+  const [buatTtd, setBuatTtd] = useState(false)
+  async function simpanTtd(file) {
+    try {
+      const url = await unggahTtd(supabase, file, user.id)
+      const { error } = await supabase.from('profiles').update({ ttd_url: url }).eq('id', user.id)
+      if (error) throw new Error(/ttd_url/.test(error.message) ? 'Fitur tanda tangan belum siap. Mohon beri tahu admin web (migrasi-alur-biro-ttd-lampiran.sql).' : error.message)
+      setP(x => ({ ...x, ttd_url: url })); setBuatTtd(false)
+    } catch (e) { setGalat(e.message) }
+  }
 
   useEffect(() => { muat() }, [])
   async function muat() {
@@ -122,6 +132,15 @@ export default function ProfilPage() {
                 <Baris a="Peran">{admin ? 'Admin' : 'Pengguna'}</Baris>
                 <Baris a="Bergabung">{fmtTgl(user?.created_at)}</Baris>
                 <Baris a="Terakhir aktif">{p?.last_seen ? fmtWaktu(p.last_seen) : '-'}</Baris>
+              </div>
+
+              <div className="profil-kartu">
+                <h3>Tanda tangan digital</h3>
+                <p className="ket">Dipakai saat meneruskan / mendisposisikan surat.</p>
+                {p?.ttd_url && !buatTtd && <img src={p.ttd_url} alt="Tanda tangan" style={{ maxWidth: '100%', height: 90, background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 4 }} />}
+                {!buatTtd
+                  ? <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }} onClick={() => setBuatTtd(true)}>✍️ {p?.ttd_url ? 'Buat ulang tanda tangan' : 'Buat tanda tangan'}</button>
+                  : <div style={{ marginTop: 12 }}><TandaTangan onSimpan={simpanTtd} onBatal={() => setBuatTtd(false)} simpanLabel="Simpan tanda tangan" /></div>}
               </div>
 
               <div className="profil-kartu">
