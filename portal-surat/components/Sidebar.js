@@ -44,6 +44,7 @@ const LINKS = [
   { href: '/surat-masuk', label: 'Buku Surat Masuk (lengkap)', icon: 'masuk', grup: 'lain', penuh: true },
   { href: '/ekspedisi', label: 'Ekspedisi', icon: 'ekspedisi', grup: 'lain', penuh: true },
   { href: '/riwayat', label: 'Riwayat & Buku Agenda', icon: 'riwayat', grup: 'lain', penuh: true },
+  { href: '/laporan-bulanan', label: 'Laporan Bulanan', icon: 'riwayat', grup: 'lain', penuh: true },
   { href: '/arsip', label: 'Arsip Biro Umum', icon: 'arsip', grup: 'lain' },
   { href: '/perjanjian-kerja-sama', label: 'Perjanjian Kerja Sama', icon: 'pks', grup: 'lain' },
   { href: '/sertifikat-piagam', label: 'Sertifikat & Piagam', icon: 'sertifikat', grup: 'lain' },

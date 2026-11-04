@@ -15,11 +15,11 @@ export default function DaftarLampiran({ supabase, jenis, suratId, fileUtamaUrl,
   }
   useEffect(() => { if (suratId) muat() }, [suratId])
 
-  async function tambah(e) {
+  async function tambah(e, jenisBerkas = 'surat') {
     const files = e.target.files; if (!files?.length) return
     setSibuk(true); setPesan('')
     try {
-      const { berhasil, gagal } = await unggahBanyak(supabase, files, 'surat')
+      const { berhasil, gagal } = await unggahBanyak(supabase, files, jenisBerkas)
       const err = await simpanLampiran(supabase, jenis, suratId, berhasil)
       if (err) throw new Error(/surat_lampiran/.test(err.message) ? 'Fitur lampiran banyak belum aktif: jalankan supabase/migrasi-alur-biro-ttd-lampiran.sql.' : err.message)
       if (gagal.length) setPesan('Sebagian file tidak bisa dipakai:\n' + gagal.join('\n'))
@@ -48,7 +48,12 @@ export default function DaftarLampiran({ supabase, jenis, suratId, fileUtamaUrl,
         <div style={{ marginTop: 8 }}>
           <label className="btn btn-ghost" style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', cursor: 'pointer', textTransform: 'none' }}>
             {sibuk ? 'Mengunggah...' : '➕ Tambah berkas (boleh banyak)'}
-            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} onChange={tambah} disabled={sibuk} />
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} onChange={e => tambah(e, 'surat')} disabled={sibuk} />
+          </label>
+          {' '}
+          <label className="btn btn-ghost" style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', cursor: 'pointer', textTransform: 'none' }}>
+            {sibuk ? 'Mengunggah...' : '📑 Tambah PDF (surat > 2 lembar)'}
+            <input type="file" multiple accept=".pdf,application/pdf" style={{ display: 'none' }} onChange={e => tambah(e, 'dokumen')} disabled={sibuk} />
           </label>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>{ketHint('surat')}</div>
         </div>

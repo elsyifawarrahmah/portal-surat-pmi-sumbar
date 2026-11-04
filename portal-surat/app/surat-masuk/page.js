@@ -94,12 +94,12 @@ function SuratMasukInner() {
     }
   }
 
-  async function handleUploadBukti(e) {
+  async function handleUploadBukti(e, jenisBerkas = 'surat') {
     const files = e.target.files
     if (!files || files.length === 0) return
     setUploading(true); setError('')
     try {
-      const { berhasil, gagal } = await unggahBanyak(supabase, files, 'surat')
+      const { berhasil, gagal } = await unggahBanyak(supabase, files, jenisBerkas)
       if (berhasil.length) setForm(f => {
         const semua = [...(f._berkas || []), ...berhasil]
         return { ...f, _berkas: semua, file_bukti_url: semua[0].url, file_bukti_nama: semua[0].nama }
@@ -361,8 +361,13 @@ function SuratMasukInner() {
               </div>
               <div className="field">
                 <label>File Bukti (PDF/Foto Surat) — boleh lebih dari 1</label>
-                <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleUploadBukti} />
+                <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e=>handleUploadBukti(e,'surat')} />
                 <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('surat')}</div>
+              </div>
+              <div className="field">
+                <label>Dokumen PDF Surat — untuk surat lebih dari 2 lembar</label>
+                <input type="file" multiple accept=".pdf,application/pdf" onChange={e=>handleUploadBukti(e,'dokumen')} />
+                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('dokumen')}</div>
                 {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
                 {(form._berkas || []).map((b, i) => <div key={i} style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {b.nama} terunggah</div>)}
               </div>

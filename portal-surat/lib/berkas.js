@@ -1,6 +1,8 @@
 // Aturan unggah berkas: HANYA 1 file, jenis & ukuran dibatasi, foto besar dikecilkan otomatis supaya cepat dibuka di HP.
 export const BATAS = {
   surat: { min: 10 * 1024, maks: 5 * 1024 * 1024, tipe: ['pdf', 'jpg', 'jpeg', 'png', 'webp'], nama: 'PDF, JPG, atau PNG' },
+  // Dokumen PDF utuh (surat lebih dari 2 lembar): hanya PDF, batas ukuran lebih longgar daripada foto
+  dokumen: { min: 10 * 1024, maks: 15 * 1024 * 1024, tipe: ['pdf'], nama: 'PDF' },
   foto: { min: 5 * 1024, maks: 2 * 1024 * 1024, tipe: ['jpg', 'jpeg', 'png', 'webp'], nama: 'JPG atau PNG' },
 }
 const SISI_MAKS = { surat: 1800, foto: 512 }
@@ -8,6 +10,7 @@ const BATAS_ASLI = 30 * 1024 * 1024   // foto mentah di atas ini ditolak sebelum
 
 export const ketHint = (jenis = 'surat') => {
   const b = BATAS[jenis]
+  if (jenis === 'dokumen') return `Khusus file PDF · tiap file minimal ${Math.round(b.min / 1024)} KB, maksimal ${Math.round(b.maks / 1048576)} MB. Boleh lebih dari 1 file. Cocok untuk surat yang lebih dari 2 lembar (scan jadi 1 PDF, tidak perlu banyak foto).`
   return `Boleh lebih dari 1 file (${b.nama}) · tiap file minimal ${Math.round(b.min / 1024)} KB, maksimal ${Math.round(b.maks / 1048576)} MB.` + (jenis === 'surat' ? ' Foto yang besar dikecilkan otomatis.' : ' Foto dipotong persegi dan dikecilkan otomatis.')
 }
 const ukuran = n => (n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB')
