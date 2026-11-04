@@ -212,7 +212,7 @@ export default function DetailSurat() {
             {disposisi.map(d => (
               <div key={d.id} style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 13.5, color: 'var(--ink-soft)', marginBottom: 6 }}>{d.dari_nama || d.dari?.nama || '-'} · {fmtTgl(d.tanggal_diteruskan)}{d.induk_tujuan_id ? ' (diteruskan lagi)' : ''}</div>
-                {d.ttd_url && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 12.5, color: 'var(--ink-soft)' }}><img src={d.ttd_url} alt="Tanda tangan digital" style={{ height: 56, background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 3 }} /><span>✔ Ditandatangani digital oleh <b style={{ color: 'var(--ink)' }}>{d.ttd_nama || d.dari_nama}</b><br />{fmtWaktu(d.ttd_pada)}</span></div>}
+                {d.ttd_url && <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 12.5, color: 'var(--ink-soft)' }}><img src={d.ttd_url} alt="Tanda tangan digital" style={{ height: 56, background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 3 }} /><span>✔ Ditandatangani digital oleh <b style={{ color: 'var(--ink)' }}>{d.ttd_nama || d.dari_nama}</b><br />{fmtWaktu(d.ttd_pada)}{d.ttd_kode && <><br />Kode: <b className="mono" style={{ color: 'var(--ink)' }}>{d.ttd_kode}</b></>}</span></div>}
                 {d.tujuan.map(t => {
                   const kunci = t.status === 'selesai' ? (t.diarsipkan_pada ? 'arsip' : 'selesai') : t.status === 'menunggu' ? 'belum' : 'proses'
                   const s2 = STATUS_SURAT[kunci]

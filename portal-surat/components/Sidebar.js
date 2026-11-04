@@ -37,7 +37,7 @@ const LINKS = [
   { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi' },
   { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama' },
   { href: '/lacak', label: 'Lacak Surat', icon: 'riwayat', grup: 'utama' },
-  { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'utama' },
+  { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
   { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'lain' },
   { href: '/disposisi', label: 'Buku Disposisi', icon: 'disposisi', grup: 'lain', penuh: true },

@@ -67,7 +67,7 @@ export function cetakLembarDisposisi({ surat, disposisi, tujuan = [], namaPencet
     <tr><th style="width:30%;text-align:center">Kepada</th><th style="text-align:center">Disposisi</th></tr></thead>
     <tbody>${baris.map((b, i) => `<tr>${i === 0 ? `<td rowspan="${baris.length}">${h(dari)}${disposisi?.catatan ? '<br><br><i>' + h(disposisi.catatan) + '</i>' : ''}</td>` : ''}<td>${h(b.kepada)}</td><td>${h(b.isi)}</td></tr>`).join('')}</tbody>
   </table>
-  ${disposisi?.ttd_url ? `<div class="ttd"><div><div>${h(dari)}</div><img src="${h(disposisi.ttd_url)}" style="height:70px;margin:6px 0" alt="TTD"><div style="font-size:11px">Ditandatangani digital · ${h(fmtWaktu(disposisi.ttd_pada))}</div></div></div>` : ''}
+  ${disposisi?.ttd_url ? `<div class="ttd"><div><div>${h(dari)}</div><img src="${h(disposisi.ttd_url)}" style="height:70px;margin:6px 0" alt="TTD"><div style="font-size:11px">Ditandatangani digital · ${h(fmtWaktu(disposisi.ttd_pada))}${disposisi.ttd_kode ? '<br>Kode: ' + h(disposisi.ttd_kode) : ''}</div></div></div>` : ''}
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Disposisi', body)
 }
@@ -99,4 +99,24 @@ export function cetakRiwayat({ jenis, surat, riwayat, namaPencetak }) {
   <tbody>${riwayat.map((r, i) => `<tr><td>${i + 1}</td><td>${h(fmtWaktu(r.waktu))}</td><td>${h(r.aksi)}</td><td>${h(r.keterangan || '')}</td><td>${h(r.oleh_nama || '')}${r.unit_nama ? '<br><span style="color:#444">' + h(r.unit_nama) + '</span>' : ''}</td></tr>`).join('')}</tbody></table>
   ${jejakCetak(namaPencetak)}`
   buka('Riwayat Surat', body)
+}
+
+// Lembar pengesahan surat keluar: kiri = Kepala Markas/Ketua (menyetujui), tengah = Sekretaris (paraf). Memuat kode penanda untuk dicocokkan di web.
+export function cetakPengesahanKeluar({ surat, namaPencetak }) {
+  const blok = (judul, nama, ttd, kode, waktu) => `<td style="width:33%;text-align:center;vertical-align:top;padding:10px"><div style="font-size:13px">${h(judul)}</div>${ttd ? `<img src="${h(ttd)}" style="height:80px;margin:8px 0" alt="TTD">` : '<div style="height:96px"></div>'}<div style="font-weight:700">${h(nama || '')}</div><div style="font-size:11px">Kode: ${h(kode || '-')}<br>${h(fmtWaktu(waktu))}</div></td>`
+  const body = `${kop()}
+  <div class="box"><table>
+    <tr><td style="width:50%">Nomor surat : ${h(surat.nomor_surat)}</td><td>Tanggal surat : ${h(fmtTgl(surat.tanggal_surat))}</td></tr>
+    <tr><td colspan="2">Kepada : ${h(surat.tujuan_surat)}</td></tr>
+    <tr><td colspan="2">Perihal : ${h(surat.perihal)}</td></tr>
+    <tr><td colspan="2">Tanggal disetujui : <b>${h(fmtWaktu(surat.setuju_pada))}</b></td></tr>
+  </table></div>
+  <table style="width:100%;margin-top:30px"><tr>
+    ${blok('Menyetujui,<br>' + (surat.setuju_jabatan || ''), surat.setuju_nama, surat.setuju_ttd_url, surat.setuju_kode, surat.setuju_pada)}
+    ${blok('Diparaf,<br>Sekretaris', surat.paraf_nama, surat.paraf_ttd_url, surat.paraf_kode, surat.paraf_pada)}
+    <td style="width:33%"></td>
+  </tr></table>
+  <div style="font-size:11px;margin-top:24px">Keaslian dapat dicek di portal surat dengan memasukkan kode di atas.</div>
+  ${jejakCetak(namaPencetak)}`
+  buka('Lembar Pengesahan Surat Keluar', body)
 }

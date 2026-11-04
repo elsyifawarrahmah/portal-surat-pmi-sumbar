@@ -10,6 +10,7 @@ import { kodeDivisi } from '@/lib/divisi'
 import { unduhBerkasZip } from '@/lib/zip'
 import { usePeran, useUnits } from '@/lib/peran'
 import RiwayatModal from '@/components/RiwayatModal'
+import PersetujuanKeluar, { LABEL_SETUJU } from '@/components/PersetujuanKeluar'
 import { PESAN_MIGRASI } from '@/lib/format'
 
 export default function SuratKeluarPage() {
@@ -23,6 +24,7 @@ function SuratKeluarInner() {
   const { units } = useUnits()
   const [suratMasukList, setSuratMasukList] = useState([])
   const [modalRiwayat, setModalRiwayat] = useState(null)
+  const [modalSetuju, setModalSetuju] = useState(null)
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -187,7 +189,7 @@ function SuratKeluarInner() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Agenda</th>{columns.map(c=><th key={c.k}>{c.label}</th>)}<th>Jawaban untuk</th><th>Bukti</th><th>Petugas</th><th></th></tr></thead>
+              <thead><tr><th>Agenda</th>{columns.map(c=><th key={c.k}>{c.label}</th>)}<th>Persetujuan</th><th>Jawaban untuk</th><th>Bukti</th><th>Petugas</th><th></th></tr></thead>
               <tbody>
                 {loading ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
                 filtered.length===0 ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada data.</td></tr> :
@@ -195,12 +197,13 @@ function SuratKeluarInner() {
                   <tr key={r.id}>
                     <td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
                     {columns.map(c => <td key={c.k} data-label={c.label}>{r[c.k] ?? '-'}</td>)}
+                    <td data-label="Persetujuan"><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,whiteSpace:'normal',textAlign:'left'}} onClick={()=>setModalSetuju(r)}><span style={{color:(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[1],fontWeight:700}}>{(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[0]}</span></button></td>
                     <td data-label="Jawaban untuk" className="mono">{r.jawab?.nomor_surat || '-'}</td>
                     <td data-label="Bukti">{r.file_bukti_url ? <LihatBerkas url={r.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</LihatBerkas> : '-'}</td>
                     <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{whiteSpace:'nowrap'}}>
                       <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>setModalRiwayat(r)}>Riwayat</button>
-                      {bisaUbah(r) && <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>openEdit(r)}>Edit</button>}
+                      {bisaUbah(r) && r.status_persetujuan !== 'disetujui' && <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>openEdit(r)}>Edit</button>}
                       {isAdmin && <button className="btn btn-ghost" style={{padding:'4px 8px'}} onClick={()=>handleDelete(r.id)}>Hapus</button>}
                     </td>
                   </tr>
@@ -211,6 +214,7 @@ function SuratKeluarInner() {
         </div>
       </div>
 
+      {modalSetuju && <PersetujuanKeluar supabase={supabase} surat={rows.find(x => x.id === modalSetuju.id) || modalSetuju} peran={peran} bisaUbah={bisaUbah(modalSetuju)} onClose={() => setModalSetuju(null)} onChanged={load} />}
       {showModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:50}} onClick={e=>{if(e.target===e.currentTarget)setShowModal(false)}}>
           <div style={{background:'#fff',borderRadius:16,width:'100%',maxWidth:440,maxHeight:'90vh',overflowY:'auto'}}>

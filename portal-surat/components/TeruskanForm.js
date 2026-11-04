@@ -6,6 +6,7 @@ import { hariIni } from '@/lib/format'
 import { PETUNJUK, SIFAT_DISPOSISI, susunInstruksi } from '@/lib/surat'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 
+const kodePenanda = () => { const a = new Uint8Array(4); crypto.getRandomValues(a); const h = Array.from(a, x => x.toString(16).padStart(2, '0')).join('').toUpperCase(); return `PMI-${h.slice(0, 4)}-${h.slice(4)}` }
 const cek = r => { if (r.error) throw new Error(r.error.message); return r }
 const besar = { fontSize: 16 }
 
@@ -46,7 +47,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
       const dari = (atasNama.trim() || peran.unit?.nama || peran.nama || 'Admin')
       const dasar = { surat_id: surat.id, tanggal_diteruskan: hariIni(), dari_unit_id: peran.unitId || null, dari_nama: dari, ...(induk ? { induk_tujuan_id: induk.id } : {}) }
       if (pakaiTtd && !ttdUrl) { setError('Buat tanda tangan dulu, atau matikan pilihan tanda tangan digital.'); setSaving(false); return }
-      const denganTtd = pakaiTtd ? { ...dasar, ttd_url: ttdUrl, ttd_nama: dari, ttd_pada: new Date().toISOString() } : dasar
+      const denganTtd = pakaiTtd ? { ...dasar, ttd_url: ttdUrl, ttd_nama: dari, ttd_pada: new Date().toISOString(), ttd_kode: kodePenanda() } : dasar
       const d = cek(await supabase.from('surat_disposisi').insert(denganTtd).select('id').single()).data
       const instruksi = susunInstruksi(sifat, petunjuk, pesan)
       cek(await supabase.from('surat_disposisi_tujuan').insert(dipilih.map(unit_id => ({ disposisi_id: d.id, unit_id, instruksi, perlu_jawaban: /balas/i.test(petunjuk) }))))
@@ -69,9 +70,9 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
           {daftar.map(u => {
             const sudah = sudahMenerima.includes(u.id), aktif = dipilih.includes(u.id)
             return (
-              <label key={u.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '12px 14px', marginBottom: 6, border: '2px solid ' + (aktif ? 'var(--pmi-red)' : 'var(--line)'), borderRadius: 12, background: aktif ? '#FFF3F1' : '#fff', cursor: sudah ? 'not-allowed' : 'pointer', textTransform: 'none', color: 'var(--ink)', opacity: sudah ? 0.5 : 1, ...besar }}>
-                <input type="checkbox" style={{ width: 22, height: 22 }} checked={aktif} disabled={sudah} onChange={() => ganti(u.id)} />
-                <span><b>{u.nama}</b>{sudah && <span style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}> — sudah menerima surat ini</span>}</span>
+              <label key={u.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '12px 14px', marginBottom: 6, border: '2px solid ' + (aktif ? 'var(--pmi-red)' : 'var(--line)'), borderRadius: 12, background: aktif ? '#FFF3F1' : '#fff', cursor: 'pointer', textTransform: 'none', color: 'var(--ink)', ...besar }}>
+                <input type="checkbox" style={{ width: 22, height: 22 }} checked={aktif} onChange={() => ganti(u.id)} />
+                <span><b>{u.nama}</b>{sudah && <span style={{ fontSize: 12.5, color: 'var(--gold)' }}> — sudah pernah menerima (centang untuk kirim ulang)</span>}</span>
               </label>
             )
           })}
