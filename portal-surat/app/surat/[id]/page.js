@@ -18,8 +18,9 @@ import { STATUS_SURAT, statusUntukSaya } from '@/lib/surat'
 const kartu = { background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '18px 20px', marginBottom: 16 }
 const judulKartu = { margin: '0 0 12px', fontSize: 18 }
 
-function TombolBesar({ ikon, judul, ket, onClick, href, utama }) {
-  const gaya = { display: 'flex', alignItems: 'center', gap: 14, width: '100%', textAlign: 'left', padding: '14px 16px', marginBottom: 10, borderRadius: 14, minHeight: 64, textDecoration: 'none', cursor: 'pointer', border: '2px solid ' + (utama ? 'var(--pmi-red)' : 'var(--line)'), background: utama ? 'var(--pmi-red)' : '#fff', color: utama ? '#fff' : 'var(--ink)', font: 'inherit' }
+function TombolBesar({ ikon, judul, ket, onClick, href, utama, hijau }) {
+  const warna = hijau ? '#1E7B3A' : 'var(--pmi-red)'
+  const gaya = { display: 'flex', alignItems: 'center', gap: 14, width: '100%', textAlign: 'left', padding: '14px 16px', marginBottom: 10, borderRadius: 14, minHeight: 64, textDecoration: 'none', cursor: 'pointer', border: '2px solid ' + (utama || hijau ? warna : 'var(--line)'), background: utama || hijau ? warna : '#fff', color: utama || hijau ? '#fff' : 'var(--ink)', font: 'inherit' }
   const isi = <><span style={{ fontSize: 26 }}>{ikon}</span><span><b style={{ fontSize: 17 }}>{judul}</b><br /><span style={{ fontSize: 13.5, opacity: 0.85 }}>{ket}</span></span></>
   return href ? <Link href={href} style={gaya}>{isi}</Link> : <button type="button" onClick={onClick} style={gaya}>{isi}</button>
 }
@@ -43,6 +44,8 @@ export default function DetailSurat() {
   const [editTujuan, setEditTujuan] = useState(null)   // { t, instruksi, batas }
   const [editSurat, setEditSurat] = useState(null)     // form data surat
   const [editCat, setEditCat] = useState(null)         // { id, isi }
+  const [lainnya, setLainnya] = useState(false)
+  const [batal, setBatal] = useState(null)             // { alasan }
 
   useEffect(() => { if (!peran.loading) muat(true) }, [peran.loading, id])
 
@@ -75,6 +78,7 @@ export default function DetailSurat() {
   const status = statusUntukSaya(semuaTujuan, peran.unitId)
   const st = STATUS_SURAT[status]
   const bisaTeruskan = peran.bisaDisposisi || milik.length > 0
+  const bolehBatal = !!surat && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)
 
   async function tandaiSelesai() {
     setSibuk(true)
@@ -139,6 +143,15 @@ export default function DetailSurat() {
     if (error) { alert('Belum bisa disimpan: ' + error.message); return }
     setEditCat(null); muat(false)
   }
+  async function batalkanSurat() {
+    setSibuk(true)
+    const { error } = await supabase.rpc('batalkan_surat_masuk', { p_id: surat.id, p_alasan: batal.alasan })
+    setSibuk(false)
+    if (error) { alert(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-batal-surat.sql dulu.' : error.message); return }
+    alert('Surat dibatalkan. Bisa dipulihkan dari menu "Surat Dibatalkan".')
+    window.location.href = '/surat'
+  }
+
   async function hapusCatatan(c) {
     if (!confirm('Hapus catatan ini?')) return
     const { error } = await supabase.from('surat_catatan').delete().eq('id', c.id)
@@ -187,23 +200,31 @@ export default function DetailSurat() {
             {(peran.bisaCatatMasuk && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)) && <button className="btn btn-ghost" style={{ minHeight: 44 }} onClick={() => setEditSurat({ ...surat })}>✏️ Ubah data surat</button>}
           </div>
 
+          {/* Tindak Lanjut — pilihan utama di atas, sisanya dilipat di "Lainnya" */}
+          {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0) || bolehBatal) && (
+            <div style={kartu}>
+              <h3 style={judulKartu}>Apa yang mau kamu lakukan?</h3>
+              {milik.length > 0 && <TombolBesar hijau ikon="✅" judul="Selesai" ket="Surat sudah saya kerjakan." onClick={bukaSelesai} />}
+              {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar hijau ikon="🗄️" judul="Arsipkan" ket="Surat sudah selesai. Simpan ke arsip." onClick={arsipkan} />}
+              {bisaTeruskan && <TombolBesar ikon="➡️" judul="Teruskan ke bidang lain" ket="Pilih siapa yang mengerjakan." onClick={() => setTeruskan(true)} />}
+              {(milik.length > 0 && peran.bisaCatatKeluar) || peran.bisaCatatan || bolehBatal ? (
+                <button type="button" className="btn btn-ghost" style={{ width: '100%', minHeight: 48, fontSize: 15 }} onClick={() => setLainnya(v => !v)}>{lainnya ? '▲ Tutup' : '▼ Pilihan lain'}</button>
+              ) : null}
+              {lainnya && (
+                <div style={{ marginTop: 10 }}>
+                  {milik.length > 0 && peran.bisaCatatKeluar && <TombolBesar ikon="✉️" judul="Balas dengan surat" ket="Buat surat jawaban." href={`/surat-keluar?jawab=${surat.id}`} />}
+                  {peran.bisaCatatan && <TombolBesar ikon="💬" judul="Tulis catatan" ket="Bertanya atau memberi arahan." onClick={() => document.getElementById('catatan')?.scrollIntoView({ behavior: 'smooth' })} />}
+                  {bolehBatal && <TombolBesar ikon="🗑️" judul="Batalkan surat ini" ket="Salah input atau dobel. Bisa dipulihkan." onClick={() => setBatal({ alasan: '' })} />}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Berkas / lampiran (boleh banyak) */}
           <div style={kartu}>
             <h3 style={judulKartu}>📎 Berkas surat</h3>
             <DaftarLampiran supabase={supabase} jenis="masuk" suratId={surat.id} fileUtamaUrl={surat.file_bukti_url} fileUtamaNama={surat.file_bukti_nama} boleh={peran.bisaCatatMasuk || milik.length > 0 || peran.isAdmin} peran={peran} />
           </div>
-
-          {/* Tindak Lanjut */}
-          {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0)) && (
-            <div style={kartu}>
-              <h3 style={judulKartu}>Tindak Lanjut — apa yang mau kamu lakukan?</h3>
-              {milik.length > 0 && <TombolBesar utama ikon="✅" judul="Selesai" ket="Surat sudah kamu kerjakan. Tulis hasilnya, lalu diserahkan ke Biro Umum untuk diarsipkan." onClick={bukaSelesai} />}
-              {bisaTeruskan && <TombolBesar ikon="➡️" judul="Teruskan ke bidang lain (Disposisi)" ket="Pilih siapa yang perlu mengerjakan, lalu tulis petunjuknya." onClick={() => setTeruskan(true)} />}
-              {milik.length > 0 && peran.bisaCatatKeluar && <TombolBesar ikon="✉️" judul="Balas dengan surat" ket="Buat surat jawaban untuk surat ini." href={`/surat-keluar?jawab=${surat.id}`} />}
-              {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar utama ikon="🗄️" judul="Arsipkan" ket="Surat ini sudah selesai dikerjakan. Simpan ke arsip Biro Umum." onClick={arsipkan} />}
-              {peran.bisaCatatan && <TombolBesar ikon="💬" judul="Tulis catatan" ket="Bertanya, memberi arahan, atau berkoordinasi. Terlihat oleh yang menerima surat." onClick={() => document.getElementById('catatan')?.scrollIntoView({ behavior: 'smooth' })} />}
-            </div>
-          )}
 
           {/* Ke mana diteruskan */}
           <div style={kartu}>
@@ -314,6 +335,13 @@ export default function DetailSurat() {
           <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Isi disposisi / petunjuk</label><textarea rows={4} style={{ fontSize: 16 }} value={editTujuan.instruksi} onChange={e => setEditTujuan({ ...editTujuan, instruksi: e.target.value })} autoFocus /></div>
           <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Batas waktu (boleh kosong)</label><input type="date" value={editTujuan.batas} onChange={e => setEditTujuan({ ...editTujuan, batas: e.target.value })} /></div>
           <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>Hanya bisa diubah selama penerima belum mulai memproses. Salah penerima? Tutup ini lalu pilih “Tarik kembali”, kemudian teruskan ulang.</div>
+        </Modal>
+      )}
+      {batal && (
+        <Modal judul="Batalkan surat ini?" onClose={() => setBatal(null)} lebar={480}
+          footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={() => setBatal(null)}>Jangan jadi</button><button className="btn btn-primary" style={{ minHeight: 48 }} disabled={sibuk || batal.alasan.trim().length < 5} onClick={batalkanSurat}>Ya, batalkan</button></>}>
+          <div style={{ fontSize: 16, marginBottom: 10 }}>Surat <b>{surat.perihal}</b> akan hilang dari daftar. Surat <b>tidak dihapus permanen</b> dan bisa dipulihkan lagi.</div>
+          <div className="field"><label>Kenapa dibatalkan? *</label><textarea rows={3} style={{ fontSize: 16 }} value={batal.alasan} onChange={e => setBatal({ alasan: e.target.value })} placeholder="Contoh: salah input, surat dobel" /></div>
         </Modal>
       )}
       {editSurat && (

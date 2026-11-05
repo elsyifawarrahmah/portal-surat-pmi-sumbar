@@ -63,7 +63,7 @@ export default function PemantauanPage() {
     const gagal = [k, t, p, m, d, th].find(r => r.error)
     if (gagal) { setPesan(tabelBelumAda(gagal.error) ? pesanGalat(gagal.error) : 'Gagal memuat data: ' + gagal.error.message); setLoading(false); return }
     setPesan('')
-    setData({ keluar: k.data || [], tujuan: t.data || [], panggilan: p.data || [], masuk: m.data || [], disposisiSurat: new Set((d.data || []).map(x => x.surat_id)), tahap: th.data || [] })
+    setData({ keluar: k.data || [], tujuan: (t.data || []).filter(r => r.disposisi?.surat), panggilan: p.data || [], masuk: m.data || [], disposisiSurat: new Set((d.data || []).map(x => x.surat_id)), tahap: th.data || [] })
     setLoading(false)
   }
 
