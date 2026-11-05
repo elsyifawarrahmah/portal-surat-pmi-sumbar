@@ -38,14 +38,19 @@ function kop() {
 }
 
 function buka(judul, bodyHtml, orientasi = 'portrait') {
-  const w = window.open('', '_blank')
-  if (!w) { alert('Jendela cetak diblokir browser. Izinkan pop-up untuk situs ini, lalu coba lagi.'); return }
-  w.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${h(judul)}</title><style>${CSS} @page{size:A4 ${orientasi}}</style></head><body>${bodyHtml}
-  <div class="noprint" style="margin-top:16px"><button onclick="window.print()" style="padding:8px 16px;font-size:14px">🖨 Cetak</button></div></body></html>`)
-  w.document.close()
-  const siap = () => { try { w.focus(); w.print() } catch (e) {} }
-  const img = w.document.images[0]
-  if (img && !img.complete) { img.onload = siap; img.onerror = siap } else setTimeout(siap, 250)
+  // Cetak lewat iframe tersembunyi: tidak membuka jendela baru, jadi tidak diblokir pemblokir pop-up browser.
+  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${h(judul)}</title><style>${CSS} @page{size:A4 ${orientasi}}</style></head><body>${bodyHtml}</body></html>`
+  const f = document.createElement('iframe')
+  f.setAttribute('aria-hidden', 'true')
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
+  document.body.appendChild(f)
+  const w = f.contentWindow, d = w.document
+  d.open(); d.write(html); d.close()
+  let jalan = false
+  const cetak = () => { if (jalan) return; jalan = true; try { w.focus(); w.print() } catch (e) { alert('Gagal membuka cetak: ' + e.message) } setTimeout(() => f.remove(), 120000) }
+  const gambar = Array.from(d.images).filter(i => !i.complete)
+  if (gambar.length) { let sisa = gambar.length; gambar.forEach(i => { i.onload = i.onerror = () => { if (--sisa === 0) cetak() } }); setTimeout(cetak, 2500) }
+  else setTimeout(cetak, 300)
 }
 
 const jejakCetak = nama => `<div class="foot">Dicetak ${h(fmtWaktu(new Date()))}${nama ? ' oleh ' + h(nama) : ''} · ${h(NAMA_APLIKASI)} PMI Sumatera Barat</div>`

@@ -147,7 +147,7 @@ export default function DetailSurat() {
     setSibuk(true)
     const { error } = await supabase.rpc('batalkan_surat_masuk', { p_id: surat.id, p_alasan: batal.alasan })
     setSibuk(false)
-    if (error) { alert(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-batal-surat.sql dulu.' : error.message); return }
+    if (error) { alert(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-batal-surat.sql dulu. Pesan teknis: ' + error.message : error.message); return }
     alert('Surat dibatalkan. Bisa dipulihkan dari menu "Surat Dibatalkan".')
     window.location.href = '/surat'
   }

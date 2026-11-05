@@ -16,7 +16,7 @@ export default function SuratDibatalkanPage() {
   async function muat() {
     setLoading(true)
     const { data, error } = await supabase.rpc('daftar_surat_batal')
-    setPesan(error ? (/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-batal-surat.sql di Supabase (SQL Editor) satu kali.' : error.message) : '')
+    setPesan(error ? (/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-batal-surat.sql di Supabase (SQL Editor) satu kali. Pesan teknis: ' + error.message : error.message) : '')
     setRows(data || []); setLoading(false)
   }
   async function pulihkan(r) {
