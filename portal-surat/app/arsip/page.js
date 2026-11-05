@@ -37,6 +37,7 @@ export default function ArsipPage() {
   const [fJenis, setFJenis] = useState('semua')
   const [fStatus, setFStatus] = useState('semua')
   const [fTahun, setFTahun] = useState('semua')
+  const [fBulan, setFBulan] = useState('semua')
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState(null)   // baris yang sedang diarsipkan / diedit
   const [form, setForm] = useState({})
@@ -54,13 +55,21 @@ export default function ArsipPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', userData.user.id).single()
       setIsAdmin(profile?.role === 'admin')
     }
-    const [masuk, keluar, dok, tahap, cat] = await Promise.all([
+    const [masuk, keluar, dok, tahap, cat, disp] = await Promise.all([
       supabase.from('surat_masuk').select('*'),
       supabase.from('surat_keluar').select('*'),
       supabase.from('arsip_dokumen').select('*'),
       supabase.from('surat_tahapan').select('id, surat_id, nama_tahap, urutan, tanggal_diterima, tanggal_diteruskan'),
       supabase.from('arsip_catatan').select('*, profiles:diarsip_oleh(nama_lengkap)'),
+      supabase.from('surat_disposisi').select('surat_id, tujuan:surat_disposisi_tujuan(status, diarsipkan_pada)'),
     ])
+
+    // Surat masuk yang SEMUA tujuannya selesai = masuk arsip otomatis (tanggal = selesai terakhir)
+    const oto = {}
+    ;(disp.data || []).forEach(d => {
+      const o = oto[d.surat_id] = oto[d.surat_id] || { n: 0, ok: 0, tgl: '' }
+      ;(d.tujuan || []).forEach(t => { o.n++; if (t.status === 'selesai' && t.diarsipkan_pada) { o.ok++; if (t.diarsipkan_pada > o.tgl) o.tgl = t.diarsipkan_pada } })
+    })
 
     if (cat.error) {
       const belumAda = cat.error.code === '42P01' || cat.error.code === 'PGRST205' || /arsip_catatan/.test(cat.error.message || '')
@@ -94,12 +103,15 @@ export default function ArsipPage() {
       const c = catMap[r.jenis + ':' + r.id] || null
       let status = 'siap'
       let info = ''
+      let tglArsip = c?.tanggal_arsip || ''
+      let otomatis = false
       if (c) status = 'arsip'
+      else if (r.jenis === 'surat_masuk' && oto[r.id] && oto[r.id].n > 0 && oto[r.id].n === oto[r.id].ok) { status = 'arsip'; otomatis = true; tglArsip = oto[r.id].tgl.slice(0, 10) }
       else if (r.jenis === 'surat_masuk') {
         const st = statusSurat(peta[r.id])
         if (st && st.tone !== 'ok') { status = 'proses'; info = st.label }
       }
-      return { ...r, key: r.jenis + ':' + r.id, catat: c, status, info }
+      return { ...r, key: r.jenis + ':' + r.id, catat: c, status, info, otomatis, tglArsip, bulan: String(tglArsip || r.tanggal || '').slice(0, 7) }
     }).sort((a, b) => String(b.tanggal || '').localeCompare(String(a.tanggal || '')))
 
     setRows(hasil)
@@ -108,11 +120,14 @@ export default function ArsipPage() {
 
   const tahunList = [...new Set(rows.map(r => String(r.tanggal || '').slice(0, 4)).filter(Boolean))].sort().reverse()
   const hitung = s => rows.filter(r => r.status === s).length
+  const namaBulan = k => { const d = new Date(k + '-01T00:00:00'); return isNaN(d) ? k : d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) }
+  const bulanList = [...new Set(rows.map(r => r.bulan).filter(Boolean))].sort().reverse()
 
   const filtered = rows.filter(r => {
     if (fJenis !== 'semua' && r.jenis !== fJenis) return false
     if (fStatus !== 'semua' && r.status !== fStatus) return false
     if (fTahun !== 'semua' && String(r.tanggal || '').slice(0, 4) !== fTahun) return false
+    if (fBulan !== 'semua' && r.bulan !== fBulan) return false
     if (!search) return true
     const gabung = [r.nomor, r.judul, r.pihak, r.divisi, r.catat?.lokasi_arsip, r.catat?.catatan, JENIS[r.jenis]].join(' ').toLowerCase()
     return gabung.includes(search.toLowerCase())
@@ -203,7 +218,7 @@ export default function ArsipPage() {
     <div className="app">
       <div className="main">
         <div className="topbar">
-          <div><h1>Arsip Biro Umum</h1><p className="desc">Register arsip semua dokumen: catat lokasi simpan, tandai sudah diarsip, dan cari dengan cepat.</p></div>
+          <div><h1>Arsip Bulanan</h1><p className="desc">Surat yang sudah sampai tujuan dan selesai masuk arsip otomatis per bulan. Biro Umum mencatat lokasi simpan fisiknya.</p></div>
         </div>
 
         {!bisaArsip && !peran.loading && (
@@ -217,6 +232,11 @@ export default function ArsipPage() {
           {kartu('siap', 'var(--gold)')}
           {kartu('arsip', 'var(--stock)')}
           {kartu('proses', '#4A5568')}
+        </div>
+
+        <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:6,marginBottom:12}}>
+          <button className={'btn ' + (fBulan === 'semua' ? 'btn-primary' : 'btn-ghost')} style={{whiteSpace:'nowrap'}} onClick={() => setFBulan('semua')}>Semua bulan</button>
+          {bulanList.map(b => <button key={b} className={'btn ' + (fBulan === b ? 'btn-primary' : 'btn-ghost')} style={{whiteSpace:'nowrap'}} onClick={() => setFBulan(fBulan === b ? 'semua' : b)}>🗂 {namaBulan(b)} ({rows.filter(r => r.bulan === b).length})</button>)}
         </div>
 
         <div className="panel">
@@ -259,7 +279,7 @@ export default function ArsipPage() {
                       <td data-label="Status">
                         <span className="tag" style={STATUS_STYLE[r.status]}>{STATUS_LABEL[r.status]}</span>
                         {r.status === 'proses' && r.info && <div style={{fontSize:11.5,color:'var(--ink-soft)',marginTop:3}}>{r.info}</div>}
-                        {r.status === 'arsip' && r.catat?.tanggal_arsip && <div style={{fontSize:11.5,color:'var(--ink-soft)',marginTop:3}}>{tgl(r.catat.tanggal_arsip)}</div>}
+                        {r.status === 'arsip' && r.tglArsip && <div style={{fontSize:11.5,color:'var(--ink-soft)',marginTop:3}}>{tgl(r.tglArsip)}{r.otomatis ? ' · otomatis' : ''}</div>}
                       </td>
                       <td data-label="Lokasi Arsip">{r.catat?.lokasi_arsip || '-'}{r.catat?.catatan ? <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{r.catat.catatan}</div> : null}</td>
                       <td data-label="Berkas">{!tutup && r.file ? <a href={r.file} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>

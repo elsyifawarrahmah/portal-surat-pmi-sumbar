@@ -247,7 +247,7 @@ export default function PemantauanPage() {
 
           <div className="panel">
             <div className="panel-head">
-              <h3>🗄 Selesai — menunggu diarsipkan Biro Umum</h3>
+              <h3>🗄 Selesai — otomatis masuk arsip bulanan</h3>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span className="tag" style={{ background: menungguArsip.length ? 'var(--gold-bg)' : 'var(--stock-bg)', color: menungguArsip.length ? 'var(--gold)' : 'var(--stock)' }}>{menungguArsip.length}</span>
                 {menungguArsip.length > 0 && <button className="btn btn-primary" style={{ minHeight: 36, padding: '6px 14px', fontSize: 13 }} onClick={arsipkanSemua}>Arsipkan semua</button>}
@@ -255,7 +255,7 @@ export default function PemantauanPage() {
             </div>
             <div style={{ overflowX: 'auto' }}><table>
               <thead><tr><th>Selesai</th><th>Unit</th><th>Surat</th><th></th></tr></thead>
-              <tbody>{menungguArsip.length === 0 ? <tr><td colSpan={4} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada yang menunggu diarsipkan.</td></tr> : menungguArsip.slice(0, 80).map(t => (
+              <tbody>{menungguArsip.length === 0 ? <tr><td colSpan={4} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada yang tertahan.</td></tr> : menungguArsip.slice(0, 80).map(t => (
                 <tr key={t.id}>
                   <td data-label="Selesai">{fmtWaktu(t.selesai_pada)}</td><td data-label="Unit"><b>{t.unit?.nama}</b></td>
                   <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>

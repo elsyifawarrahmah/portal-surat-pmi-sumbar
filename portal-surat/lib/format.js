@@ -18,7 +18,7 @@ export const STATUS_DISPOSISI = {
   menunggu: { label: 'Menunggu', style: { background: '#FBE7E7', color: '#B3261E' } },
   dibaca: { label: 'Sudah dibaca', style: { background: 'var(--gold-bg)', color: 'var(--gold)' } },
   diproses: { label: 'Sedang diproses', style: { background: '#E4EEF9', color: '#1F5E99' } },
-  selesai: { label: 'Selesai · menunggu arsip', style: { background: '#E7F4EA', color: '#2E7D32' } },
+  selesai: { label: 'Selesai · masuk arsip', style: { background: '#E7F4EA', color: '#2E7D32' } },
   diarsip: { label: 'Diarsipkan', style: { background: 'var(--stock-bg)', color: 'var(--stock)' } },
 }
 // Status yang ditampilkan: selesai + sudah diarsipkan Biro Umum = "diarsip"

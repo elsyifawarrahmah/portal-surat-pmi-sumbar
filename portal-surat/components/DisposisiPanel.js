@@ -175,7 +175,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
                         </select>
                         <div style={{ fontSize: 12.5, marginTop: 5 }}>Belum dibuat? <Link href={`/surat-keluar?jawab=${surat.id}`} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>Buat surat jawaban dulu →</Link></div>
                       </div>
-                      <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 8 }}>Setelah selesai, surat diserahkan ke Biro Umum untuk diarsipkan.</div>
+                      <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 8 }}>Setelah semua tujuan selesai, surat otomatis masuk Arsip bulan ini.</div>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="btn btn-primary" disabled={sibuk} onClick={simpanSelesai}>Tandai Selesai</button>
                         <button className="btn btn-ghost" onClick={() => setSelesai(null)}>Batal</button>

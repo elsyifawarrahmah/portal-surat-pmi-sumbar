@@ -204,7 +204,7 @@ export default function DetailSurat() {
           {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0) || bolehBatal) && (
             <div style={kartu}>
               <h3 style={judulKartu}>Apa yang mau kamu lakukan?</h3>
-              {milik.length > 0 && <TombolBesar hijau ikon="✅" judul="Selesai" ket="Surat sudah saya kerjakan." onClick={bukaSelesai} />}
+              {milik.length > 0 && <TombolBesar hijau ikon="✅" judul="Selesai" ket="Surat sudah saya kerjakan. Setelah semua tujuan selesai, otomatis masuk arsip bulanan." onClick={bukaSelesai} />}
               {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar hijau ikon="🗄️" judul="Arsipkan" ket="Surat sudah selesai. Simpan ke arsip." onClick={arsipkan} />}
               {bisaTeruskan && <TombolBesar ikon="➡️" judul="Teruskan ke bidang lain" ket="Pilih siapa yang mengerjakan." onClick={() => setTeruskan(true)} />}
               {(milik.length > 0 && peran.bisaCatatKeluar) || peran.bisaCatatan || bolehBatal ? (
@@ -326,7 +326,7 @@ export default function DetailSurat() {
             <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Ada surat jawaban? <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}>(pilih kalau ada)</span></label>
               <select style={{ fontSize: 16 }} value={selesai.jawabanId} onChange={e => setSelesai({ ...selesai, jawabanId: e.target.value })}><option value="">— tidak ada —</option>{selesai.opsi.map(o => <option key={o.id} value={o.id}>{o.nomor_surat} — {o.perihal}</option>)}</select></div>
           )}
-          <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>Setelah ini surat diserahkan ke Biro Umum untuk diarsipkan.</div>
+          <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>Setelah semua tujuan selesai, surat otomatis masuk Arsip bulan ini (tidak perlu kembali ke Biro Umum).</div>
         </Modal>
       )}
       {editTujuan && (

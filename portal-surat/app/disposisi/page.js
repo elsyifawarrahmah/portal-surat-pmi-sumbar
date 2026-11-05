@@ -103,7 +103,7 @@ function Isi() {
         <div className="stat" style={{ '--accent': '#B3261E' }}><div className="lbl">Menunggu</div><div className="val">{hitung('menunggu')}</div></div>
         <div className="stat" style={{ '--accent': 'var(--gold)' }}><div className="lbl">Dibaca / Diproses</div><div className="val">{hitung('dibaca') + hitung('diproses')}</div></div>
         <div className="stat" style={{ '--accent': '#7B2CBF' }}><div className="lbl">Lewat Batas Waktu</div><div className="val">{lewat}</div></div>
-        <div className="stat" style={{ '--accent': '#2E7D32' }}><div className="lbl">Selesai · Menunggu Arsip</div><div className="val">{hitung('selesai')}</div></div>
+        <div className="stat" style={{ '--accent': '#2E7D32' }}><div className="lbl">Selesai · Masuk Arsip</div><div className="val">{hitung('selesai')}</div></div>
       </div>
 
       <div className="panel">

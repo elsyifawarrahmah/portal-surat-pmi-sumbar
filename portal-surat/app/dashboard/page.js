@@ -72,7 +72,7 @@ export default function Beranda() {
         {penuh ? <>
           <Kotak href="/surat?tab=belum" angka={loading ? '…' : hit('belum_diteruskan')} judul="Belum diteruskan" ket="Surat baru yang belum didisposisikan" warna="#B3261E" />
           <Kotak href="/surat?tab=proses" angka={loading ? '…' : hit('berjalan')} judul="Sedang berjalan" ket="Sedang dikerjakan bidang tujuan" warna="#1F5E99" />
-          <Kotak href="/surat?tab=selesai" angka={loading ? '…' : hit('selesai')} judul="Menunggu diarsipkan" ket="Sudah selesai, tinggal diarsipkan" warna="#2E7D32" />
+          <Kotak href="/surat?tab=selesai" angka={loading ? '…' : hit('selesai')} judul="Selesai" ket="Sudah sampai tujuan, otomatis masuk arsip bulanan" warna="#2E7D32" />
         </> : <>
           <Kotak href="/surat?tab=belum" angka={loading ? '…' : hit('belum')} judul="Belum dibaca" ket="Surat baru untuk bidangmu" warna="#B3261E" />
           <Kotak href="/surat?tab=proses" angka={loading ? '…' : hit('proses')} judul="Sedang dikerjakan" ket="Sudah kamu baca, belum selesai" warna="#1F5E99" />
