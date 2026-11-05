@@ -120,3 +120,42 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Pengesahan Surat Keluar', body)
 }
+
+// Surat Tugas / Surat Aset / Tugas Kerja Sama — semua kolom terisi otomatis dari data surat (anggota, tanggal, kendaraan, TTD + kode).
+// Boleh dicetak kapan saja; sebelum disetujui TTD kosong dan ada keterangan "DRAF".
+export function cetakSuratTugas({ surat, skNomor, pksNomor, namaPencetak }) {
+  const s = surat, jenis = s.jenis || 'tugas'
+  const sah = s.status_persetujuan === 'disetujui'
+  const judul = jenis === 'aset' ? 'Surat Aset' : jenis === 'kerja_sama' ? 'Surat Tugas Kerja Sama' : 'Surat Tugas'
+  const anggota = Array.isArray(s.anggota) ? s.anggota : []
+  const hari = s.tanggal_berangkat && s.tanggal_kembali ? Math.round((new Date(s.tanggal_kembali) - new Date(s.tanggal_berangkat)) / 86400000) + 1 : null
+  const baris = (a, b) => `<tr><td style="width:150px;border:none;padding:3px 6px;vertical-align:top">${h(a)}</td><td style="border:none;padding:3px 6px;width:10px">:</td><td style="border:none;padding:3px 6px">${b}</td></tr>`
+  const dasar = [s.dasar, skNomor ? 'SK Nomor ' + skNomor : '', pksNomor ? 'PKS Nomor ' + pksNomor : ''].filter(Boolean).map(h).join('<br>')
+  const tabelAnggota = anggota.length ? `<table style="margin:6px 0 10px"><thead><tr><th style="width:28px">No</th><th>Nama</th><th>Jabatan</th></tr></thead><tbody>${anggota.map((a, i) => `<tr><td>${i + 1}</td><td>${h(a.nama)}</td><td>${h(a.jabatan || '')}</td></tr>`).join('')}</tbody></table>` : ''
+  const ket = []
+  if (jenis === 'tugas') {
+    ket.push(baris('Tujuan / Lokasi', h(s.tujuan_surat || '-')))
+    ket.push(baris('Tanggal berangkat', h(fmtTgl(s.tanggal_berangkat))))
+    ket.push(baris('Tanggal kembali', h(fmtTgl(s.tanggal_kembali)) + (hari ? ` (${hari} hari)` : '')))
+    ket.push(baris('Kendaraan', s.kendaraan_nama || s.kendaraan_nopol ? h([s.kendaraan_nama, s.kendaraan_nopol ? 'No. Polisi ' + s.kendaraan_nopol : ''].filter(Boolean).join(' · ')) : 'Tanpa kendaraan dinas'))
+    if (s.sopir) ket.push(baris('Pengemudi', h(s.sopir)))
+  } else {
+    ket.push(baris(jenis === 'aset' ? 'Kepada' : 'Mitra / Pihak', h(s.tujuan_surat || '-')))
+    if (s.mengetahui) ket.push(baris('Mengetahui', h(s.mengetahui)))
+    if (jenis === 'kerja_sama') ket.push(baris('Status pekerjaan', s.status_pekerjaan === 'selesai' ? 'Selesai' : 'Disiapkan'))
+  }
+  const blok = (j, nama, ttd, kode, waktu) => `<td style="width:50%;text-align:center;vertical-align:top;border:none;padding:8px"><div>${h(j)}</div>${ttd ? `<img src="${h(ttd)}" style="height:76px;margin:6px 0" alt="TTD">` : '<div style="height:88px"></div>'}<div style="font-weight:700">${h(nama || '')}</div>${kode ? `<div style="font-size:11px">Kode: ${h(kode)}<br>${h(fmtWaktu(waktu))}</div>` : ''}</td>`
+  const body = `${kop()}
+  <div class="judul" style="font-size:16px">${h(judul)}</div>
+  <div class="sub" style="margin-bottom:12px">Nomor : ${h(s.nomor_surat)}${sah ? '' : ' &nbsp;<b style="color:#B3261E">(DRAF — belum disetujui)</b>'}</div>
+  <table class="info">${dasar ? baris('Dasar', dasar) : ''}${baris('Perihal', h(s.perihal))}</table>
+  ${jenis === 'tugas' ? '<p style="margin:12px 0 2px"><b>Menugaskan kepada:</b></p>' : anggota.length ? '<p style="margin:12px 0 2px"><b>Pihak terkait:</b></p>' : ''}
+  ${tabelAnggota}
+  ${s.rincian ? `<p style="margin:8px 0 2px"><b>${jenis === 'aset' ? 'Uraian aset:' : 'Uraian:'}</b></p><div style="white-space:pre-wrap;margin-bottom:8px">${h(s.rincian)}</div>` : ''}
+  <table class="info">${ket.join('')}</table>
+  <p style="margin-top:14px">Demikian surat ini dibuat untuk dilaksanakan dengan penuh tanggung jawab.</p>
+  <div style="text-align:right;margin-top:10px">Padang, ${h(fmtTgl(s.tanggal_surat))}</div>
+  <table style="margin-top:4px;border:none"><tr>${blok('Paraf Sekretaris', s.paraf_nama, s.paraf_ttd_url, s.paraf_kode, s.paraf_pada)}${blok(s.setuju_jabatan || 'Kepala Markas / Ketua', s.setuju_nama, s.setuju_ttd_url, s.setuju_kode, s.setuju_pada)}</tr></table>
+  ${jejakCetak(namaPencetak)}`
+  buka(judul, body)
+}

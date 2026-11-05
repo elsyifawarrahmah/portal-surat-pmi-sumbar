@@ -13,7 +13,7 @@ export const LABEL_SETUJU = {
 const langkah = [['diajukan', '1. Diajukan'], ['diparaf', '2. Paraf Sekretaris'], ['disetujui', '3. Disetujui + TTD']]
 const urut = { diajukan: 1, diparaf: 2, disetujui: 3 }
 
-export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, onClose, onChanged }) {
+export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, onClose, onChanged, rpc = 'surat_keluar', cetak = cetakPengesahanKeluar, migrasi = 'migrasi-persetujuan-paraf.sql' }) {
   const st = surat.status_persetujuan || null
   const [sibuk, setSibuk] = useState(false)
   const [galat, setGalat] = useState('')
@@ -31,7 +31,7 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
     setSibuk(true); setGalat('')
     const { error } = await supabase.rpc(fn, args)
     setSibuk(false)
-    if (error) { setGalat(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-persetujuan-paraf.sql dulu.' : error.message); return false }
+    if (error) { setGalat(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/' + migrasi + ' dulu.' : error.message); return false }
     onChanged && onChanged(); return true
   }
   async function simpanTtd(file) {
@@ -68,12 +68,12 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         {surat.setuju_ttd_url && <img src={surat.setuju_ttd_url} alt="TTD" style={{ height: 64, margin: '6px 0', background: '#fff' }} />}<br />
         <span className="mono" style={{ fontSize: 13 }}>Kode: {surat.setuju_kode}</span></div>}
 
-      {bisaAjukan && <button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk} onClick={() => panggil('ajukan_surat_keluar', { p_id: surat.id })}>📨 Ajukan untuk paraf & persetujuan</button>}
-      {bisaParaf && <><div style={{ fontWeight: 700 }}>Paraf Sekretaris</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('paraf_surat_keluar', { p_id: surat.id, p_ttd: ttdUrl })}>✍️ Paraf & teruskan ke Kepala Markas/Ketua</button></>}
-      {bisaSetuju && <><div style={{ fontWeight: 700 }}>Setujui & tanda tangan</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('setujui_surat_keluar', { p_id: surat.id, p_ttd: ttdUrl })}>✅ Setujui & tanda tangani</button></>}
+      {bisaAjukan && <button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk} onClick={() => panggil('ajukan_' + rpc, { p_id: surat.id })}>📨 Ajukan untuk paraf & persetujuan</button>}
+      {bisaParaf && <><div style={{ fontWeight: 700 }}>Paraf Sekretaris</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('paraf_' + rpc, { p_id: surat.id, p_ttd: ttdUrl })}>✍️ Paraf & teruskan ke Kepala Markas/Ketua</button></>}
+      {bisaSetuju && <><div style={{ fontWeight: 700 }}>Setujui & tanda tangan</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('setujui_' + rpc, { p_id: surat.id, p_ttd: ttdUrl })}>✅ Setujui & tanda tangani</button></>}
       {bisaKembali && !tolak && <button className="btn btn-ghost" style={{ minHeight: 44, width: '100%', marginTop: 10 }} onClick={() => setTolak(true)}>↩ Kembalikan untuk diperbaiki</button>}
-      {tolak && <div style={{ marginTop: 10 }}><textarea rows={3} placeholder="Apa yang perlu diperbaiki?" value={alasan} onChange={e => setAlasan(e.target.value)} style={{ fontSize: 16 }} /><button className="btn btn-primary" style={{ minHeight: 44, marginTop: 6 }} disabled={sibuk} onClick={() => panggil('kembalikan_surat_keluar', { p_id: surat.id, p_alasan: alasan })}>Kembalikan</button></div>}
-      {st === 'disetujui' && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 8 }} onClick={() => cetakPengesahanKeluar({ surat, namaPencetak: peran.nama })}>🖨 Cetak lembar pengesahan (TTD + kode)</button>}
+      {tolak && <div style={{ marginTop: 10 }}><textarea rows={3} placeholder="Apa yang perlu diperbaiki?" value={alasan} onChange={e => setAlasan(e.target.value)} style={{ fontSize: 16 }} /><button className="btn btn-primary" style={{ minHeight: 44, marginTop: 6 }} disabled={sibuk} onClick={() => panggil('kembalikan_' + rpc, { p_id: surat.id, p_alasan: alasan })}>Kembalikan</button></div>}
+      {st === 'disetujui' && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 8 }} onClick={() => cetak({ surat, namaPencetak: peran.nama })}>🖨 Cetak lembar pengesahan (TTD + kode)</button>}
     </Modal>
   )
 }

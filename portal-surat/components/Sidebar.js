@@ -36,6 +36,7 @@ const LINKS = [
   { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama' },
   { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi' },
   { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama' },
+  { href: '/surat-tugas', label: 'Surat Tugas & Aset', icon: 'sk', grup: 'utama' },
   { href: '/lacak', label: 'Lacak Surat', icon: 'riwayat', grup: 'utama' },
   { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
