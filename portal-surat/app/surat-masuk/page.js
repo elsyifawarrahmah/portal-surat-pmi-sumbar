@@ -133,6 +133,11 @@ function SuratMasukInner() {
       penerima_nama: i === 0 ? '' : null,
     }))
     await supabase.from('surat_tahapan').insert(tahapRows)
+    if (peran.isTataUsaha) {
+      const { error: eKirim } = await supabase.rpc('kirim_ke_biro_umum', { p_surat: newSurat.id })
+      if (eKirim) alert('Surat tercatat, tetapi belum terkirim ke Biro Umum: ' + (/function|schema cache|does not exist/i.test(eKirim.message) ? 'jalankan supabase/migrasi-tata-usaha.sql dulu.' : eKirim.message) + '\nBuka surat itu lalu tekan "Kirim ke Biro Umum".')
+      else alert('Surat tercatat dan sudah dikirim ke Biro Umum. Pantau lewat menu Lacak Surat.')
+    }
     // file pertama = berkas utama (kolom lama); file ke-2 dst. disimpan sebagai lampiran
     if (_berkas && _berkas.length > 1) await simpanLampiran(supabase, 'masuk', newSurat.id, _berkas.slice(1))
     setShowAddModal(false); setForm({}); setError('')
@@ -273,7 +278,7 @@ function SuratMasukInner() {
     <div className="app">
       <div className="main">
         <div className="topbar">
-          <div><h1>{peran.aksesPenuh || peran.loading ? 'Surat Masuk' : 'Surat untuk Saya'}</h1><p className="desc">{peran.aksesPenuh || peran.loading ? 'Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.' : `Surat yang ditujukan ke ${peran.unit?.nama || 'unit kamu'}. Surat bidang lain tidak ditampilkan di sini — lihat posisinya di menu Lacak Surat.`}</p></div>
+          <div><h1>{peran.aksesPenuh || peran.loading ? 'Surat Masuk' : peran.isTataUsaha ? 'Surat yang Saya Catat' : 'Surat untuk Saya'}</h1><p className="desc">{peran.aksesPenuh || peran.loading ? 'Pencatatan dan pelacakan surat masuk PMI Sumatera Barat.' : `Surat yang ditujukan ke ${peran.unit?.nama || 'unit kamu'}. Surat bidang lain tidak ditampilkan di sini — lihat posisinya di menu Lacak Surat.`}</p></div>
           {bolehCatat && <button className="btn btn-primary" onClick={() => { setForm({}); setError(''); setShowAddModal(true) }}>+ Catat Surat Masuk</button>}
         </div>
 

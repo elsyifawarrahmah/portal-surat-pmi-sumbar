@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
-export const NAMA_TIPE = { biro_umum: 'Biro Umum', sekretariat: 'Sekretariat', pimpinan: 'Pimpinan', bidang: 'Bidang' }
+export const NAMA_TIPE = { biro_umum: 'Biro Umum', sekretariat: 'Sekretariat', pimpinan: 'Pimpinan', bidang: 'Bidang', tata_usaha: 'Tata Usaha' }
 
 export function hitungIzin(profil, unit) {
   const isAdmin = profil?.role === 'admin'
@@ -13,10 +13,11 @@ export function hitungIzin(profil, unit) {
   return {
     isAdmin, tipe, unit, adaUnit,
     isBiroUmum: tipe === 'biro_umum',
+    isTataUsaha: tipe === 'tata_usaha',   // mencatat surat, hanya bisa mengirim ke Biro Umum, selebihnya memantau lewat Lacak Surat
     aksesPenuh: isAdmin || tipe === 'biro_umum',   // tampilan lengkap (buku/pantau). Pembatasan ISI surat dijaga database (RLS): hanya yang menerima/meneruskan
-    bisaCatatMasuk: isAdmin || ['biro_umum', 'sekretariat'].includes(tipe),
+    bisaCatatMasuk: isAdmin || ['biro_umum', 'sekretariat', 'tata_usaha'].includes(tipe),
     bisaDisposisi: isAdmin || ['biro_umum', 'sekretariat', 'pimpinan'].includes(tipe),
-    bisaCatatKeluar: isAdmin || ['sekretariat', 'pimpinan', 'bidang'].includes(tipe),
+    bisaCatatKeluar: isAdmin || ['sekretariat', 'pimpinan', 'bidang', 'tata_usaha'].includes(tipe),
     bisaAlur: isAdmin || ['sekretariat', 'pimpinan', 'biro_umum'].includes(tipe),
     bisaPantau: isAdmin || tipe === 'biro_umum',
     bisaArsip: isAdmin || tipe === 'biro_umum',

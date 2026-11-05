@@ -42,7 +42,8 @@ export default function TandaTangan({ onSimpan, onBatal, simpanLabel = 'Pakai ta
 
 // Unggah PNG tanda tangan ke penyimpanan dan kembalikan URL-nya
 export async function unggahTtd(supabase, file, userId) {
-  const nama = `ttd/${userId}-${Date.now()}.png`
+  // Disimpan di akar bucket (sama seperti berkas surat lain) supaya lolos kebijakan penyimpanan
+  const nama = `${Date.now()}-ttd-${userId}.png`
   const { error } = await supabase.storage.from('bukti-surat').upload(nama, file, { contentType: 'image/png' })
   if (error) throw new Error('Gagal menyimpan tanda tangan: ' + error.message)
   return supabase.storage.from('bukti-surat').getPublicUrl(nama).data.publicUrl

@@ -4,7 +4,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
-import { usePeran } from '@/lib/peran'
+import { usePeran, useUnits } from '@/lib/peran'
+import KontakModal from '@/components/KontakModal'
 import Modal from '@/components/Modal'
 import { fmtTgl, fmtWaktu, pesanGalat } from '@/lib/format'
 
@@ -12,6 +13,15 @@ const WARNA = {
   'Baru masuk': ['#EEE9E2', '#6B5E4F'], 'Diterima': ['#EEE9E2', '#6B5E4F'], 'Belum dibuka': ['#FBE7E7', '#B3261E'], 'Sudah dibaca': ['var(--gold-bg)', 'var(--gold)'],
   'Sedang diproses': ['#E4EEF9', '#1F5E99'], 'Selesai': ['#E7F4EA', '#2E7D32'], 'Diarsipkan': ['var(--stock-bg)', 'var(--stock)'],
   'Belum dikirim': ['#FBE7E7', '#B3261E'], 'Dikirim': ['var(--gold-bg)', 'var(--gold)'], 'Kembali': ['#F3E8FB', '#7B2CBF'],
+}
+// Penanda keadaan per penerima: ikon + warna, supaya jelas sudah dibaca atau belum
+const CHIP = {
+  'belum dibuka': ['🔴', 'Belum dibuka', '#FBE7E7', '#B3261E'],
+  'sudah dibaca': ['👁️', 'Sudah dibaca', 'var(--gold-bg)', 'var(--gold)'],
+  'sedang diproses': ['⚙️', 'Sedang diproses', '#E4EEF9', '#1F5E99'],
+}
+function uraiPosisi(teks) {
+  return String(teks || '').split(/,\s*/).map(x => { const m = x.match(/^(.*?)\s*\(([^)]+)\)\s*$/); return m ? { unit: m[1].trim(), status: m[2].trim().toLowerCase() } : { unit: x.trim(), status: '' } }).filter(x => x.unit)
 }
 const FILTER = [['semua', 'Semua'], ['saya', 'Untuk unit saya'], ['tertahan', 'Tertahan ≥ 3 hari'], ['selesai', 'Selesai / diarsipkan'], ['keluar', 'Surat keluar']]
 
@@ -26,10 +36,17 @@ export default function LacakPage() {
   const [jejak, setJejak] = useState(null)
   const [garis, setGaris] = useState([])
   const [muatGaris, setMuatGaris] = useState(false)
+  const { units } = useUnits()
+  const [hubungi, setHubungi] = useState(null)   // { unit, pesan }
+  const [milikSaya, setMilikSaya] = useState(null) // Tata Usaha: hanya surat yang ia catat
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { if (!peran.loading) load() }, [peran.loading])
   async function load() {
     setLoading(true)
+    if (peran.isTataUsaha) {
+      const [a, b] = await Promise.all([supabase.from('surat_masuk').select('id'), supabase.from('surat_keluar').select('id')])
+      setMilikSaya(new Set([...(a.data || []), ...(b.data || [])].map(x => x.id)))
+    } else setMilikSaya(null)
     const { data, error } = await supabase.rpc('lacak_surat')
     if (error) { setPesan(pesanGalat(error)); setRows([]) } else { setPesan(''); setRows(data || []) }
     setLoading(false)
@@ -41,7 +58,19 @@ export default function LacakPage() {
   }
 
   const namaUnit = peran.unit?.nama || ''
+  const unitBiro = units.find(u => u.tipe === 'biro_umum')
+  function bukaHubungi(r) {
+    const pesanWa = `Selamat pagi/siang, saya dari ${namaUnit || 'PMI Sumbar'}. Mohon dicek surat agenda ${r.nomor_agenda || '-'} (${r.jenis === 'masuk' ? 'surat masuk' : 'surat keluar'}), statusnya masih "${r.status}" sudah ${r.hari <= 0 ? 'hari ini' : r.hari + ' hari'}. Terima kasih.`
+    // Tata Usaha selalu menghubungi Biro Umum; unit lain menghubungi unit yang belum membuka suratnya
+    let unit = unitBiro
+    if (!peran.isTataUsaha) {
+      const p = uraiPosisi(r.posisi); const target = p.find(x => x.status === 'belum dibuka') || p[0]
+      unit = units.find(u => target && u.nama === target.unit) || unitBiro
+    }
+    if (unit) setHubungi({ unit, pesan: pesanWa })
+  }
   const tampil = useMemo(() => rows.filter(r => {
+    if (milikSaya && !milikSaya.has(r.surat_id)) return false
     if (filter === 'saya' && !(namaUnit && (r.untuk || '').includes(namaUnit))) return false
     if (filter === 'tertahan' && !(['Belum dibuka', 'Sudah dibaca', 'Sedang diproses', 'Diterima', 'Belum dikirim'].includes(r.status) && r.hari >= 3)) return false
     if (filter === 'selesai' && !['Selesai', 'Diarsipkan', 'Diterima'].includes(r.status)) return false
@@ -49,9 +78,10 @@ export default function LacakPage() {
     if (filter === 'keluar' && r.jenis !== 'keluar') return false
     if (cari && !`${r.nomor_agenda} ${r.untuk} ${r.posisi} ${r.dari || ''}`.toLowerCase().includes(cari.toLowerCase())) return false
     return true
-  }).sort((a, b) => (a.sejak < b.sejak ? 1 : -1)), [rows, filter, cari, namaUnit])
+  }).sort((a, b) => (a.sejak < b.sejak ? 1 : -1)), [rows, filter, cari, namaUnit, milikSaya])
 
-  const ditahan = rows.filter(r => r.jenis === 'masuk' && ['Belum dibuka', 'Sudah dibaca', 'Sedang diproses', 'Diterima'].includes(r.status) && r.hari >= 3).length
+  const dasar = milikSaya ? rows.filter(r => milikSaya.has(r.surat_id)) : rows
+  const ditahan = dasar.filter(r => r.jenis === 'masuk' && ['Belum dibuka', 'Sudah dibaca', 'Sedang diproses', 'Diterima'].includes(r.status) && r.hari >= 3).length
 
   return (
     <div className="app"><div className="main">
@@ -59,17 +89,20 @@ export default function LacakPage() {
       {pesan && <div className="error-box">{pesan}</div>}
 
       <div className="grid4" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
-        <div className="stat" style={{ '--accent': 'var(--pmi-red)' }}><div className="lbl">Surat tercatat</div><div className="val">{rows.length}</div></div>
+        <div className="stat" style={{ '--accent': 'var(--pmi-red)' }}><div className="lbl">Surat tercatat</div><div className="val">{dasar.length}</div></div>
         <div className="stat" style={{ '--accent': '#B3261E' }}><div className="lbl">Tertahan ≥ 3 hari</div><div className="val">{ditahan}</div></div>
-        <div className="stat" style={{ '--accent': 'var(--stock)' }}><div className="lbl">Selesai / diarsipkan</div><div className="val">{rows.filter(r => ['Selesai', 'Diarsipkan'].includes(r.status)).length}</div></div>
+        <div className="stat" style={{ '--accent': 'var(--stock)' }}><div className="lbl">Selesai / diarsipkan</div><div className="val">{dasar.filter(r => ['Selesai', 'Diarsipkan'].includes(r.status)).length}</div></div>
       </div>
 
       <div className="panel">
         <div className="panel-head">
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
             <input placeholder="Cari nomor agenda atau nama bidang..." value={cari} onChange={e => setCari(e.target.value)} style={{ maxWidth: 300 }} />
-            {FILTER.map(([k, l]) => <button key={k} type="button" className={'btn ' + (filter === k ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 40, padding: '6px 14px', fontSize: 13.5 }} onClick={() => setFilter(k)}>{l}</button>)}
+            {FILTER.filter(([k]) => !(peran.isTataUsaha && k === 'saya')).map(([k, l]) => <button key={k} type="button" className={'btn ' + (filter === k ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 40, padding: '6px 14px', fontSize: 13.5 }} onClick={() => setFilter(k)}>{l}</button>)}
           </div>
+        </div>
+        <div style={{ padding: '10px 20px', fontSize: 14, color: 'var(--ink-soft)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <span>🔴 <b>Belum dibuka</b></span><span>👁️ <b>Sudah dibaca</b></span><span>⚙️ <b>Sedang diproses</b></span><span>✅ <b>Selesai</b></span>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table>
@@ -84,11 +117,12 @@ export default function LacakPage() {
                       <tr key={r.jenis + r.surat_id}>
                         <td data-label="No. Agenda"><b className="mono">{r.nomor_agenda || '-'}</b><div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{r.jenis === 'masuk' ? 'Surat masuk' : 'Surat keluar'} · {fmtTgl(r.tanggal)}</div></td>
                         <td data-label="Ditujukan ke">{r.jenis === 'keluar' ? <>Dari <b>{r.dari}</b></> : r.untuk}</td>
-                        <td data-label="Sekarang di">{r.posisi}</td>
-                        <td data-label="Keadaan"><span className="tag" style={{ background: bg, color: fg }}>{r.status}</span></td>
+                        <td data-label="Sekarang di">{uraiPosisi(r.posisi).map((x, i) => { const c = CHIP[x.status]; return <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}><b>{x.unit}</b>{c && <span className="tag" style={{ background: c[2], color: c[3] }}>{c[0]} {c[1]}</span>}</div> })}</td>
+                        <td data-label="Keadaan"><span className="tag" style={{ background: bg, color: fg }}>{({ 'Belum dibuka': '🔴 ', 'Sudah dibaca': '👁️ ', 'Sedang diproses': '⚙️ ', 'Selesai': '✅ ', 'Diarsipkan': '🗄️ ' })[r.status] || ''}{r.status}</span></td>
                         <td data-label="Lama" style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{r.hari <= 0 ? 'hari ini' : r.hari + ' hari'}</td>
                         <td data-label="" style={{ whiteSpace: 'nowrap' }}>
                           <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaJejak(r)}>Jejak</button>
+                          {!['Selesai', 'Diarsipkan', 'Diterima', 'Dikirim'].includes(r.status) && <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6, ...(telat || r.status === 'Belum dibuka' ? { borderColor: '#B3261E', color: '#B3261E' } : {}) }} onClick={() => bukaHubungi(r)}>📞 Hubungi</button>}
                           {r.boleh_baca
                             ? <Link href={r.jenis === 'masuk' ? `/surat/${r.surat_id}` : '/surat-keluar'} className="btn btn-primary" style={{ padding: '6px 12px', minHeight: 36, fontSize: 13, textDecoration: 'none' }}>Buka surat</Link>
                             : <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>🔒 isi hanya untuk yang dituju</span>}
@@ -101,6 +135,7 @@ export default function LacakPage() {
         </div>
       </div>
 
+      {hubungi && <KontakModal supabase={supabase} unit={hubungi.unit} pesan={hubungi.pesan} onClose={() => setHubungi(null)} />}
       {jejak && (
         <Modal judul={`Jejak surat ${jejak.nomor_agenda || ''}`} onClose={() => setJejak(null)} lebar={560}>
           <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 14, marginBottom: 14 }}>

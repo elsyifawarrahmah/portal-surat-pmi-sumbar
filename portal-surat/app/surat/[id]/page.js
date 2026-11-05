@@ -78,6 +78,8 @@ export default function DetailSurat() {
   const status = statusUntukSaya(semuaTujuan, peran.unitId)
   const st = STATUS_SURAT[status]
   const bisaTeruskan = peran.bisaDisposisi || milik.length > 0
+  const unitBiro = units.find(u => u.tipe === 'biro_umum')
+  const tuBelumKirim = peran.isTataUsaha && disposisi.length === 0 && surat?.petugas_id === peran.userId
   const bolehBatal = !!surat && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)
 
   async function tandaiSelesai() {
@@ -143,6 +145,14 @@ export default function DetailSurat() {
     if (error) { alert('Belum bisa disimpan: ' + error.message); return }
     setEditCat(null); muat(false)
   }
+  async function kirimBiro() {
+    setSibuk(true)
+    const { error } = await supabase.rpc('kirim_ke_biro_umum', { p_surat: surat.id })
+    setSibuk(false)
+    if (error) { alert(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-tata-usaha.sql dulu.' : error.message); return }
+    muat(false)
+  }
+
   async function batalkanSurat() {
     setSibuk(true)
     const { error } = await supabase.rpc('batalkan_surat_masuk', { p_id: surat.id, p_alasan: batal.alasan })
@@ -201,9 +211,11 @@ export default function DetailSurat() {
           </div>
 
           {/* Tindak Lanjut — pilihan utama di atas, sisanya dilipat di "Lainnya" */}
-          {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0) || bolehBatal) && (
+          {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0) || bolehBatal || peran.isTataUsaha) && (
             <div style={kartu}>
               <h3 style={judulKartu}>Apa yang mau kamu lakukan?</h3>
+              {tuBelumKirim && <TombolBesar utama ikon="📤" judul="Kirim ke Biro Umum" ket="Surat ini belum dikirim." onClick={kirimBiro} />}
+              {peran.isTataUsaha && unitBiro && <TombolBesar ikon="📞" judul="Hubungi Biro Umum" ket="Kalau surat belum dibaca atau tertahan." onClick={() => setKontak(unitBiro)} />}
               {milik.length > 0 && <TombolBesar hijau ikon="✅" judul="Selesai" ket="Surat sudah saya kerjakan. Setelah semua tujuan selesai, otomatis masuk arsip bulanan." onClick={bukaSelesai} />}
               {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar hijau ikon="🗄️" judul="Arsipkan" ket="Surat sudah selesai. Simpan ke arsip." onClick={arsipkan} />}
               {bisaTeruskan && <TombolBesar ikon="➡️" judul="Teruskan ke bidang lain" ket="Pilih siapa yang mengerjakan." onClick={() => setTeruskan(true)} />}
