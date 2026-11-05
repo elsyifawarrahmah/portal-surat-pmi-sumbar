@@ -40,11 +40,15 @@ export default function TandaTangan({ onSimpan, onBatal, simpanLabel = 'Pakai ta
   )
 }
 
-// Unggah PNG tanda tangan ke penyimpanan dan kembalikan URL-nya
+// Simpan tanda tangan sebagai gambar kecil (data URL) langsung di database, TIDAK lewat penyimpanan file.
+// Alasannya: aturan keamanan penyimpanan file bisa menolak (galat "row-level security"), dan dengan cara ini
+// gambar tanda tangan juga tidak punya alamat publik yang bisa dibuka orang lain.
 export async function unggahTtd(supabase, file, userId) {
-  // Disimpan di akar bucket (sama seperti berkas surat lain) supaya lolos kebijakan penyimpanan
-  const nama = `${Date.now()}-ttd-${userId}.png`
-  const { error } = await supabase.storage.from('bukti-surat').upload(nama, file, { contentType: 'image/png' })
-  if (error) throw new Error('Gagal menyimpan tanda tangan: ' + error.message)
-  return supabase.storage.from('bukti-surat').getPublicUrl(nama).data.publicUrl
+  const bmp = await createImageBitmap(file)
+  const lebar = Math.min(600, bmp.width), tinggi = Math.round(bmp.height * (lebar / bmp.width))
+  const c = document.createElement('canvas'); c.width = lebar; c.height = tinggi
+  c.getContext('2d').drawImage(bmp, 0, 0, lebar, tinggi)
+  const url = c.toDataURL('image/png')
+  if (url.length > 200000) throw new Error('Gambar tanda tangan terlalu besar. Ulangi dengan goresan yang lebih sederhana.')
+  return url
 }
