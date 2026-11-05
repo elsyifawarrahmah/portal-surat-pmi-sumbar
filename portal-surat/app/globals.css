@@ -175,3 +175,29 @@ td{padding:13px 12px;border-bottom:1px solid var(--line);}
 .profil-baris > b{text-align:right;font-weight:600;overflow-wrap:anywhere;}
 @media (max-width: 900px){ .profil-grid{grid-template-columns:1fr;} }
 @media (max-width: 600px){ .profil-nama{margin-top:0;} .profil-2kol{grid-template-columns:1fr;} .profil-isi{padding:0 18px 18px;justify-content:center;text-align:center;} .profil-nama{text-align:center;} .profil-catatan{padding:0 18px 16px;text-align:center;} .profil-kartu{padding:20px 18px;} }
+
+/* ===== Menu samping: lebih hidup, jelas, dan mudah dilihat ===== */
+.sidebar{background:linear-gradient(180deg,#9A1028 0%,var(--pmi-red-dark) 34%,#6A0A1A 100%);}
+.sapa{margin:12px 14px 2px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.1);font-size:14px;line-height:1.25;border:1px solid rgba(255,255,255,.14);}
+.sapa span{display:block;opacity:.8;font-size:12.5px;}
+.sapa b{font-size:16px;}
+.nav a{position:relative;gap:12px;padding:10px 12px;transition:background .15s, transform .15s;}
+.nav a:hover{transform:translateX(2px);}
+.nav a .chip{width:36px;height:36px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.14);color:var(--tone,#fff);}
+.nav a .chip svg{width:19px;height:19px;}
+.nav a.active::before{content:'';position:absolute;left:-10px;top:9px;bottom:9px;width:5px;border-radius:0 5px 5px 0;background:#F5C26B;}
+.nav a.active .chip{background:var(--tone-d,var(--pmi-red-dark));color:#fff;}
+.nav a[data-tone=emas]{--tone:#FFD27A;--tone-d:#B7791F;} .nav a[data-tone=biru]{--tone:#9CC7FF;--tone-d:#1F5E99;} .nav a[data-tone=hijau]{--tone:#8FE3B0;--tone-d:#2E7D32;}
+.nav a[data-tone=oranye]{--tone:#FFC48A;--tone-d:#C2570C;} .nav a[data-tone=ungu]{--tone:#D3B8FF;--tone-d:#6B3FB5;} .nav a[data-tone=netral]{--tone:rgba(255,255,255,.9);--tone-d:var(--pmi-red-dark);}
+.seksi{margin-top:6px;}
+.nav-seksi{display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font:inherit;font-weight:700;font-size:14px;padding:10px 12px;cursor:pointer;text-align:left;margin-top:6px;}
+.nav-seksi:hover{background:rgba(255,255,255,.13);}
+.nav-seksi .seksi-ikon{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.14);display:inline-flex;align-items:center;justify-content:center;}
+.nav-seksi .seksi-ikon svg{width:17px;height:17px;}
+.nav-seksi .panah{opacity:.8;transition:transform .2s;font-size:13px;}
+.nav-seksi.buka .panah{transform:rotate(180deg);}
+.seksi-isi{padding:6px 0 2px 6px;border-left:2px solid rgba(255,255,255,.16);margin:4px 0 4px 18px;}
+.seksi-isi a{padding:8px 10px;font-size:14.5px;}
+.seksi-isi a .chip{width:30px;height:30px;border-radius:9px;}
+.seksi-isi a.active::before{left:-8px;}
+.sidebar-user{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:8px 10px;}

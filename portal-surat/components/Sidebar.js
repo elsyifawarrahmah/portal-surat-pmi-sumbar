@@ -28,25 +28,31 @@ const ICONS = {
   riwayat: <Svg><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15 14"/></Svg>,
   pantau: <Svg><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></Svg>,
   saran: <Svg><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Svg>,
+  lacak: <Svg><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></Svg>,
+  laporan: <Svg><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></Svg>,
+  batal: <Svg><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></Svg>,
+  tugas: <Svg><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></Svg>,
+  bantuan: <Svg><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></Svg>,
+  buku: <Svg><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></Svg>,
   logout: <Svg><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Svg>,
 }
 
 // grup: 'utama' = selalu tampil; 'lain' = dilipat di "Menu lain"; 'admin' = khusus admin web
 const LINKS = [
-  { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama' },
-  { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi' },
-  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama' },
-  { href: '/surat-tugas', label: 'Surat Tugas & Aset', icon: 'sk', grup: 'utama' },
-  { href: '/lacak', label: 'Lacak Surat', icon: 'riwayat', grup: 'utama' },
-  { href: '/bantuan', label: 'Bantuan', icon: 'log', grup: 'lain' },
+  { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama', tone: 'emas' },
+  { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi', tone: 'biru' },
+  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama', tone: 'hijau' },
+  { href: '/surat-tugas', label: 'Surat Tugas & Aset', icon: 'tugas', grup: 'utama', tone: 'oranye' },
+  { href: '/lacak', label: 'Lacak Surat', icon: 'lacak', grup: 'utama', tone: 'ungu' },
+  { href: '/bantuan', label: 'Bantuan', icon: 'bantuan', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
   { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'lain' },
   { href: '/disposisi', label: 'Buku Disposisi', icon: 'disposisi', grup: 'lain', penuh: true },
-  { href: '/surat-masuk', label: 'Buku Surat Masuk (lengkap)', icon: 'masuk', grup: 'lain', penuh: true },
+  { href: '/surat-masuk', label: 'Buku Surat Masuk (lengkap)', icon: 'buku', grup: 'lain', penuh: true },
   { href: '/ekspedisi', label: 'Ekspedisi', icon: 'ekspedisi', grup: 'lain', penuh: true },
   { href: '/riwayat', label: 'Riwayat & Buku Agenda', icon: 'riwayat', grup: 'lain', penuh: true },
-  { href: '/laporan-bulanan', label: 'Laporan Bulanan', icon: 'riwayat', grup: 'lain', penuh: true },
-  { href: '/surat-dibatalkan', label: 'Surat Dibatalkan', icon: 'arsip', grup: 'lain', penuh: true },
+  { href: '/laporan-bulanan', label: 'Laporan Bulanan', icon: 'laporan', grup: 'lain', penuh: true },
+  { href: '/surat-dibatalkan', label: 'Surat Dibatalkan', icon: 'batal', grup: 'lain', penuh: true },
   { href: '/arsip', label: 'Arsip Biro Umum', icon: 'arsip', grup: 'lain' },
   { href: '/perjanjian-kerja-sama', label: 'Perjanjian Kerja Sama', icon: 'pks', grup: 'lain' },
   { href: '/sertifikat-piagam', label: 'Sertifikat & Piagam', icon: 'sertifikat', grup: 'lain' },
@@ -57,6 +63,15 @@ const LINKS = [
   { href: '/diagnosa', label: 'Cek Database', icon: 'log', grup: 'admin' },
 ]
 
+// Bagian menu yang bisa dibuka. Lima menu utama selalu terlihat; sisanya dikelompokkan supaya mudah dicari.
+const SEKSI = [
+  { id: 'laporan', judul: 'Pantau & Laporan', ikon: 'laporan', hrefs: ['/pemantauan', '/laporan-bulanan', '/riwayat', '/surat-dibatalkan'] },
+  { id: 'buku', judul: 'Buku & Arsip', ikon: 'buku', hrefs: ['/surat-masuk', '/disposisi', '/ekspedisi', '/arsip', '/surat-keputusan', '/perjanjian-kerja-sama', '/sertifikat-piagam'] },
+  { id: 'bantu', judul: 'Bantuan & Saran', ikon: 'bantuan', hrefs: ['/bantuan', '/kotak-saran'] },
+  { id: 'admin', judul: 'Khusus admin web', ikon: 'user', hrefs: ['/data-user', '/log-aktivitas', '/backup', '/diagnosa'] },
+]
+const sapaan = () => { const j = new Date().getHours(); return j < 11 ? 'Selamat pagi' : j < 15 ? 'Selamat siang' : j < 18 ? 'Selamat sore' : 'Selamat malam' }
+
 export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -65,7 +80,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const peran = usePeran()
   const [badge, setBadge] = useState({ disposisi: 0, panggilan: 0 })
-  const [lainBuka, setLainBuka] = useState(false)
+  const [seksiBuka, setSeksiBuka] = useState({})
 
   const [nomorHp, setNomorHp] = useState('')
   async function isiNomorHp() {
@@ -145,22 +160,37 @@ export default function Sidebar() {
           </div>
           <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>{NAMA_APLIKASI}</div>
         </div>
+        {peran.nama && <div className="sapa"><span>{sapaan()},</span><b>{peran.nama.split(' ')[0]}</b> 👋</div>}
         <div className="nav">
           {(() => {
             const bisaLihat = l => !(l.grup === 'admin' && !peran.isAdmin && !peran.loading) && !(l.penuh && !peran.aksesPenuh && !peran.loading)
             const item = l => (
-              <Link key={l.href} href={l.href} className={pathname === l.href || (l.href === '/surat' && pathname.startsWith('/surat/')) ? 'active' : ''}>
-                {ICONS[l.icon]}<span style={{flex:1}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}</span>
+              <Link key={l.href} href={l.href} data-tone={l.tone || 'netral'} className={pathname === l.href || (l.href === '/surat' && pathname.startsWith('/surat/')) ? 'active' : ''}>
+                <span className="chip">{ICONS[l.icon]}</span><span style={{flex:1}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}</span>
                 {l.badge && badge[l.badge] > 0 && <span className="nav-badge">{badge[l.badge] > 99 ? '99+' : badge[l.badge]}</span>}
               </Link>
             )
-            const lain = LINKS.filter(l => l.grup === 'lain' && bisaLihat(l)), admin = LINKS.filter(l => l.grup === 'admin' && bisaLihat(l))
-            const lainAktif = lain.some(l => l.href === pathname)
+            const dipakai = new Set()
             return <>
               {LINKS.filter(l => l.grup === 'utama').map(item)}
-              <button type="button" className="nav-lipat" onClick={() => setLainBuka(o => !o)} aria-expanded={lainBuka || lainAktif}>Menu lain <span>{lainBuka || lainAktif ? '▴' : '▾'}</span>{!(lainBuka || lainAktif) && badge.panggilan > 0 && <span className="nav-badge" style={{marginLeft:6}}>{badge.panggilan}</span>}</button>
-              {(lainBuka || lainAktif) && lain.map(item)}
-              {admin.length > 0 && <><div className="nav-label">Khusus admin web</div>{admin.map(item)}</>}
+              {SEKSI.map(sk => {
+                const daftar = sk.hrefs.map(h => LINKS.find(l => l.href === h)).filter(l => l && bisaLihat(l))
+                daftar.forEach(l => dipakai.add(l.href))
+                if (daftar.length === 0) return null
+                const aktif = daftar.some(l => l.href === pathname)
+                const terbuka = seksiBuka[sk.id] ?? aktif
+                const lencana = daftar.reduce((n, l) => n + (l.badge ? badge[l.badge] || 0 : 0), 0)
+                return (
+                  <div key={sk.id} className="seksi">
+                    <button type="button" className={'nav-seksi' + (terbuka ? ' buka' : '')} onClick={() => setSeksiBuka(o => ({ ...o, [sk.id]: !terbuka }))} aria-expanded={terbuka}>
+                      <span className="seksi-ikon">{ICONS[sk.ikon]}</span><span style={{ flex: 1 }}>{sk.judul}</span>
+                      {!terbuka && lencana > 0 && <span className="nav-badge">{lencana}</span>}
+                      <span className="panah">▾</span>
+                    </button>
+                    {terbuka && <div className="seksi-isi">{daftar.map(item)}</div>}
+                  </div>
+                )
+              })}
             </>
           })()}
         </div>
