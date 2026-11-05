@@ -335,7 +335,7 @@ export default function DetailSurat() {
           footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={() => setSelesai(null)}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16 }} disabled={sibuk} onClick={tandaiSelesai}>Tandai Selesai</button></>}>
           <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Apa yang sudah dikerjakan? <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}>(boleh dikosongkan)</span></label>
             <KalimatCepat daftar={KALIMAT_SELESAI} onPilih={k => setSelesai(x => ({ ...x, teks: tambahKalimat(x.teks, k) }))} />
-            <TombolBicara onTeks={t => setSelesai(x => ({ ...x, teks: tambahKalimat(x.teks, t) }))} />
+            <TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setSelesai(x => ({ ...x, teks: tambahKalimat(x.teks, t) }))} />
             <textarea rows={4} style={{ fontSize: 16 }} value={selesai.teks} onChange={e => setSelesai({ ...selesai, teks: e.target.value })} placeholder="mis. Sudah dikoordinasikan, laporan dikirim tanggal ..." autoFocus /></div>
           {selesai.opsi.length > 0 && (
             <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Ada surat jawaban? <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}>(pilih kalau ada)</span></label>

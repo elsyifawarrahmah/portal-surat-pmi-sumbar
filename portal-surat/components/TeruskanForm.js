@@ -102,7 +102,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
 
       <h4 style={{ margin: '18px 0 8px', fontSize: 17 }}>3. Pesan tambahan <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(boleh dikosongkan)</span></h4>
       <KalimatCepat daftar={KALIMAT_PESAN} onPilih={k => setPesan(p => tambahKalimat(p, k))} />
-      <TombolBicara onTeks={t => setPesan(p => tambahKalimat(p, t))} />
+      <TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setPesan(p => tambahKalimat(p, t))} />
       <textarea rows={3} style={besar} value={pesan} onChange={e => setPesan(e.target.value)} placeholder="Atau tulis kata-katamu di sini..." />
 
       <div style={{ marginTop: 18, border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px' }}>

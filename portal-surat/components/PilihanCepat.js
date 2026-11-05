@@ -14,11 +14,11 @@ export function KalimatCepat({ daftar, onPilih, judul = 'Sentuh kalimat untuk me
   )
 }
 
-// Tombol bicara: memakai pengenalan suara peramban (Chrome Android). Tidak tampil kalau perangkat tidak mendukung.
-export function TombolBicara({ onTeks }) {
+// Tombol bicara (hanya tampil bila tampil=true, dipakai untuk Ketua/Kepala Markas): memakai pengenalan suara peramban (Chrome Android). Tidak tampil kalau perangkat tidak mendukung.
+export function TombolBicara({ onTeks, tampil = false }) {
   const [aktif, setAktif] = useState(false)
   const SR = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null
-  if (!SR) return null
+  if (!tampil || !SR) return null
   function mulai() {
     const r = new SR()
     r.lang = 'id-ID'; r.interimResults = false; r.maxAlternatives = 1
