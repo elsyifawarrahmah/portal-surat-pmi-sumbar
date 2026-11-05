@@ -1,9 +1,19 @@
 // Istilah & aturan tampilan "gaya Srikandi": status sederhana, petunjuk disposisi, dsb.
 export const PETUNJUK = ['Tindaklanjuti', 'Hadiri', 'Wakili', 'Koordinasikan', 'Untuk diketahui', 'Mohon tanggapan / balas surat', 'Arsipkan']
+// Keputusan pimpinan: tinggal sentuh (tidak perlu mengetik)
+export const KEPUTUSAN = [
+  { k: 'Setuju', ikon: '✅', petunjuk: 'Tindaklanjuti' },
+  { k: 'Tidak setuju', ikon: '❌', petunjuk: '' },
+  { k: 'Ditunda dulu', ikon: '⏸️', petunjuk: '' },
+  { k: 'Dikaji dulu', ikon: '🔎', petunjuk: 'Koordinasikan' },
+]
+export const KALIMAT_PESAN = ['Segera laporkan hasilnya', 'Koordinasikan dengan bidang terkait', 'Hadir mewakili saya', 'Sesuai aturan yang berlaku', 'Laporkan kepada saya setelah selesai']
+export const KALIMAT_TOLAK = ['Isi surat perlu diperbaiki', 'Nomor atau tanggal surat belum tepat', 'Tujuan surat kurang tepat', 'Lampiran belum lengkap', 'Mohon dilengkapi dulu']
+export const KALIMAT_SELESAI = ['Sudah dikerjakan', 'Sudah dikoordinasikan', 'Sudah dilaporkan', 'Sudah dihadiri', 'Surat jawaban sudah dikirim']
 export const SIFAT_DISPOSISI = ['Biasa', 'Segera', 'Sangat Segera']
 
-export function susunInstruksi(sifat, petunjuk, pesan) {
-  return [sifat && sifat !== 'Biasa' ? `[${sifat}]` : '', petunjuk, pesan ? '— ' + pesan.trim() : ''].filter(Boolean).join(' ')
+export function susunInstruksi(sifat, petunjuk, pesan, keputusan) {
+  return [sifat && sifat !== 'Biasa' ? `[${sifat}]` : '', keputusan ? keputusan.toUpperCase() + '.' : '', petunjuk, pesan ? (keputusan || petunjuk ? '— ' : '') + pesan.trim() : ''].filter(Boolean).join(' ')
 }
 
 export const STATUS_SURAT = {

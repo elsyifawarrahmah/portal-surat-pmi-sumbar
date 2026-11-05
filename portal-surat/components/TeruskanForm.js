@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Modal from '@/components/Modal'
 import { hariIni } from '@/lib/format'
-import { PETUNJUK, SIFAT_DISPOSISI, susunInstruksi } from '@/lib/surat'
+import { PETUNJUK, SIFAT_DISPOSISI, KEPUTUSAN, KALIMAT_PESAN, susunInstruksi } from '@/lib/surat'
+import { KalimatCepat, TombolBicara, tambahKalimat } from '@/components/PilihanCepat'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 
 const kodePenanda = () => { const a = new Uint8Array(4); crypto.getRandomValues(a); const h = Array.from(a, x => x.toString(16).padStart(2, '0')).join('').toUpperCase(); return `PMI-${h.slice(0, 4)}-${h.slice(4)}` }
@@ -15,6 +16,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
   const [petunjuk, setPetunjuk] = useState(PETUNJUK[0])
   const [sifat, setSifat] = useState('Biasa')
   const [pesan, setPesan] = useState('')
+  const [keputusan, setKeputusan] = useState('')
   const [atasNama, setAtasNama] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -49,8 +51,8 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
       if (pakaiTtd && !ttdUrl) { setError('Buat tanda tangan dulu, atau matikan pilihan tanda tangan digital.'); setSaving(false); return }
       const denganTtd = pakaiTtd ? { ...dasar, ttd_url: ttdUrl, ttd_nama: dari, ttd_pada: new Date().toISOString(), ttd_kode: kodePenanda() } : dasar
       const d = cek(await supabase.from('surat_disposisi').insert(denganTtd).select('id').single()).data
-      const instruksi = susunInstruksi(sifat, petunjuk, pesan)
-      cek(await supabase.from('surat_disposisi_tujuan').insert(dipilih.map(unit_id => ({ disposisi_id: d.id, unit_id, instruksi, perlu_jawaban: /balas/i.test(petunjuk) }))))
+      const instruksi = susunInstruksi(sifat, petunjuk, pesan, keputusan)
+      cek(await supabase.from('surat_disposisi_tujuan').insert(dipilih.map(unit_id => ({ disposisi_id: d.id, unit_id, instruksi, perlu_jawaban: /balas/i.test(petunjuk || '') }))))
       if (induk && ['menunggu', 'dibaca'].includes(induk.status)) await supabase.from('surat_disposisi_tujuan').update({ status: 'diproses' }).eq('id', induk.id)
       onSaved && onSaved()
     } catch (e) { setError('Belum bisa dikirim. ' + e.message) }
@@ -61,6 +63,19 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
     <Modal judul="Teruskan surat ini" onClose={onClose} lebar={560}
       footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={onClose}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16, padding: '0 28px' }} onClick={kirim} disabled={saving}>{saving ? 'Mengirim...' : 'Kirim'}</button></>}>
       {error && <div className="error-box">{error}</div>}
+
+      {(peran.isAdmin || ['pimpinan', 'sekretariat'].includes(peran.tipe)) && (
+        <div style={{ marginBottom: 16 }}>
+          <h4 style={{ margin: '0 0 8px', fontSize: 17 }}>Keputusan <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(tinggal sentuh)</span></h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+            {KEPUTUSAN.map(o => {
+              const on = keputusan === o.k
+              return <button key={o.k} type="button" onClick={() => { setKeputusan(on ? '' : o.k); if (!on) setPetunjuk(o.petunjuk) }}
+                style={{ minHeight: 64, fontSize: 18, fontWeight: 700, borderRadius: 14, cursor: 'pointer', border: '2px solid ' + (on ? 'var(--pmi-red)' : 'var(--line)'), background: on ? 'var(--pmi-red)' : '#fff', color: on ? '#fff' : 'var(--ink)', font: 'inherit' }}>{o.ikon} {o.k}</button>
+            })}
+          </div>
+        </div>
+      )}
 
       <h4 style={{ margin: '0 0 8px', fontSize: 17 }}>1. Diteruskan kepada siapa? <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(boleh centang lebih dari satu)</span></h4>
       {pimpinan.length > 1 && <button type="button" className={'btn ' + (semuaPimpinanDipilih ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 44, marginBottom: 10 }} onClick={togglePimpinan}>{semuaPimpinanDipilih ? '✓ ' : ''}Pilih sekaligus: {pimpinan.map(p => p.nama).join(' + ')}</button>}
@@ -80,13 +95,15 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
       ))}
 
       <h4 style={{ margin: '18px 0 8px', fontSize: 17 }}>2. Petunjuknya apa?</h4>
-      <select value={petunjuk} onChange={e => setPetunjuk(e.target.value)} style={{ ...besar, minHeight: 50, marginBottom: 10 }}>{PETUNJUK.map(p => <option key={p}>{p}</option>)}</select>
+      <select value={petunjuk} onChange={e => setPetunjuk(e.target.value)} style={{ ...besar, minHeight: 50, marginBottom: 10 }}><option value="">— tanpa petunjuk lain —</option>{PETUNJUK.map(p => <option key={p}>{p}</option>)}</select>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {SIFAT_DISPOSISI.map(s => <button key={s} type="button" className={'btn ' + (sifat === s ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 46, fontSize: 15 }} onClick={() => setSifat(s)}>{s}</button>)}
       </div>
 
       <h4 style={{ margin: '18px 0 8px', fontSize: 17 }}>3. Pesan tambahan <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(boleh dikosongkan)</span></h4>
-      <textarea rows={3} style={besar} value={pesan} onChange={e => setPesan(e.target.value)} placeholder="Tulis kata-katamu di sini..." />
+      <KalimatCepat daftar={KALIMAT_PESAN} onPilih={k => setPesan(p => tambahKalimat(p, k))} />
+      <TombolBicara onTeks={t => setPesan(p => tambahKalimat(p, t))} />
+      <textarea rows={3} style={besar} value={pesan} onChange={e => setPesan(e.target.value)} placeholder="Atau tulis kata-katamu di sini..." />
 
       <div style={{ marginTop: 18, border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px' }}>
         <label style={{ display: 'flex', gap: 10, alignItems: 'center', textTransform: 'none', fontSize: 16, color: 'var(--ink)', margin: 0, cursor: 'pointer' }}>

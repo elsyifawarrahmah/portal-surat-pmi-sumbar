@@ -13,7 +13,8 @@ import KontakModal from '@/components/KontakModal'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { fmtTgl, fmtWaktu, pesanGalat, unggahBerkas } from '@/lib/format'
 import { cetakLembarDisposisi } from '@/lib/cetak'
-import { STATUS_SURAT, statusUntukSaya } from '@/lib/surat'
+import { STATUS_SURAT, statusUntukSaya, KALIMAT_SELESAI } from '@/lib/surat'
+import { KalimatCepat, TombolBicara, tambahKalimat } from '@/components/PilihanCepat'
 
 const kartu = { background: '#fff', border: '1px solid var(--line)', borderRadius: 16, padding: '18px 20px', marginBottom: 16 }
 const judulKartu = { margin: '0 0 12px', fontSize: 18 }
@@ -333,6 +334,8 @@ export default function DetailSurat() {
         <Modal judul="Selesai — tulis hasilnya" onClose={() => setSelesai(null)} lebar={520}
           footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={() => setSelesai(null)}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16 }} disabled={sibuk} onClick={tandaiSelesai}>Tandai Selesai</button></>}>
           <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Apa yang sudah dikerjakan? <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}>(boleh dikosongkan)</span></label>
+            <KalimatCepat daftar={KALIMAT_SELESAI} onPilih={k => setSelesai(x => ({ ...x, teks: tambahKalimat(x.teks, k) }))} />
+            <TombolBicara onTeks={t => setSelesai(x => ({ ...x, teks: tambahKalimat(x.teks, t) }))} />
             <textarea rows={4} style={{ fontSize: 16 }} value={selesai.teks} onChange={e => setSelesai({ ...selesai, teks: e.target.value })} placeholder="mis. Sudah dikoordinasikan, laporan dikirim tanggal ..." autoFocus /></div>
           {selesai.opsi.length > 0 && (
             <div className="field"><label style={{ textTransform: 'none', fontSize: 15 }}>Ada surat jawaban? <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}>(pilih kalau ada)</span></label>
