@@ -100,3 +100,20 @@ export async function simpanLampiran(supabase, jenis, suratId, hasil) {
   const { error } = await supabase.from('surat_lampiran').insert(hasil.map(h => ({ jenis, surat_id: suratId, url: h.url, nama: h.nama, ukuran: h.ukuran })))
   return error || null
 }
+
+// ===== Berkas privat: alamat tersimpan tetap sama, tetapi dibuka lewat alamat sementara bertanda tangan =====
+const AWALAN_PUBLIK = '/storage/v1/object/public/bukti-surat/'
+const simpanan = new Map()
+export function namaDariUrl(url) { try { return decodeURIComponent(String(url || '').split('?')[0].split('/').pop()) } catch { return '' } }
+export async function urlAman(supabase, url) {
+  if (!url) return url
+  const i = String(url).indexOf(AWALAN_PUBLIK)
+  if (i < 0) return url            // bukan berkas bucket ini (mis. data URL tanda tangan)
+  const path = decodeURIComponent(String(url).slice(i + AWALAN_PUBLIK.length).split('?')[0])
+  const c = simpanan.get(path)
+  if (c && c.exp > Date.now()) return c.url
+  const { data, error } = await supabase.storage.from('bukti-surat').createSignedUrl(path, 3600)
+  if (error || !data?.signedUrl) return url
+  simpanan.set(path, { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 })
+  return data.signedUrl
+}

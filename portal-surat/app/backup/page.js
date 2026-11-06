@@ -1,4 +1,5 @@
 'use client'
+import { namaDariUrl } from '@/lib/berkas'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
@@ -34,7 +35,7 @@ export default function BackupPage() {
       const sheetSuratMasuk = (suratMasuk.data || []).map(r => ({
         'Tanggal Diterima': r.tanggal_diterima_kantor, 'Tanggal Surat': r.tanggal_surat,
         'Nomor Agenda': r.nomor_agenda || '', 'Macam Surat': r.macam_surat || '', 'Lampiran': r.lampiran || '', 'Nomor Surat': r.nomor_surat, 'Asal': r.asal_surat, 'Perihal': r.perihal,
-        'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': r.file_bukti_url || '',
+        'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': namaDariUrl(r.file_bukti_url),
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSuratMasuk), 'Surat Masuk')
 
@@ -46,7 +47,7 @@ export default function BackupPage() {
 
       const sheetSuratKeluar = (suratKeluar.data || []).map(r => ({
         'Tanggal': r.tanggal_surat, 'Nomor Agenda': r.nomor_agenda || '', 'Nomor Surat': r.nomor_surat, 'Divisi/Biro': r.divisi || '', 'Tujuan': r.tujuan_surat,
-        'Perihal': r.perihal, 'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': r.file_bukti_url || '',
+        'Perihal': r.perihal, 'Sifat': r.sifat, 'Petugas': r.profiles?.nama_lengkap || '', 'Link Bukti': namaDariUrl(r.file_bukti_url),
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSuratKeluar), 'Surat Keluar')
 
@@ -56,21 +57,21 @@ export default function BackupPage() {
       const sheetPks = arsipRows.filter(r => r.jenis === 'pks').map(r => ({
         'Tanggal': r.tanggal, 'Nomor Perjanjian': r.nomor, 'Bidang/Divisi/Biro': r.divisi || '', 'Pihak Kedua / Mitra': r.pihak, 'Tentang': r.judul,
         'Berlaku Mulai': r.tanggal_mulai || '', 'Berlaku Sampai': r.tanggal_berakhir || '', 'Keterangan': r.keterangan || '',
-        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
+        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': namaDariUrl(r.file_bukti_url),
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetPks), 'Perjanjian Kerja Sama')
 
       const sheetSertifikat = arsipRows.filter(r => r.jenis === 'sertifikat').map(r => ({
         'Tanggal Terbit': r.tanggal, 'Jenis': r.kategori || '', 'Nomor': r.nomor, 'Penerima': r.pihak,
         'Nama Kegiatan': r.judul, 'Diterbitkan Oleh': r.penerbit || '', 'Catatan': r.keterangan || '',
-        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
+        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': namaDariUrl(r.file_bukti_url),
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSertifikat), 'Sertifikat & Piagam')
 
       const sheetSk = arsipRows.filter(r => r.jenis === 'sk').map(r => ({
         'Tanggal': r.tanggal, 'Nomor SK': r.nomor, 'Bidang/Divisi/Biro': r.divisi || '', 'Tentang': r.judul, 'Ditetapkan Oleh': r.penerbit || '',
         'Berlaku Mulai': r.tanggal_mulai || '', 'Berlaku Sampai': r.tanggal_berakhir || '', 'Keterangan': r.keterangan || '',
-        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': r.file_bukti_url || '',
+        'Petugas': r.profiles?.nama_lengkap || '', 'Link Dokumen': namaDariUrl(r.file_bukti_url),
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetSk), 'Surat Keputusan')
 

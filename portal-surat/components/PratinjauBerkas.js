@@ -1,6 +1,8 @@
 'use client'
 // Pratinjau berkas di dalam aplikasi: foto muat di layar HP (bisa diperbesar), PDF bisa dibuka. Pengganti membuka alamat mentah Supabase.
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase-browser'
+import { urlAman } from '@/lib/berkas'
 
 export function PratinjauBerkas({ url, judul = 'Surat', onClose }) {
   const [zoom, setZoom] = useState(1)
@@ -34,11 +36,18 @@ export function PratinjauBerkas({ url, judul = 'Surat', onClose }) {
 
 // Pengganti <a href=... target="_blank">: membuka pratinjau di dalam aplikasi
 export function LihatBerkas({ url, judul, children, ...sisa }) {
-  const [buka, setBuka] = useState(false)
+  const [aman, setAman] = useState(null)
+  const [sibuk, setSibuk] = useState(false)
+  async function buka(e) {
+    e.preventDefault(); e.stopPropagation()
+    if (sibuk) return
+    setSibuk(true)
+    try { setAman(await urlAman(createClient(), url)) } finally { setSibuk(false) }
+  }
   return (
     <>
-      <a href={url} onClick={e => { e.preventDefault(); e.stopPropagation(); setBuka(true) }} {...sisa}>{children}</a>
-      {buka && <PratinjauBerkas url={url} judul={judul} onClose={() => setBuka(false)} />}
+      <a href={url} onClick={buka} {...sisa}>{sibuk ? 'Membuka...' : children}</a>
+      {aman && <PratinjauBerkas url={aman} judul={judul} onClose={() => setAman(null)} />}
     </>
   )
 }

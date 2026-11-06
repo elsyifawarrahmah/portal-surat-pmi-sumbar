@@ -7,6 +7,7 @@ import { usePeran } from '@/lib/peran'
 import { fmtTgl, fmtWaktu, unduhCsv, pesanGalat } from '@/lib/format'
 import { cetakDaftar } from '@/lib/cetak'
 import { LihatBerkas } from '@/components/PratinjauBerkas'
+import { urlAman } from '@/lib/berkas'
 
 const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const bulanIni = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` }
@@ -93,7 +94,7 @@ export default function LaporanBulananPage() {
       'No. Agenda': r.s.nomor_agenda || '', 'No. Surat': r.s.nomor_surat, 'Asal Surat': r.s.asal_surat, 'Perihal': r.s.perihal,
       'Tgl Diterima': fmtTgl(r.s.tanggal_diterima_kantor), 'Tgl Selesai': fmtTgl(r.tglSelesai),
       'Disposisi': teksDisposisi(r), 'Hasil / Tanggapan': teksHasil(r), 'Catatan': teksCatatan(r),
-      'File Surat': r.berkas.map(b => b.url).join('\n'),
+      'File Surat': r.berkas.map(b => b.nama).join('\n'),
     }))
     const ws = XLSX.utils.json_to_sheet(data)
     ws['!cols'] = [10, 22, 24, 34, 14, 14, 60, 40, 40, 50].map(w => ({ wch: w }))
@@ -103,7 +104,7 @@ export default function LaporanBulananPage() {
 
   function htmlLaporan() {
     const br = t => esc(t).replace(/\n/g, '<br>')
-    const tr = daftarAman().map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.s.perihal)}</b><br>Agenda: ${esc(r.s.nomor_agenda || '-')}<br>No: ${esc(r.s.nomor_surat)}<br>Dari: ${esc(r.s.asal_surat)}<br>Diterima: ${esc(fmtTgl(r.s.tanggal_diterima_kantor))}</td><td>${esc(fmtTgl(r.tglSelesai))}</td><td>${br(teksDisposisi(r)) || '-'}</td><td>${br(teksHasil(r)) || '-'}</td><td>${br(teksCatatan(r)) || '-'}</td><td>${r.berkas.map(b => `<a href="${esc(b.url)}">${esc(b.nama)}</a>`).join('<br>') || '-'}</td></tr>`).join('')
+    const tr = daftarAman().map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.s.perihal)}</b><br>Agenda: ${esc(r.s.nomor_agenda || '-')}<br>No: ${esc(r.s.nomor_surat)}<br>Dari: ${esc(r.s.asal_surat)}<br>Diterima: ${esc(fmtTgl(r.s.tanggal_diterima_kantor))}</td><td>${esc(fmtTgl(r.tglSelesai))}</td><td>${br(teksDisposisi(r)) || '-'}</td><td>${br(teksHasil(r)) || '-'}</td><td>${br(teksCatatan(r)) || '-'}</td><td>${r.berkas.map(b => esc(b.nama)).join('<br>') || '-'}</td></tr>`).join('')
     return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Laporan ${esc(judulBulan)}</title><style>@page{size:A4 landscape;margin:1.5cm}body{font-family:Arial,sans-serif;font-size:10pt}table{border-collapse:collapse;width:100%}td,th{border:1px solid #444;padding:4px;vertical-align:top}th{background:#eee}</style></head><body><h2 style="text-align:center">LAPORAN SURAT MASUK SELESAI<br>${esc(judulBulan.toUpperCase())}</h2><p>Jumlah surat selesai: <b>${daftarAman().length}</b></p><table><thead><tr><th>No</th><th>Surat</th><th>Selesai</th><th>Disposisi</th><th>Hasil / Tanggapan</th><th>Catatan</th><th>File Surat</th></tr></thead><tbody>${tr}</tbody></table></body></html>`
   }
   const unduhWord = () => unduhBlob(`laporan-surat-${bulan}.doc`, new Blob(['\ufeff', htmlLaporan()], { type: 'application/msword' }))
@@ -119,10 +120,10 @@ export default function LaporanBulananPage() {
         const folder = `file-surat/${String(i + 1).padStart(3, '0')}-${(r.s.nomor_agenda || r.s.perihal || 'surat').toString().replace(/[^\w\-]+/g, '_').slice(0, 40)}`
         for (const b of r.berkas) {
           setPesan(`Menyiapkan ZIP: mengunduh file ${++n}...`)
-          try { const res = await fetch(b.url); if (!res.ok) throw new Error(res.status); zip.file(`${folder}/${b.nama.replace(/[\\/:*?"<>|]+/g, '_')}`, await res.blob()) } catch { gagal.push(`${r.s.nomor_surat}: ${b.nama}\n${b.url}`) }
+          try { const res = await fetch(await urlAman(supabase, b.url)); if (!res.ok) throw new Error(res.status); zip.file(`${folder}/${b.nama.replace(/[\\/:*?"<>|]+/g, '_')}`, await res.blob()) } catch { gagal.push(`${r.s.nomor_surat}: ${b.nama}`) }
         }
       }
-      if (gagal.length) zip.file('GAGAL-DIUNDUH.txt', 'File berikut tidak bisa diambil otomatis, buka lewat alamatnya:\n\n' + gagal.join('\n\n'))
+      if (gagal.length) zip.file('GAGAL-DIUNDUH.txt', 'File berikut tidak bisa diambil otomatis, unduh manual dari portal:\n\n' + gagal.join('\n\n'))
       unduhBlob(`laporan-surat-${bulan}.zip`, await zip.generateAsync({ type: 'blob' }))
       setPesan(gagal.length ? `ZIP terunduh. ${gagal.length} file gagal diambil, daftarnya ada di GAGAL-DIUNDUH.txt.` : '')
     } catch (e) { setPesan(pesanGalat(e)) }

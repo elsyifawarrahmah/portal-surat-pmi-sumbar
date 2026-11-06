@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [kirimUlang, setKirimUlang] = useState(false)
   const [prov, setProv] = useState({ google: false, facebook: false })
   const router = useRouter()
   const supabase = createClient()
@@ -34,8 +35,17 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
       if (error) { setError('Email atau kata sandi salah. Lupa kata sandi? Klik "Lupa kata sandi" di bawah.'); setLoading(false); return }
     } else if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { nama_lengkap: nama } } })
+      const cek = await fetch('/api/cek-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) }).then(r => r.json()).catch(() => ({ ok: true }))
+      if (!cek.ok) { setError(cek.pesan); setLoading(false); return }
+      if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) { setError('Kata sandi minimal 8 karakter dan harus ada huruf dan angka.'); setLoading(false); return }
+      const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { nama_lengkap: nama }, emailRedirectTo: `${window.location.origin}/auth/callback` } })
       if (error) { setError(error.message); setLoading(false); return }
+      if (data?.session) {   // konfirmasi email belum diaktifkan di Supabase: jangan biarkan masuk
+        await supabase.auth.signOut()
+        setError('Pendaftaran belum bisa diselesaikan karena pengaturan konfirmasi email belum aktif. Mohon hubungi admin web.'); setLoading(false); return
+      }
+      setLoading(false); setKirimUlang(true)
+      setInfo(`Kami mengirim email konfirmasi ke ${email.trim()}. Buka email itu lalu klik tautannya untuk mengaktifkan akun. Cek folder Spam bila belum ada. Setelah itu admin akan menempatkan akunmu di bidang yang sesuai.`); return
     } else {
       const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: `${window.location.origin}/auth/callback`, shouldCreateUser: false } })
       setLoading(false)
@@ -43,6 +53,13 @@ export default function LoginPage() {
       setInfo(`Link masuk sudah dikirim ke ${email.trim()}. Buka email kamu lalu klik link-nya. Cek folder Spam bila tidak ada.`); return
     }
     router.push('/dashboard'); router.refresh()
+  }
+
+  async function kirimUlangEmail() {
+    setError(''); setInfo('')
+    const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: `${window.location.origin}/auth/callback` } })
+    if (error) setError(/rate|seconds/i.test(error.message) ? 'Terlalu sering. Tunggu satu menit, lalu coba lagi.' : error.message)
+    else setInfo('Email konfirmasi dikirim ulang. Cek kotak masuk dan folder Spam.')
   }
 
   async function lewat(provider) {
@@ -70,6 +87,7 @@ export default function LoginPage() {
           {mode === 'signin' ? 'Masuk dengan email dan kata sandi kamu.' : mode === 'signup' ? 'Setelah mendaftar, admin akan menempatkan akunmu di bidang yang sesuai.' : 'Tanpa kata sandi: kami kirim link masuk ke emailmu.'}
         </p>
         {error && <div className="error-box">{error}</div>}
+        {kirimUlang && email.trim() && <button type="button" className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginBottom: 14 }} onClick={kirimUlangEmail}>📧 Kirim ulang email konfirmasi</button>}
         {info && <div style={{ background: 'var(--stock-bg)', color: 'var(--stock)', padding: '12px 14px', borderRadius: 12, fontSize: 14.5, lineHeight: 1.5, marginBottom: 14 }}>✓ {info}</div>}
 
         {mode !== 'link' && (prov.google || prov.facebook) && (
@@ -87,7 +105,7 @@ export default function LoginPage() {
           <div className="field"><label>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="nama@email.com" style={besar} autoComplete="email" /></div>
           {mode !== 'link' && (
             <div className="field"><label>Kata sandi</label>
-              <input type={lihat ? 'text' : 'password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} placeholder="minimal 6 karakter" style={besar} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
+              <input type={lihat ? 'text' : 'password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} placeholder="minimal 8 karakter, ada huruf dan angka" style={besar} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
               <label style={{ display: 'flex', gap: 8, alignItems: 'center', textTransform: 'none', fontSize: 13.5, color: 'var(--ink)', margin: '8px 0 0' }}><input type="checkbox" style={{ width: 18, height: 18 }} checked={lihat} onChange={e => setLihat(e.target.checked)} /> Tampilkan kata sandi</label>
             </div>
           )}
@@ -96,7 +114,7 @@ export default function LoginPage() {
 
         <div style={{textAlign:'center',marginTop:16,fontSize:14.5,lineHeight:2}}>
           {mode === 'signin' && <><Link href="/lupa-sandi" style={{color:'var(--pmi-red)',fontWeight:700}}>Lupa kata sandi?</Link><br /><a href="#" onClick={e=>{e.preventDefault();setMode('link');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:600}}>Masuk tanpa kata sandi (kirim link ke email)</a><br /></>}
-          {mode === 'signin' ? <>Belum punya akun? <a href="#" onClick={e=>{e.preventDefault();setMode('signup');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>Daftar di sini</a></>
+          {mode === 'signin' ? <><Link href="/pasang" style={{color:'var(--pmi-red)',fontWeight:700}}>📲 Pasang di layar HP</Link><br />Belum punya akun? <a href="#" onClick={e=>{e.preventDefault();setMode('signup');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>Daftar di sini</a></>
             : <a href="#" onClick={e=>{e.preventDefault();setMode('signin');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>← Kembali ke halaman masuk</a>}
         </div>
       </div>

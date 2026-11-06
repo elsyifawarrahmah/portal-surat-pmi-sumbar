@@ -1,4 +1,5 @@
 'use client'
+import { namaDariUrl } from '@/lib/berkas'
 import { unggahSatu, ketHint } from '@/lib/berkas'
 import { LihatBerkas } from '@/components/PratinjauBerkas'
 // Halaman arsip dokumen serbaguna: dipakai Perjanjian Kerja Sama, Sertifikat & Piagam, dan Surat Keputusan.
@@ -131,7 +132,7 @@ export default function DokumenPage({ config }) {
     const csvRows = filtered.map(r => [
       ...fields.map(f => f.type === 'date' ? tgl(r[f.k]) : (r[f.k] ?? '')),
       ...(config.masaBerlaku ? [statusMasa(r)?.label || ''] : []),
-      r.profiles?.nama_lengkap || '', r.file_bukti_url || '',
+      r.profiles?.nama_lengkap || '', namaDariUrl(r.file_bukti_url),
     ].map(esc).join(';'))
     const csv = '\uFEFF' + [header, ...csvRows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })

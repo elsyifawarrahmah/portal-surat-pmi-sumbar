@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar'
 
 export default function AppShell({ children }) {
   const pathname = usePathname() || ''
-  const tanpaMenu = pathname === '/' || pathname.startsWith('/login')
+  const tanpaMenu = pathname === '/' || pathname.startsWith('/login') || pathname === '/pasang'
   return (
     <>
       {!tanpaMenu && <Sidebar />}

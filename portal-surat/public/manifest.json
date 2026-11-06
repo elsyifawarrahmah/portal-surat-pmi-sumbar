@@ -6,7 +6,50 @@
   "background_color": "#FAF6EF",
   "theme_color": "#C8102E",
   "icons": [
-    { "src": "/icon-pmi-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-pmi-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/icon-pmi-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-pmi-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-pmi-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/dashboard",
+  "scope": "/",
+  "lang": "id",
+  "orientation": "portrait",
+  "description": "Portal Surat Digital PMI Sumatera Barat",
+  "shortcuts": [
+    {
+      "name": "Surat Masuk",
+      "url": "/surat",
+      "icons": [
+        {
+          "src": "/icon-pmi-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Lacak Surat",
+      "url": "/lacak",
+      "icons": [
+        {
+          "src": "/icon-pmi-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

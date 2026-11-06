@@ -1,6 +1,10 @@
 // Unduh banyak berkas (PDF/foto bukti) sekaligus dalam satu file ZIP, plus daftar CSV-nya.
 // rows: data yang punya file_bukti_url. Berkas tanpa file dilewati.
+import { createClient } from '@/lib/supabase-browser'
+import { urlAman } from '@/lib/berkas'
+
 export async function unduhBerkasZip({ rows, namaFile, daftarHeader, daftarBaris, namaZip, onProgress }) {
+  const sb = createClient()
   const target = rows.filter(r => r.file_bukti_url)
   const JSZip = (await import('jszip')).default
   const zip = new JSZip()
@@ -11,7 +15,7 @@ export async function unduhBerkasZip({ rows, namaFile, daftarHeader, daftarBaris
 
   const kerjakan = async (r) => {
     try {
-      const res = await fetch(r.file_bukti_url)
+      const res = await fetch(await urlAman(sb, r.file_bukti_url))
       if (!res.ok) throw new Error('HTTP ' + res.status)
       const blob = await res.blob()
       const ext = (r.file_bukti_url.split('?')[0].split('.').pop() || 'pdf').toLowerCase().slice(0, 5)
