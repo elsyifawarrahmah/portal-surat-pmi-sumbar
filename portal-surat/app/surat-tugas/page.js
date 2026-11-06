@@ -10,7 +10,8 @@ import { cetakSuratTugas } from '@/lib/cetak'
 
 const JENIS = { tugas: 'Surat Tugas', aset: 'Surat Aset', kerja_sama: 'Kerja Sama' }
 const BELUM_AKTIF = 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-surat-tugas.sql di Supabase (SQL Editor) satu kali.'
-const kosong = j => ({ jenis: j, tanggal_surat: hariIni(), anggota: [{ nama: '', jabatan: '' }] })
+const kosong = j => ({ jenis: j, tanggal_surat: hariIni(), anggota: [{ nama: '', jabatan: '' }], ...(j === 'tugas' ? { angkutan: 'Kendaraan PMI', anggaran: 'PMI' } : {}) })
+const ROMAWI = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 const tumpang = (a1, a2, b1, b2) => a1 && a2 && b1 && b2 && a1 <= b2 && b1 <= a2
 
 export default function SuratTugasPage() {
@@ -92,10 +93,17 @@ export default function SuratTugasPage() {
       tanggal_berangkat: bersih(f.tanggal_berangkat), tanggal_kembali: bersih(f.tanggal_kembali),
       kendaraan_id: bersih(f.kendaraan_id), kendaraan_nama: mb?.nama || null, kendaraan_nopol: mb?.nopol || null, sopir: mb?.sopir || null,
       sk_id: bersih(f.sk_id), pks_id: bersih(f.pks_id),
+      angkutan: bersih(f.angkutan), anggaran: bersih(f.anggaran),
     }
-    let err
-    if (editing) ({ error: err } = await supabase.from('surat_tugas').update(payload).eq('id', editing.id))
-    else ({ error: err } = await supabase.from('surat_tugas').insert({ ...payload, petugas_id: peran.userId, ...(f.jenis === 'kerja_sama' ? { status_pekerjaan: 'disiapkan' } : {}) }))
+    const tulis = async data => editing
+      ? supabase.from('surat_tugas').update(data).eq('id', editing.id)
+      : supabase.from('surat_tugas').insert({ ...data, petugas_id: peran.userId, ...(f.jenis === 'kerja_sama' ? { status_pekerjaan: 'disiapkan' } : {}) })
+    let { error: err } = await tulis(payload)
+    if (err && /angkutan|anggaran/i.test(err.message)) {   // migrasi format belum dijalankan: simpan tanpa dua kolom itu
+      const { angkutan, anggaran, ...tanpa } = payload
+      ;({ error: err } = await tulis(tanpa))
+      if (!err) alert('Tersimpan, tetapi kolom Angkutan dan Anggaran belum aktif di database. Jalankan supabase/migrasi-surat-tugas-format.sql di Supabase supaya tercetak.')
+    }
     if (err) { setError(tabelBelumAda(err) ? BELUM_AKTIF : err.message); return }
     setForm(null); muat()
   }
@@ -181,7 +189,12 @@ export default function SuratTugasPage() {
           footer={<><button className="btn btn-ghost" onClick={() => setForm(null)}>Batal</button><button className="btn btn-primary" onClick={simpan}>Simpan</button></>}>
           {error && <div className="error-box" style={{ whiteSpace: 'pre-wrap' }}>{error}</div>}
           <div className="field"><label>Tanggal Surat *</label><input type="date" value={form.tanggal_surat || ''} onChange={e => set('tanggal_surat', e.target.value)} /></div>
-          <div className="field"><label>Nomor Surat *</label><input value={form.nomor_surat || ''} onChange={e => set('nomor_surat', e.target.value)} placeholder="001/ST/PMI-SB/XI/2026" /></div>
+          <div className="field"><label>Nomor Surat *</label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input value={form.nomor_surat || ''} onChange={e => set('nomor_surat', e.target.value)} placeholder="/01.04.00/ST-ORG/XI/2026" />
+              {j === 'tugas' && <button type="button" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }} onClick={() => { const d = new Date((form.tanggal_surat || hariIni()) + 'T00:00:00'); set('nomor_surat', `/01.04.00/ST-ORG/${ROMAWI[d.getMonth()]}/${d.getFullYear()}`) }}>Pakai format</button>}
+            </div>
+            {j === 'tugas' && <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>Tekan “Pakai format”, lalu tambahkan nomor urut di depan garis miring pertama.</div>}</div>
           <div className="field"><label>{j === 'tugas' ? 'Maksud / Perihal Penugasan *' : 'Perihal *'}</label><input value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} /></div>
           <div className="field"><label>Dasar</label><textarea rows={2} value={form.dasar || ''} onChange={e => set('dasar', e.target.value)} placeholder="mis. Undangan dari ... / Surat Keputusan ..." /></div>
           <div className="field"><label>{j === 'tugas' ? 'Tujuan / Lokasi' : j === 'aset' ? 'Kepada' : 'Mitra / Pihak'}</label><input value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} /></div>
@@ -190,7 +203,11 @@ export default function SuratTugasPage() {
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Tanggal Berangkat *</label><input type="date" value={form.tanggal_berangkat || ''} onChange={e => set('tanggal_berangkat', e.target.value)} /></div>
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Tanggal Kembali *</label><input type="date" value={form.tanggal_kembali || ''} onChange={e => set('tanggal_kembali', e.target.value)} /></div>
             </div>
-            <div className="field"><label>Kendaraan</label>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Angkutan</label><input value={form.angkutan || ''} onChange={e => set('angkutan', e.target.value)} placeholder="Kendaraan PMI" /></div>
+              <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Anggaran</label><input value={form.anggaran || ''} onChange={e => set('anggaran', e.target.value)} placeholder="PMI" /></div>
+            </div>
+            <div className="field"><label>Kendaraan (untuk jadwal; tampil di cetakan)</label>
               <select value={form.kendaraan_id || ''} onChange={e => set('kendaraan_id', e.target.value)}>
                 <option value="">Tanpa kendaraan dinas</option>
                 {kendaraan.map(k => <option key={k.id} value={k.id}>{k.nama} · {k.nopol}{k.sopir ? ' · ' + k.sopir : ''}</option>)}

@@ -39,6 +39,7 @@ function SuratKeluarInner() {
   const bolehCatat = peran.bisaCatatKeluar
   // unit biasa (bukan admin) mengeluarkan surat atas nama unitnya sendiri
   const unitSaya = !peran.isAdmin && peran.unit ? peran.unit : null
+  const [divisiLain, setDivisiLain] = useState(false)
   const bisaUbah = r => isAdmin || (bolehCatat && (r.petugas_id === peran.userId || (peran.unitId && r.unit_id === peran.unitId)))
 
   const fields = [
@@ -70,7 +71,7 @@ function SuratKeluarInner() {
     setLoading(false)
   }
 
-  function openAdd(jawabId) { setEditing(null); setForm({ ...(unitSaya ? { divisi: unitSaya.nama } : {}), ...(jawabId ? { surat_masuk_id: jawabId } : {}) }); setError(''); setShowModal(true) }
+  function openAdd(jawabId) { setDivisiLain(false); setEditing(null); setForm({ ...(unitSaya ? { divisi: unitSaya.nama } : {}), ...(jawabId ? { surat_masuk_id: jawabId } : {}) }); setError(''); setShowModal(true) }
   // dari tombol "Buat surat jawaban" di Disposisi: ?jawab=<id surat masuk>
   useEffect(() => { const j = searchParams.get('jawab'); if (j && !peran.loading && bolehCatat) openAdd(j) }, [searchParams, peran.loading])
   function openEdit(row) { setEditing(row); setForm(row); setError(''); setShowModal(true) }
@@ -153,6 +154,8 @@ function SuratKeluarInner() {
       : error.message
   }
   const saranDivisi = [...new Set(['Biro Umum', ...rows.map(r => r.divisi).filter(Boolean)])]
+  // tujuan yang paling sering dipakai sebelumnya, supaya tinggal sentuh
+  const saranTujuan = (() => { const c = {}; rows.forEach(r => { const t = (r.tujuan_surat || '').trim(); if (t) c[t] = (c[t] || 0) + 1 }); return Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]) })()
 
   function generateNomorOtomatis() {
     const bulanRomawi = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII']
@@ -235,8 +238,21 @@ function SuratKeluarInner() {
                     <input value={unitSaya.nama} disabled />
                   ) : f.k === 'divisi' ? (
                     <>
-                      <input list="saran-divisi" value={form[f.k]||''} placeholder={f.ph||''} onChange={e=>setForm({...form,[f.k]:e.target.value})} />
-                      <datalist id="saran-divisi">{saranDivisi.map(d => <option key={d} value={d} />)}</datalist>
+                      <select value={divisiLain || (form.divisi && !units.some(u => u.nama === form.divisi)) ? '__lain' : (form.divisi || '')} style={{ fontSize: 16, minHeight: 48 }}
+                        onChange={e => { if (e.target.value === '__lain') { setDivisiLain(true); setForm({ ...form, divisi: '' }) } else { setDivisiLain(false); setForm({ ...form, divisi: e.target.value }) } }}>
+                        <option value="">— pilih bidang / biro —</option>
+                        {units.filter(u => u.aktif).map(u => <option key={u.id} value={u.nama}>{u.nama}</option>)}
+                        <option value="__lain">Lainnya (ketik sendiri)</option>
+                      </select>
+                      {(divisiLain || (form.divisi && !units.some(u => u.nama === form.divisi))) && <input style={{ marginTop: 6 }} value={form.divisi || ''} placeholder="Tulis nama divisi / biro" onChange={e => setForm({ ...form, divisi: e.target.value })} />}
+                    </>
+                  ) : f.k === 'tujuan_surat' ? (
+                    <>
+                      <input value={form[f.k] || ''} placeholder={f.ph || ''} onChange={e => setForm({ ...form, [f.k]: e.target.value })} />
+                      {saranTujuan.length > 0 && <div style={{ marginTop: 6 }}>
+                        <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 4 }}>Sering dipakai — sentuh untuk memilih:</div>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{saranTujuan.map(t => <button key={t} type="button" className="btn btn-ghost" style={{ minHeight: 38, fontSize: 14, padding: '2px 12px', borderRadius: 999, textTransform: 'none' }} onClick={() => setForm({ ...form, tujuan_surat: t })}>{t}</button>)}</div>
+                      </div>}
                     </>
                   ) : f.k === 'nomor_surat' ? (
                     <div style={{display:'flex',gap:6}}>
