@@ -11,6 +11,15 @@ const kodePenanda = () => { const a = new Uint8Array(4); crypto.getRandomValues(
 const cek = r => { if (r.error) throw new Error(r.error.message); return r }
 const besar = { fontSize: 16 }
 
+function Langkah({ n, judul, ket }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '22px 0 10px' }}>
+      <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--pmi-red)', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>{n}</span>
+      <div><div style={{ fontWeight: 700, fontSize: 17, lineHeight: 1.2 }}>{judul}</div>{ket && <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>{ket}</div>}</div>
+    </div>
+  )
+}
+
 export default function TeruskanForm({ supabase, surat, units, peran, induk, sudahMenerima = [], onClose, onSaved }) {
   const [dipilih, setDipilih] = useState([])
   const [petunjuk, setPetunjuk] = useState(PETUNJUK[0])
@@ -33,12 +42,14 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
     } catch (e) { setError(e.message) }
   }
 
-  const kandidat = units.filter(u => u.aktif && u.tipe !== 'biro_umum' && u.id !== peran.unitId)
+  const kandidat = units.filter(u => u.aktif && !['biro_umum', 'tata_usaha'].includes(u.tipe) && u.id !== peran.unitId)
   const pilihan = (nama) => [['Pimpinan & Sekretariat', [...kandidat.filter(u => u.tipe === 'pimpinan'), ...kandidat.filter(u => !['bidang', 'pimpinan'].includes(u.tipe))]], ['Bidang', kandidat.filter(u => u.tipe === 'bidang')]]
   const pimpinan = kandidat.filter(u => u.tipe === 'pimpinan' && !sudahMenerima.includes(u.id))
   const semuaPimpinanDipilih = pimpinan.length > 0 && pimpinan.every(u => dipilih.includes(u.id))
   const togglePimpinan = () => setDipilih(d => semuaPimpinanDipilih ? d.filter(x => !pimpinan.some(p => p.id === x)) : [...new Set([...d, ...pimpinan.map(p => p.id)])])
   const ganti = id => setDipilih(d => (d.includes(id) ? d.filter(x => x !== id) : [...d, id]))
+  const adaKeputusan = peran.isAdmin || peran.tipe === 'pimpinan'
+  const off = adaKeputusan ? 1 : 0
   const wakilkan = peran.bisaDisposisi   // Sekretariat/pimpinan boleh mencatat disposisi atas nama Ketua dsb.
 
   async function kirim() {
@@ -61,23 +72,29 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
 
   return (
     <Modal judul="Teruskan surat ini" onClose={onClose} lebar={560}
-      footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={onClose}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16, padding: '0 28px' }} onClick={kirim} disabled={saving}>{saving ? 'Mengirim...' : 'Kirim'}</button></>}>
+      footer={<><button className="btn btn-ghost" style={{ minHeight: 48 }} onClick={onClose}>Batal</button><button className="btn btn-primary" style={{ minHeight: 48, fontSize: 16, padding: '0 28px' }} onClick={kirim} disabled={saving}>{saving ? 'Mengirim...' : dipilih.length > 0 ? `Kirim ke ${dipilih.length} tujuan` : 'Kirim'}</button></>}>
       {error && <div className="error-box">{error}</div>}
 
-      {(peran.isAdmin || ['pimpinan', 'sekretariat'].includes(peran.tipe)) && (
-        <div style={{ marginBottom: 16 }}>
-          <h4 style={{ margin: '0 0 8px', fontSize: 17 }}>Keputusan <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(tinggal sentuh)</span></h4>
+      <div style={{ background: 'var(--cream, #FAF6EF)', border: '1px solid var(--line)', borderRadius: 12, padding: '10px 14px', fontSize: 14.5 }}>
+        <div style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Surat yang diteruskan</div>
+        <b>{surat.perihal}</b>
+        <div style={{ color: 'var(--ink-soft)' }}>{surat.nomor_agenda ? `Agenda ${surat.nomor_agenda} · ` : ''}dari {surat.asal_surat}</div>
+      </div>
+
+      {adaKeputusan && (
+        <div>
+          <Langkah n={1} judul="Keputusan" ket="Tinggal sentuh satu" />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {KEPUTUSAN.map(o => {
               const on = keputusan === o.k
               return <button key={o.k} type="button" onClick={() => { setKeputusan(on ? '' : o.k); if (!on) setPetunjuk(o.petunjuk) }}
-                style={{ minHeight: 64, fontSize: 18, fontWeight: 700, borderRadius: 14, cursor: 'pointer', border: '2px solid ' + (on ? 'var(--pmi-red)' : 'var(--line)'), background: on ? 'var(--pmi-red)' : '#fff', color: on ? '#fff' : 'var(--ink)', font: 'inherit' }}>{o.ikon} {o.k}</button>
+                style={{ minHeight: 56, fontSize: 17, fontWeight: 700, borderRadius: 14, cursor: 'pointer', border: '2px solid ' + (on ? 'var(--pmi-red)' : 'var(--line)'), background: on ? 'var(--pmi-red)' : '#fff', color: on ? '#fff' : 'var(--ink)', font: 'inherit' }}>{o.ikon} {o.k}</button>
             })}
           </div>
         </div>
       )}
 
-      <h4 style={{ margin: '0 0 8px', fontSize: 17 }}>1. Diteruskan kepada siapa? <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(boleh centang lebih dari satu)</span></h4>
+      <Langkah n={1 + off} judul="Diteruskan kepada siapa?" ket="Boleh centang lebih dari satu" />
       {pimpinan.length > 1 && <button type="button" className={'btn ' + (semuaPimpinanDipilih ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 44, marginBottom: 10 }} onClick={togglePimpinan}>{semuaPimpinanDipilih ? '✓ ' : ''}Pilih sekaligus: {pimpinan.map(p => p.nama).join(' + ')}</button>}
       {pilihan().map(([judul, daftar]) => daftar.length > 0 && (
         <div key={judul} style={{ marginBottom: 8 }}>
@@ -85,7 +102,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
           {daftar.map(u => {
             const sudah = sudahMenerima.includes(u.id), aktif = dipilih.includes(u.id)
             return (
-              <label key={u.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '12px 14px', marginBottom: 6, border: '2px solid ' + (aktif ? 'var(--pmi-red)' : 'var(--line)'), borderRadius: 12, background: aktif ? '#FFF3F1' : '#fff', cursor: 'pointer', textTransform: 'none', color: 'var(--ink)', ...besar }}>
+              <label key={u.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 14px', marginBottom: 6, border: '2px solid ' + (aktif ? 'var(--pmi-red)' : 'var(--line)'), borderRadius: 12, background: aktif ? '#FFF3F1' : '#fff', cursor: 'pointer', textTransform: 'none', color: 'var(--ink)', ...besar }}>
                 <input type="checkbox" style={{ width: 22, height: 22 }} checked={aktif} onChange={() => ganti(u.id)} />
                 <span><b>{u.nama}</b>{sudah && <span style={{ fontSize: 12.5, color: 'var(--gold)' }}> — sudah pernah menerima (centang untuk kirim ulang)</span>}</span>
               </label>
@@ -94,13 +111,13 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
         </div>
       ))}
 
-      <h4 style={{ margin: '18px 0 8px', fontSize: 17 }}>2. Petunjuknya apa?</h4>
+      <Langkah n={2 + off} judul="Petunjuknya apa?" />
       <select value={petunjuk} onChange={e => setPetunjuk(e.target.value)} style={{ ...besar, minHeight: 50, marginBottom: 10 }}><option value="">— tanpa petunjuk lain —</option>{PETUNJUK.map(p => <option key={p}>{p}</option>)}</select>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {SIFAT_DISPOSISI.map(s => <button key={s} type="button" className={'btn ' + (sifat === s ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 46, fontSize: 15 }} onClick={() => setSifat(s)}>{s}</button>)}
       </div>
 
-      <h4 style={{ margin: '18px 0 8px', fontSize: 17 }}>3. Pesan tambahan <span style={{ fontWeight: 400, fontSize: 14, color: 'var(--ink-soft)' }}>(boleh dikosongkan)</span></h4>
+      <Langkah n={3 + off} judul="Pesan tambahan" ket="Boleh dikosongkan" />
       <KalimatCepat daftar={KALIMAT_PESAN} onPilih={k => setPesan(p => tambahKalimat(p, k))} />
       <TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setPesan(p => tambahKalimat(p, t))} />
       <textarea rows={3} style={besar} value={pesan} onChange={e => setPesan(e.target.value)} placeholder="Atau tulis kata-katamu di sini..." />

@@ -3,12 +3,12 @@
 import { useState } from 'react'
 
 // Kalimat cepat. onPilih(teks) dipanggil dengan kalimat yang disentuh.
-export function KalimatCepat({ daftar, onPilih, judul = 'Sentuh kalimat untuk memasukkan:' }) {
+export function KalimatCepat({ daftar, onPilih, judul = 'Sentuh untuk memasukkan:' }) {
   return (
     <div style={{ margin: '6px 0 8px' }}>
       <div style={{ fontSize: 13.5, color: 'var(--ink-soft)', marginBottom: 6 }}>{judul}</div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {daftar.map(k => <button key={k} type="button" className="btn btn-ghost" style={{ minHeight: 44, fontSize: 15, padding: '6px 14px', textTransform: 'none' }} onClick={() => onPilih(k)}>+ {k}</button>)}
+        {daftar.map(k => <button key={k} type="button" className="btn btn-ghost" style={{ minHeight: 40, fontSize: 14.5, padding: '4px 14px', borderRadius: 999, textTransform: 'none', fontWeight: 600 }} onClick={() => onPilih(k)}>{k}</button>)}
       </div>
     </div>
   )

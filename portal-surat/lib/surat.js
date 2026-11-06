@@ -7,7 +7,7 @@ export const KEPUTUSAN = [
   { k: 'Ditunda dulu', ikon: '⏸️', petunjuk: '' },
   { k: 'Dikaji dulu', ikon: '🔎', petunjuk: 'Koordinasikan' },
 ]
-export const KALIMAT_PESAN = ['Segera laporkan hasilnya', 'Koordinasikan dengan bidang terkait', 'Hadir mewakili saya', 'Sesuai aturan yang berlaku', 'Laporkan kepada saya setelah selesai']
+export const KALIMAT_PESAN = ['Segera laporkan hasilnya', 'Koordinasikan dengan bidang terkait', 'Hadir mewakili saya', 'Sesuai aturan yang berlaku', 'Laporkan setelah selesai']
 export const KALIMAT_TOLAK = ['Isi surat perlu diperbaiki', 'Nomor atau tanggal surat belum tepat', 'Tujuan surat kurang tepat', 'Lampiran belum lengkap', 'Mohon dilengkapi dulu']
 export const KALIMAT_SELESAI = ['Sudah dikerjakan', 'Sudah dikoordinasikan', 'Sudah dilaporkan', 'Sudah dihadiri', 'Surat jawaban sudah dikirim']
 export const SIFAT_DISPOSISI = ['Biasa', 'Segera', 'Sangat Segera']
