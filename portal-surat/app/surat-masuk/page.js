@@ -1,6 +1,8 @@
 'use client'
 import { unggahBanyak, simpanLampiran, ketHint } from '@/lib/berkas'
 import { LihatBerkas } from '@/components/PratinjauBerkas'
+import PilihBerkas from '@/components/PilihBerkas'
+import DaftarLampiran from '@/components/DaftarLampiran'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -41,6 +43,7 @@ function SuratMasukInner() {
   const [modalDisposisi, setModalDisposisi] = useState(null)
   const [modalRiwayat, setModalRiwayat] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [modalBerkas, setModalBerkas] = useState(null)
 
   useEffect(() => { load() }, [])
 
@@ -318,7 +321,7 @@ function SuratMasukInner() {
                     <td data-label="Sifat"><span className="tag" style={sifatStyle(s.sifat)}>{s.sifat}</span></td>
                     <td data-label="Status">{isRahasia ? '-' : (() => { const st = statusSurat(tahapMap[s.id]); return st ? <span className="tag" style={st.tone === 'ok' ? { background: 'var(--stock-bg)', color: 'var(--stock)' } : { background: 'var(--gold-bg)', color: 'var(--gold)' }}>{st.label}</span> : '-' })()}</td>
                     <td data-label="Disposisi" onClick={e=>e.stopPropagation()}>{isRahasia ? '-' : (() => { const d = disposisiMap[s.id]; return <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>setModalDisposisi(s)}>{d ? <span style={{color: d.selesai === d.total ? 'var(--stock)' : 'var(--gold)',fontWeight:700}}>{d.total} tujuan · {d.selesai} selesai</span> : (peran.bisaDisposisi ? '+ Disposisi' : 'Belum')}</button> })()}</td>
-                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <LihatBerkas url={s.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</LihatBerkas> : '-'}</td>
+                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,color:'var(--pmi-red)',fontWeight:700}} onClick={()=>setModalBerkas(s)}>📎 Ruang file</button> : '-'}</td>
                     <td data-label="Petugas">{s.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right',whiteSpace:'nowrap'}} onClick={e=>e.stopPropagation()}>{isRahasia ? '' : <><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,marginRight:6}} onClick={()=>setModalRiwayat(s)}>Riwayat</button><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>openTahap(s.id)}>Alur →</button></>}</td>
                   </tr>
@@ -364,18 +367,7 @@ function SuratMasukInner() {
                   <option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option>
                 </select>
               </div>
-              <div className="field">
-                <label>File Bukti (PDF/Foto Surat) — boleh lebih dari 1</label>
-                <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={e=>handleUploadBukti(e,'surat')} />
-                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('surat')}</div>
-              </div>
-              <div className="field">
-                <label>Dokumen PDF Surat — untuk surat lebih dari 2 lembar</label>
-                <input type="file" multiple accept=".pdf,application/pdf" onChange={e=>handleUploadBukti(e,'dokumen')} />
-                <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>{ketHint('dokumen')}</div>
-                {uploading && <div style={{fontSize:12,color:'var(--ink-soft)',marginTop:4}}>Mengunggah file...</div>}
-                {(form._berkas || []).map((b, i) => <div key={i} style={{fontSize:12,color:'var(--stock)',marginTop:4}}>✓ {b.nama} terunggah</div>)}
-              </div>
+              <PilihBerkas supabase={supabase} denganDokumen value={form._berkas || []} onSibuk={setUploading} onChange={arr => setForm(f => ({ ...f, _berkas: arr, file_bukti_url: arr[0]?.url || '', file_bukti_nama: arr[0]?.nama || '' }))} />
             </div>
             <div style={{padding:'14px 22px',borderTop:'1px solid var(--line)',display:'flex',justifyContent:'flex-end',gap:8}}>
               <button className="btn btn-ghost" onClick={()=>setShowAddModal(false)}>Batal</button>
@@ -385,6 +377,7 @@ function SuratMasukInner() {
         </div>
       )}
 
+      {modalBerkas && <Modal judul={`Ruang file — ${modalBerkas.nomor_surat}`} onClose={() => setModalBerkas(null)} lebar={560}><DaftarLampiran supabase={supabase} jenis="masuk" suratId={modalBerkas.id} fileUtamaUrl={modalBerkas.file_bukti_url} fileUtamaNama={modalBerkas.file_bukti_nama || 'Berkas surat'} boleh={peran.bisaCatatMasuk || peran.isAdmin} peran={peran} /></Modal>}
       {modalDisposisi && (
         <Modal judul={`Disposisi — ${modalDisposisi.nomor_surat}`} onClose={() => setModalDisposisi(null)} lebar={760}>
           <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, marginBottom: 14 }}>

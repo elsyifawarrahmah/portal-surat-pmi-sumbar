@@ -54,7 +54,7 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
   return (
     <Modal judul={`Persetujuan — ${surat.nomor_surat}`} onClose={onClose} lebar={600}>
       {galat && <div className="error-box">{galat}</div>}
-      <div style={{ fontSize: 14, marginBottom: 12 }}><b>{surat.perihal}</b><br /><span style={{ color: 'var(--ink-soft)' }}>Kepada {surat.tujuan_surat}</span></div>
+      <div style={{ fontSize: 14, marginBottom: 12 }}><b>{surat.perihal}</b><br /><span style={{ color: 'var(--ink-soft)' }}>Kepada {surat.tujuan_surat}</span>{surat.tembusan && <><br /><span style={{ color: 'var(--ink-soft)' }}>Tembusan: {String(surat.tembusan).split('\n').filter(Boolean).join(', ')}</span></>}</div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
         {langkah.map(([k, t]) => <span key={k} className="tag" style={{ background: (urut[st] || 0) >= urut[k] ? '#E7F4EA' : '#F1F1F1', color: (urut[st] || 0) >= urut[k] ? '#2E7D32' : '#777', fontSize: 13, padding: '6px 12px' }}>{(urut[st] || 0) >= urut[k] ? '✔ ' : ''}{t}</span>)}
       </div>

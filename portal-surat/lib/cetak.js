@@ -121,6 +121,7 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
     ${blok('Diparaf,<br>Sekretaris', surat.paraf_nama, surat.paraf_ttd_url, surat.paraf_kode, surat.paraf_pada)}
     <td style="width:33%"></td>
   </tr></table>
+  ${surat.tembusan ? '<div style="margin-top:18px;font-size:13px"><b>Tembusan:</b><ol style="margin:4px 0 0 18px;padding:0">' + String(surat.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map(x => '<li>' + h(x.replace(/^\d+[.)]\s*/, '')) + '</li>').join('') + '</ol></div>' : ''}
   <div style="font-size:11px;margin-top:24px">Keaslian dapat dicek di portal surat dengan memasukkan kode di atas.</div>
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Pengesahan Surat Keluar', body)
