@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 
-export const NAMA_TIPE = { biro_umum: 'Biro Umum', sekretariat: 'Sekretariat', pimpinan: 'Pimpinan', bidang: 'Bidang', tata_usaha: 'Tata Usaha' }
+export const NAMA_TIPE = { biro_umum: 'Biro Umum', sekretariat: 'Sekretaris', pimpinan: 'Pimpinan', bidang: 'Bidang', tata_usaha: 'Tata Usaha' }
 
 export function hitungIzin(profil, unit) {
   const isAdmin = profil?.role === 'admin'

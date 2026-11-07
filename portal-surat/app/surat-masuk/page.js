@@ -56,8 +56,8 @@ function SuratMasukInner() {
   }, [searchParams])
 
   const isAdmin = peran.isAdmin            // admin: boleh lihat surat Rahasia
-  const bolehCatat = peran.bisaCatatMasuk  // admin / Sekretariat: mencatat surat masuk
-  const bolehAlur = peran.bisaAlur         // admin / Sekretariat / pimpinan / Biro Umum: mengurus alur & pengarsipan
+  const bolehCatat = peran.bisaCatatMasuk  // admin / Sekretaris: mencatat surat masuk
+  const bolehAlur = peran.bisaAlur         // admin / Sekretaris / pimpinan / Biro Umum: mengurus alur & pengarsipan
 
   async function load() {
     setLoading(true)
@@ -288,7 +288,7 @@ function SuratMasukInner() {
         <PeringatanUnit peran={peran} />
         {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretariat. Buka kolom “Disposisi” untuk melihat disposisi surat.
+            👁 Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretaris. Buka kolom “Disposisi” untuk melihat disposisi surat.
           </div>
         )}
         {peran.migrasiBelum && (

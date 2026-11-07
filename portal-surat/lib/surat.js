@@ -26,7 +26,7 @@ export const STATUS_SURAT = {
 }
 export const TAB_ISI = { belum: ['belum', 'belum_diteruskan'], proses: ['proses', 'berjalan'], selesai: ['selesai', 'arsip'] }
 
-// Status sebuah surat "bagi saya": kalau unit saya penerima, lihat status unit saya; kalau tidak (Sekretariat/Biro Umum/admin), lihat keseluruhan
+// Status sebuah surat "bagi saya": kalau unit saya penerima, lihat status unit saya; kalau tidak (Sekretaris/Biro Umum/admin), lihat keseluruhan
 export function statusUntukSaya(tujuan, unitId) {
   const mine = unitId ? tujuan.filter(t => t.unit_id === unitId) : []
   if (mine.length > 0) {

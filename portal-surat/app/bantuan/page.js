@@ -33,9 +33,9 @@ export default function BantuanPage() {
       <div className="panel"><div className="panel-body" style={{ fontSize: 15, lineHeight: 1.6 }}>
         <h3 style={{ marginTop: 0 }}>Siapa bisa melihat apa?</h3>
         <ul style={{ margin: '0 0 0 18px', padding: 0 }}>
-          <li><b>Isi surat</b> (perihal, asal, file) hanya bisa dibuka oleh <b>bidang yang dituju</b>, Sekretariat, Ketua / Kepala Markas, dan Biro Umum.</li>
+          <li><b>Isi surat</b> (perihal, asal, file) hanya bisa dibuka oleh <b>bidang yang dituju</b>, Sekretaris, Ketua / Kepala Markas, dan Biro Umum.</li>
           <li><b>Semua orang</b> bisa melihat <b>jejak</b> surat di menu <b>Lacak Surat</b>: ditujukan ke siapa, sudah sampai di mana, sudah dibaca atau belum, tertahan berapa hari.</li>
-          <li>Mengubah data dilakukan oleh yang bertugas (admin / Sekretariat).</li>
+          <li>Mengubah data dilakukan oleh yang bertugas (admin / Sekretaris).</li>
         </ul>
         {peran.nama && <p style={{ margin: '12px 0 0', color: 'var(--ink-soft)' }}>Kamu masuk sebagai <b>{peran.nama}</b> — {peran.isAdmin ? 'Admin web' : peran.unit?.nama || 'belum ada unit (minta admin mengaturnya)'}.</p>}
       </div></div>

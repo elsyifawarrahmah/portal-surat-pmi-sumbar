@@ -106,7 +106,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
       {loading && <div style={{ padding: 12, color: 'var(--ink-soft)' }}>Memuat...</div>}
       {!loading && daftar.length === 0 && (
         <div style={{ border: '1px dashed var(--line)', borderRadius: 12, padding: 20, textAlign: 'center', color: 'var(--ink-soft)' }}>
-          Surat ini belum didisposisikan.{peran.bisaDisposisi ? ' Klik “Buat Disposisi” untuk meneruskan ke bidang tujuan.' : ' Disposisi dibuat oleh Sekretariat / pimpinan.'}
+          Surat ini belum didisposisikan.{peran.bisaDisposisi ? ' Klik “Buat Disposisi” untuk meneruskan ke bidang tujuan.' : ' Disposisi dibuat oleh Sekretaris / pimpinan.'}
         </div>
       )}
 

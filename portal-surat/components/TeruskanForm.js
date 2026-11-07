@@ -43,14 +43,14 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
   }
 
   const kandidat = units.filter(u => u.aktif && !['biro_umum', 'tata_usaha'].includes(u.tipe) && u.id !== peran.unitId)
-  const pilihan = (nama) => [['Pimpinan & Sekretariat', [...kandidat.filter(u => u.tipe === 'pimpinan'), ...kandidat.filter(u => !['bidang', 'pimpinan'].includes(u.tipe))]], ['Bidang', kandidat.filter(u => u.tipe === 'bidang')]]
+  const pilihan = (nama) => [['Pimpinan & Sekretaris', [...kandidat.filter(u => u.tipe === 'pimpinan'), ...kandidat.filter(u => !['bidang', 'pimpinan'].includes(u.tipe))]], ['Bidang', kandidat.filter(u => u.tipe === 'bidang')]]
   const pimpinan = kandidat.filter(u => u.tipe === 'pimpinan' && !sudahMenerima.includes(u.id))
   const semuaPimpinanDipilih = pimpinan.length > 0 && pimpinan.every(u => dipilih.includes(u.id))
   const togglePimpinan = () => setDipilih(d => semuaPimpinanDipilih ? d.filter(x => !pimpinan.some(p => p.id === x)) : [...new Set([...d, ...pimpinan.map(p => p.id)])])
   const ganti = id => setDipilih(d => (d.includes(id) ? d.filter(x => x !== id) : [...d, id]))
   const adaKeputusan = peran.isAdmin || peran.tipe === 'pimpinan'
   const off = adaKeputusan ? 1 : 0
-  const wakilkan = peran.bisaDisposisi   // Sekretariat/pimpinan boleh mencatat disposisi atas nama Ketua dsb.
+  const wakilkan = peran.bisaDisposisi   // Sekretaris/pimpinan boleh mencatat disposisi atas nama Ketua dsb.
 
   async function kirim() {
     setError('')

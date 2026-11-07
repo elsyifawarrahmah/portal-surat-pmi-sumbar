@@ -67,7 +67,7 @@ export default function DisposisiForm({ supabase, surat, units, disposisi, induk
     setSaving(false)
   }
 
-  const kelompok = [['Pimpinan & Sekretariat', kandidat.filter(u => u.tipe !== 'bidang')], ['Bidang', kandidat.filter(u => u.tipe === 'bidang')]]
+  const kelompok = [['Pimpinan & Sekretaris', kandidat.filter(u => u.tipe !== 'bidang')], ['Bidang', kandidat.filter(u => u.tipe === 'bidang')]]
 
   return (
     <Modal judul={edit ? 'Ubah Disposisi' : teruskan ? `Teruskan Surat (dari ${induk.unit?.nama || 'unit kamu'})` : 'Buat Disposisi'} onClose={onClose} lebar={640}
