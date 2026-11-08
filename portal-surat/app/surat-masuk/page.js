@@ -258,15 +258,9 @@ function SuratMasukInner() {
     if (hasil.gagal.length) alert(`${hasil.gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
   }
 
-  function exportCSV() {
-    const header = ['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat','Petugas'].join(';')
-    const csvRows = filtered.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
-    const csv = '\uFEFF' + [header, ...csvRows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `surat-masuk-${new Date().toISOString().slice(0,10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+  async function exportCSV() {
+    const { unduhXlsx } = await import('@/lib/excel')
+    await unduhXlsx(`surat-masuk-${new Date().toISOString().slice(0,10)}`, ['Tanggal Diterima','Nomor Surat','Asal','Perihal','Sifat','Petugas'], filtered.map(r => [r.tanggal_diterima_kantor, r.nomor_surat, r.asal_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap || '']), 'Surat Masuk')
   }
 
   function generateNomorOtomatis() {
@@ -300,7 +294,7 @@ function SuratMasukInner() {
             <input placeholder="Cari nomor surat / asal / perihal..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:280}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
               <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
-              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
           <div style={{overflowX:'auto'}}>

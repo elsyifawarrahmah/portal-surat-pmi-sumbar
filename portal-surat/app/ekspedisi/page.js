@@ -93,7 +93,7 @@ export default function EkspedisiPage() {
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Ekspedisi', subjudul: fStatus === 'semua' ? 'Semua surat keluar' : ST[fStatus].l, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak Buku Ekspedisi</button>
-            <button className="btn btn-ghost" onClick={() => unduhCsv('ekspedisi', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ CSV</button>
+            <button className="btn btn-ghost" onClick={() => unduhCsv('ekspedisi', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
         <div style={{ overflowX: 'auto' }}>

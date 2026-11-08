@@ -126,20 +126,15 @@ export default function DokumenPage({ config }) {
 
   const filtered = rows.filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase()))
 
-  function exportCSV() {
-    const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const header = [...fields.map(f => f.label), ...(config.masaBerlaku ? ['Status'] : []), 'Petugas', 'Link Bukti'].map(esc).join(';')
-    const csvRows = filtered.map(r => [
+  async function exportCSV() {
+    const { unduhXlsx } = await import('@/lib/excel')
+    const header = [...fields.map(f => f.label), ...(config.masaBerlaku ? ['Status'] : []), 'Petugas', 'Link Bukti']
+    const baris = filtered.map(r => [
       ...fields.map(f => f.type === 'date' ? tgl(r[f.k]) : (r[f.k] ?? '')),
       ...(config.masaBerlaku ? [statusMasa(r)?.label || ''] : []),
       r.profiles?.nama_lengkap || '', namaDariUrl(r.file_bukti_url),
-    ].map(esc).join(';'))
-    const csv = '\uFEFF' + [header, ...csvRows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `${config.csvPrefix}-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+    ])
+    await unduhXlsx(`${config.csvPrefix}-${new Date().toISOString().slice(0, 10)}`, header, baris, config.csvPrefix)
   }
 
   // Unduh semua berkas dokumen (sesuai hasil pencarian) dalam satu file ZIP
@@ -190,7 +185,7 @@ export default function DokumenPage({ config }) {
             <input placeholder={config.cari || 'Cari...'} value={search} onChange={e => setSearch(e.target.value)} style={{maxWidth:260}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
               <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
-              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
           <div style={{overflowX:'auto'}}>

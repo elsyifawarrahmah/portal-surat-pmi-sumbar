@@ -119,7 +119,7 @@ function Isi() {
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Disposisi', subjudul: `${namaUnit} · ${fStatus === 'aktif' ? 'belum selesai' : fStatus === 'semua' ? 'semua status' : (STATUS_DISPOSISI[fStatus]?.label || fStatus)}`, kolom: kolomCetak, baris: barisCetak(), namaPencetak: peran.nama })}>🖨 Cetak Buku Disposisi</button>
-            <button className="btn btn-ghost" onClick={() => unduhCsv('disposisi', kolomCetak.map(k => k.judul), barisCetak().map(b => kolomCetak.map(k => b[k.k])))}>⬇ CSV</button>
+            <button className="btn btn-ghost" onClick={() => unduhCsv('disposisi', kolomCetak.map(k => k.judul), barisCetak().map(b => kolomCetak.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
         <div style={{ overflowX: 'auto' }}>

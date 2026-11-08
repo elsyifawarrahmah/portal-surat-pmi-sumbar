@@ -79,7 +79,7 @@ export default function RiwayatPage() {
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => cetakDaftar({ judul: fJenis === 'masuk' ? 'Buku Agenda Surat Masuk' : fJenis === 'keluar' ? 'Buku Agenda Surat Keluar' : 'Buku Agenda Surat Masuk & Keluar', subjudul, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak Buku Agenda</button>
-            <button className="btn btn-ghost" onClick={() => unduhCsv('riwayat-surat', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ CSV</button>
+            <button className="btn btn-ghost" onClick={() => unduhCsv('riwayat-surat', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
         <div style={{ overflowX: 'auto' }}>

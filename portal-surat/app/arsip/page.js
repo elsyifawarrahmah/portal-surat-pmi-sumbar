@@ -178,18 +178,14 @@ export default function ArsipPage() {
     load()
   }
 
-  function exportCSV() {
-    const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const header = ['Jenis','Tanggal','Nomor','Perihal / Judul','Asal / Tujuan / Pihak','Divisi/Biro','Status','Lokasi Arsip','Tanggal Arsip','Diarsip Oleh','Catatan'].map(esc).join(';')
+  async function exportCSV() {
+    const { unduhXlsx } = await import('@/lib/excel')
+    const header = ['Jenis','Tanggal','Nomor','Perihal / Judul','Asal / Tujuan / Pihak','Divisi/Biro','Status','Lokasi Arsip','Tanggal Arsip','Diarsip Oleh','Catatan']
     const baris = filtered.filter(r => !rahasia(r)).map(r => [
       JENIS[r.jenis], r.tanggal, r.nomor, r.judul, r.pihak, r.divisi, STATUS_LABEL[r.status],
       r.catat?.lokasi_arsip || '', r.catat?.tanggal_arsip || '', r.catat?.profiles?.nama_lengkap || '', r.catat?.catatan || '',
-    ].map(esc).join(';'))
-    const csv = '\uFEFF' + [header, ...baris].join('\n')
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-    const a = document.createElement('a')
-    a.href = url; a.download = `register-arsip-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+    ])
+    await unduhXlsx(`register-arsip-${new Date().toISOString().slice(0, 10)}`, header, baris, 'Register Arsip')
   }
 
   async function unduhBerkas() {
@@ -258,7 +254,7 @@ export default function ArsipPage() {
             </div>
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
               <button className="btn btn-ghost" onClick={unduhBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Berkas (ZIP)'}</button>
-              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Register Arsip (CSV)</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Register Arsip (Excel)</button>
             </div>
           </div>
           <div style={{overflowX:'auto'}}>

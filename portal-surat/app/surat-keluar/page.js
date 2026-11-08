@@ -164,15 +164,9 @@ function SuratKeluarInner() {
     if (hasil.gagal.length) alert(`${hasil.gagal.length} berkas gagal diunduh (daftarnya ada di GAGAL-diunduh.txt di dalam ZIP).`)
   }
 
-  function exportCSV() {
-    const header = ['Tanggal','Nomor Surat','Divisi/Biro','Tujuan','Perihal','Sifat','Petugas'].join(';')
-    const csvRows = filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.divisi||'', r.tujuan_surat, r.perihal, r.sifat, r.profiles?.nama_lengkap||''].join(';'))
-    const csv = '\uFEFF' + [header, ...csvRows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `surat-keluar-${new Date().toISOString().slice(0,10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+  async function exportCSV() {
+    const { unduhXlsx } = await import('@/lib/excel')
+    await unduhXlsx(`surat-keluar-${new Date().toISOString().slice(0,10)}`, ['Tanggal','Nomor Surat','Divisi/Biro','Tujuan','Perihal','Sifat','Tembusan','Petugas'], filtered.map(r => [r.tanggal_surat, r.nomor_surat, r.divisi || '', r.tujuan_surat, r.perihal, r.sifat, String(r.tembusan || '').replace(/\n/g, '; '), r.profiles?.nama_lengkap || '']), 'Surat Keluar')
   }
 
   function pesanError(error) {
@@ -222,7 +216,7 @@ function SuratKeluarInner() {
             <input placeholder="Cari..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:260}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
               <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
-              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (CSV)</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
           <div style={{overflowX:'auto'}}>

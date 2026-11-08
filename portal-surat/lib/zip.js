@@ -32,9 +32,8 @@ export async function unduhBerkasZip({ rows, namaFile, daftarHeader, daftarBaris
   }
   for (let i = 0; i < target.length; i += 4) await Promise.all(target.slice(i, i + 4).map(kerjakan))
 
-  const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
-  const csv = '\uFEFF' + [daftarHeader.map(esc).join(';'), ...daftarBaris.map(b => b.map(esc).join(';'))].join('\n')
-  zip.file('daftar.csv', csv)
+  const { buatXlsxBuffer } = await import('@/lib/excel')
+  zip.file('daftar.xlsx', await buatXlsxBuffer(daftarHeader, daftarBaris, 'Daftar'))
   if (gagal.length) zip.file('GAGAL-diunduh.txt', gagal.join('\n'))
 
   const isi = await zip.generateAsync({ type: 'blob' })

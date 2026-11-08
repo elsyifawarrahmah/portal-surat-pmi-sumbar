@@ -95,7 +95,7 @@ export default function KotakSaranPage() {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <select value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ width: 'auto' }}><option value="semua">Semua status</option>{Object.entries(ST).map(([k, v]) => <option key={k} value={k}>{v.l}</option>)}</select>
               <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Rekap Kotak Saran', subjudul: fStatus === 'semua' ? 'Semua masukan' : ST[fStatus].l, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak</button>
-              <button className="btn btn-ghost" onClick={() => unduhCsv('kotak-saran', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ CSV</button>
+              <button className="btn btn-ghost" onClick={() => unduhCsv('kotak-saran', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ Excel</button>
             </div>
           )}
         </div>

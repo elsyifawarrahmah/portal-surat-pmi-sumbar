@@ -32,13 +32,10 @@ export function pesanGalat(err) {
   return 'Data belum bisa ditampilkan. Mohon beri tahu admin web agar diperbaiki.' + detail
 }
 
-export function unduhCsv(namaFile, header, baris) {
-  const esc = v => { const s = String(v ?? '').replace(/"/g, '""'); return /[;"\n]/.test(s) ? `"${s}"` : s }
-  const csv = '\uFEFF' + [header, ...baris].map(r => r.map(esc).join(';')).join('\n')
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-  const a = document.createElement('a')
-  a.href = url; a.download = `${namaFile}-${hariIni()}.csv`
-  a.click(); URL.revokeObjectURL(url)
+// Nama lama dipertahankan agar semua halaman tetap jalan; hasilnya sekarang file Excel (.xlsx) yang rapi.
+export async function unduhCsv(namaFile, header, baris) {
+  const { unduhXlsx } = await import('@/lib/excel')
+  await unduhXlsx(`${namaFile}-${hariIni()}`, header, baris, namaFile)
 }
 
 export async function unggahBerkas(supabase, file, jenis = 'surat') {
