@@ -160,7 +160,7 @@ body{font-size:10.5pt;line-height:1.33;padding:0}
 @media print{@page{margin:0}}
 `
 
-function cetakSuratTugasPMI({ surat: s, skNomor }) {
+function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   const sah = s.status_persetujuan === 'disetujui'
   const anggota = (Array.isArray(s.anggota) ? s.anggota : []).filter(a => a && a.nama)
   const lampiran = anggota.length > MAKS_NAMA_SATU_HALAMAN
@@ -178,7 +178,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor }) {
     <div class="banner"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
     <div class="isi">
       <div class="jdl">SURAT TUGAS</div>
-      <div class="nmr">Nomor : ${h(s.nomor_surat)}${sah ? '' : ' <b style="color:#B3261E">(DRAF)</b>'}</div>
+      <div class="nmr">Nomor : ${h(s.nomor_surat)}</div>
       <table class="kv">${kv('Dasar', dasar || '-')}</table>
       <p style="margin:3mm 0 0">Ditugaskan Kepada :</p>
       ${tabelNama}
@@ -196,7 +196,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor }) {
         <div>Padang, ${h(tglPanjang(s.tanggal_surat))}</div>
         <div>Pengurus Provinsi</div><div>PALANG MERAH INDONESIA</div><div>Sumatera Barat</div><div>Sekretaris,</div>
         <div class="ttdarea">${s.paraf_ttd_url ? `<img src="${h(s.paraf_ttd_url)}" alt="TTD">` : ''}</div>
-        <div>${h(s.paraf_nama || '')}</div>
+        <div>${h(s.paraf_nama || namaSekretaris || '')}</div>
         ${kodeSah}
       </div>
       <div style="margin-top:3mm"><b>Mengetahui :</b></div>
@@ -214,9 +214,9 @@ function cetakSuratTugasPMI({ surat: s, skNomor }) {
   buka('Surat Tugas', halaman1 + halaman2, 'portrait', CSS_TUGAS)
 }
 
-export function cetakSuratTugas({ surat, skNomor, pksNomor, namaPencetak }) {
+export function cetakSuratTugas({ surat, skNomor, pksNomor, namaPencetak, namaSekretaris }) {
   const s = surat, jenis = s.jenis || 'tugas'
-  if (jenis === 'tugas') return cetakSuratTugasPMI({ surat: s, skNomor })
+  if (jenis === 'tugas') return cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris })
   const sah = s.status_persetujuan === 'disetujui'
   const judul = jenis === 'aset' ? 'Surat Aset' : jenis === 'kerja_sama' ? 'Surat Tugas Kerja Sama' : 'Surat Tugas'
   const anggota = Array.isArray(s.anggota) ? s.anggota : []

@@ -21,6 +21,7 @@ export default function SuratTugasPage() {
   const [kendaraan, setKendaraan] = useState([])
   const [dokumen, setDokumen] = useState([])
   const [orang, setOrang] = useState([])
+  const [namaSekretaris, setNamaSekretaris] = useState('')
   const [loading, setLoading] = useState(true)
   const [pesan, setPesan] = useState('')
   const [tab, setTab] = useState('tugas')
@@ -49,6 +50,9 @@ export default function SuratTugasPage() {
     if (r.error) setPesan(tabelBelumAda(r.error) ? BELUM_AKTIF : pesanGalat(r.error)); else setPesan('')
     setRows(r.data || []); setKendaraan(k.data || []); setDokumen(d.data || [])
     setOrang((p.data || []).filter(x => x.nama_lengkap))
+    // cari nama Sekretaris (unit bertipe sekretariat) untuk dicetak di kolom tanda tangan
+    const sk = await supabase.from('profiles').select('nama_lengkap, unit:surat_unit(tipe)')
+    if (!sk.error) setNamaSekretaris((sk.data || []).find(x => x.unit?.tipe === 'sekretariat')?.nama_lengkap || '')
     setLoading(false)
   }
 
@@ -74,7 +78,7 @@ export default function SuratTugasPage() {
     return hasil
   }
 
-  async function simpan() {
+  async function simpan(langsungCetak = false) {
     const f = form
     if (!f.nomor_surat || !f.tanggal_surat || !f.perihal) { setError('Lengkapi nomor surat, tanggal surat, dan perihal.'); return }
     if (f.jenis === 'tugas') {
@@ -96,16 +100,17 @@ export default function SuratTugasPage() {
       angkutan: bersih(f.angkutan), anggaran: bersih(f.anggaran),
     }
     const tulis = async data => editing
-      ? supabase.from('surat_tugas').update(data).eq('id', editing.id)
-      : supabase.from('surat_tugas').insert({ ...data, petugas_id: peran.userId, ...(f.jenis === 'kerja_sama' ? { status_pekerjaan: 'disiapkan' } : {}) })
-    let { error: err } = await tulis(payload)
+      ? supabase.from('surat_tugas').update(data).eq('id', editing.id).select().single()
+      : supabase.from('surat_tugas').insert({ ...data, petugas_id: peran.userId, ...(f.jenis === 'kerja_sama' ? { status_pekerjaan: 'disiapkan' } : {}) }).select().single()
+    let { data: tersimpan, error: err } = await tulis(payload)
     if (err && /angkutan|anggaran/i.test(err.message)) {   // migrasi format belum dijalankan: simpan tanpa dua kolom itu
       const { angkutan, anggaran, ...tanpa } = payload
-      ;({ error: err } = await tulis(tanpa))
+      ;({ data: tersimpan, error: err } = await tulis(tanpa))
       if (!err) alert('Tersimpan, tetapi kolom Angkutan dan Anggaran belum aktif di database. Jalankan supabase/migrasi-surat-tugas-format.sql di Supabase supaya tercetak.')
     }
     if (err) { setError(tabelBelumAda(err) ? BELUM_AKTIF : err.message); return }
     setForm(null); muat()
+    if (langsungCetak && tersimpan) cetak(tersimpan)
   }
 
   async function hapus(r) {
@@ -128,7 +133,7 @@ export default function SuratTugasPage() {
     const { error: e } = await supabase.from('kendaraan').delete().eq('id', k.id)
     if (e) alert('Belum bisa dihapus: ' + e.message); else muat()
   }
-  const cetak = r => cetakSuratTugas({ surat: r, skNomor: nomorDok(r.sk_id), pksNomor: nomorDok(r.pks_id), namaPencetak: peran.nama })
+  const cetak = r => cetakSuratTugas({ surat: r, skNomor: nomorDok(r.sk_id), pksNomor: nomorDok(r.pks_id), namaPencetak: peran.nama, namaSekretaris })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const j = form?.jenis
 
@@ -186,7 +191,7 @@ export default function SuratTugasPage() {
 
       {form && (
         <Modal judul={`${editing ? 'Edit' : 'Buat'} ${JENIS[j]}`} onClose={() => setForm(null)} lebar={680}
-          footer={<><button className="btn btn-ghost" onClick={() => setForm(null)}>Batal</button><button className="btn btn-primary" onClick={simpan}>Simpan</button></>}>
+          footer={<><button className="btn btn-ghost" onClick={() => setForm(null)}>Batal</button><button className="btn btn-ghost" onClick={() => simpan(false)}>Simpan</button><button className="btn btn-primary" onClick={() => simpan(true)}>🖨 Simpan & Cetak</button></>}>
           {error && <div className="error-box" style={{ whiteSpace: 'pre-wrap' }}>{error}</div>}
           <div className="field"><label>Tanggal Surat *</label><input type="date" value={form.tanggal_surat || ''} onChange={e => set('tanggal_surat', e.target.value)} /></div>
           <div className="field"><label>Nomor Surat *</label>
