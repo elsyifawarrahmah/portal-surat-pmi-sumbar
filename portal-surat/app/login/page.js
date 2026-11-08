@@ -22,6 +22,7 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    if (/type=recovery/.test(window.location.hash) && /access_token=/.test(window.location.hash)) { window.location.replace('/atur-ulang-sandi' + window.location.hash); return }
     // tombol Google/Facebook hanya muncul bila sudah diaktifkan admin di Supabase
     fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } })
       .then(r => r.json()).then(j => setProv({ google: !!j?.external?.google, facebook: !!j?.external?.facebook })).catch(() => {})

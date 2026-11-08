@@ -23,6 +23,12 @@ export default function AturUlangSandi() {
       const h = new URLSearchParams(window.location.hash.replace(/^#/, ''))
       const galat = q.get('galat') || h.get('error_code') || h.get('error') || q.get('error_code')
       if (galat) { gagal(/tautan/.test(galat) ? 'tautan' : 'kedaluwarsa'); return }
+      const at = h.get('access_token'), rt = h.get('refresh_token')
+      if (at && rt) {   // link bentuk token di bagian #: bisa dibuka di perangkat mana pun
+        const { error } = await supabase.auth.setSession({ access_token: at, refresh_token: rt })
+        if (error) gagal('kedaluwarsa'); else siap()
+        return
+      }
       const th = q.get('token_hash')
       if (th) {   // link bentuk token_hash: bisa dibuka di perangkat mana pun
         const { error } = await supabase.auth.verifyOtp({ token_hash: th, type: q.get('type') || 'recovery' })

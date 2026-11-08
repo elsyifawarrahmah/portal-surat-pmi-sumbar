@@ -2,10 +2,11 @@
 // Lupa kata sandi: kirim link ke email untuk membuat kata sandi baru.
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-browser'
+import { createClient as buatKlien } from '@supabase/supabase-js'
 
 export default function LupaSandi() {
-  const supabase = createClient()
+  // Alur "implicit": link di email tidak terikat browser yang meminta, jadi bisa dibuka dari HP atau laptop mana pun.
+  const supabase = buatKlien(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { auth: { flowType: 'implicit', persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
   const [email, setEmail] = useState('')
   const [terkirim, setTerkirim] = useState(false)
   const [error, setError] = useState('')
