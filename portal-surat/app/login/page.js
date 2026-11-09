@@ -81,7 +81,7 @@ export default function LoginPage() {
             <div className="brand-vline" style={{color:'#000'}} />
             <div className="brand-prov" style={{color:'#000',fontSize:16}}>Provinsi<br />Sumatera Barat</div>
           </div>
-          <div style={{fontSize:10,color:'var(--ink-soft)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:10}}>{NAMA_APLIKASI}</div>
+          <div style={{fontSize:16,fontWeight:800,color:'var(--pmi-red-dark)',letterSpacing:'.02em',marginTop:10}}>{NAMA_APLIKASI}</div>
         </div>
         <h1 style={{fontSize:21,margin:'0 0 4px'}}>{judul}</h1>
         <p style={{fontSize:14,color:'var(--ink-soft)',margin:'0 0 16px'}}>

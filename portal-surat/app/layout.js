@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Portal Surat" />
+        <meta name="apple-mobile-web-app-title" content="SATria PMI" />
         <meta name="color-scheme" content="light only" />
       </head>
       <body><AppShell>{children}</AppShell></body>

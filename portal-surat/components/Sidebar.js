@@ -160,7 +160,7 @@ export default function Sidebar() {
             <div className="brand-vline" />
             <div className="brand-prov">Provinsi<br />Sumatera Barat</div>
           </div>
-          <div style={{fontSize:10.5,opacity:.65,marginTop:10,letterSpacing:'.03em',textTransform:'uppercase'}}>{NAMA_APLIKASI}</div>
+          <div style={{fontSize:15,fontWeight:800,opacity:.95,marginTop:10,letterSpacing:'.02em'}}>{NAMA_APLIKASI}</div>
         </div>
         {peran.nama && <div className="sapa"><span>{sapaan()},</span><b>{peran.nama.split(' ')[0]}</b> 👋</div>}
         <div className="nav">

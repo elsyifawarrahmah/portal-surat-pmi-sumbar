@@ -17,7 +17,7 @@ export default function KontakModal({ supabase, unit, pesan, onClose }) {
     setOrang(r.data || []); setLoading(false)
   })() }, [unit.id])
 
-  const teksWa = encodeURIComponent(pesan || `Selamat pagi/siang, ini dari portal surat PMI Sumbar. Mohon dicek surat yang menunggu di ${unit.nama}. Terima kasih.`)
+  const teksWa = encodeURIComponent(pesan || `Selamat pagi/siang, ini dari SATria PMI Sumbar. Mohon dicek surat yang menunggu di ${unit.nama}. Terima kasih.`)
   return (
     <Modal judul={`Hubungi ${unit.nama}`} onClose={onClose} lebar={460}>
       {galat && <div className="error-box">{galat}</div>}

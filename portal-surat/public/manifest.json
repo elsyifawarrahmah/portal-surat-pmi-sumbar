@@ -1,6 +1,6 @@
 {
-  "name": "Portal Surat Digital - PMI Sumatera Barat",
-  "short_name": "Portal Surat PMI",
+  "name": "SATria PMI",
+  "short_name": "SATria PMI",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#FAF6EF",
@@ -29,7 +29,7 @@
   "scope": "/",
   "lang": "id",
   "orientation": "portrait",
-  "description": "Portal Surat Digital PMI Sumatera Barat",
+  "description": "SATria PMI: surat digital PMI Sumatera Barat",
   "shortcuts": [
     {
       "name": "Surat Masuk",

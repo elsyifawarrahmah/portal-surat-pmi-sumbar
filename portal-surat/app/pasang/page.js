@@ -1,5 +1,5 @@
 'use client'
-// Halaman "Pasang di HP": cara menaruh ikon Portal Surat di layar HP supaya sekali sentuh langsung masuk. Terbuka tanpa login.
+// Halaman "Pasang di HP": cara menaruh ikon SATria PMI di layar HP supaya sekali sentuh langsung masuk. Terbuka tanpa login.
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
@@ -127,7 +127,7 @@ export default function PasangPage() {
         <div style={{ background: 'var(--cream, #FAF6EF)', borderRadius: 12, padding: '12px 14px', fontSize: 16, wordBreak: 'break-all', marginBottom: 10 }}>{alamat}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button className="btn btn-ghost" style={{ minHeight: 52, fontSize: 16 }} onClick={salinLink}>{salin ? '✓ Tersalin' : '📋 Salin link'}</button>
-          <a className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href={`https://wa.me/?text=${encodeURIComponent('Portal Surat Digital PMI Sumatera Barat: ' + alamat)}`} target="_blank" rel="noreferrer">💬 Kirim lewat WhatsApp</a>
+          <a className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href={`https://wa.me/?text=${encodeURIComponent('SATria PMI, surat digital PMI Sumatera Barat: ' + alamat)}`} target="_blank" rel="noreferrer">💬 Kirim lewat WhatsApp</a>
         </div>
         {qr && <div style={{ textAlign: 'center', marginTop: 18 }}><img src={qr} alt="Kode QR portal" width={220} height={220} /><div style={{ fontSize: 15, color: 'var(--ink-soft)' }}>Arahkan kamera HP ke kode ini untuk membuka portal.</div></div>}
       </div>

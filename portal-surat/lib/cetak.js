@@ -53,7 +53,7 @@ function buka(judul, bodyHtml, orientasi = 'portrait', cssTambahan = '') {
   else setTimeout(cetak, 300)
 }
 
-const jejakCetak = nama => `<div class="foot">Dicetak ${h(fmtWaktu(new Date()))}${nama ? ' oleh ' + h(nama) : ''} · ${h(NAMA_APLIKASI)} PMI Sumatera Barat</div>`
+const jejakCetak = nama => `<div class="foot">Dicetak ${h(fmtWaktu(new Date()))}${nama ? ' oleh ' + h(nama) : ''} · ${h(NAMA_APLIKASI)} · Sumatera Barat</div>`
 
 // Lembar disposisi — mengikuti format kertas yang dipakai di kantor. Tanpa data disposisi = formulir kosong (isi tangan).
 export function cetakLembarDisposisi({ surat, disposisi, tujuan = [], namaPencetak }) {
@@ -122,7 +122,7 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
     <td style="width:33%"></td>
   </tr></table>
   ${surat.tembusan ? '<div style="margin-top:18px;font-size:13px"><b>Tembusan:</b><ol style="margin:4px 0 0 18px;padding:0">' + String(surat.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map(x => '<li>' + h(x.replace(/^\d+[.)]\s*/, '')) + '</li>').join('') + '</ol></div>' : ''}
-  <div style="font-size:11px;margin-top:24px">Keaslian dapat dicek di portal surat dengan memasukkan kode di atas.</div>
+  <div style="font-size:11px;margin-top:24px">Keaslian dapat dicek di SATria PMI (menu Cek Kode Paraf) dengan memasukkan kode di atas.</div>
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Pengesahan Surat Keluar', body)
 }
