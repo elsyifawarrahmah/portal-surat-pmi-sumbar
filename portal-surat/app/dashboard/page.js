@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran } from '@/lib/peran'
 import NotifikasiButton from '@/components/NotifikasiButton'
+import AjakPasang from '@/components/AjakPasang'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { fmtTgl, fmtWaktu } from '@/lib/format'
 import { STATUS_SURAT, statusUntukSaya } from '@/lib/surat'
@@ -90,7 +91,7 @@ export default function Beranda() {
         </div>
       ))}
 
-      <div style={{ marginTop: 24 }}><NotifikasiButton /></div>
+      <div style={{ marginTop: 24 }}><AjakPasang /><NotifikasiButton /></div>
     </div></div>
   )
 }

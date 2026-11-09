@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 
 function urlBase64ToUint8Array(base64String) {
@@ -17,7 +18,12 @@ export default function NotifikasiButton() {
   useEffect(() => { checkStatus() }, [])
 
   async function checkStatus() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) { setStatus('unsupported'); return }
+    const ua = navigator.userAgent
+    const iphone = /iPad|iPhone|iPod/.test(ua)
+    const terpasang = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setStatus(iphone ? (terpasang ? 'ios-lama' : 'ios-pasang') : 'unsupported'); return
+    }
     if (Notification.permission === 'denied') { setStatus('denied'); return }
     const reg = await navigator.serviceWorker.register('/sw.js')
     const sub = await reg.pushManager.getSubscription()
@@ -28,6 +34,7 @@ export default function NotifikasiButton() {
     setBusy(true)
     try {
       const reg = await navigator.serviceWorker.register('/sw.js')
+      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) { alert('Notifikasi belum disiapkan oleh admin web (kunci notifikasi belum dipasang). Hubungi admin web.'); setBusy(false); return }
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') { setStatus('denied'); setBusy(false); return }
       const sub = await reg.pushManager.subscribe({
@@ -50,8 +57,13 @@ export default function NotifikasiButton() {
     setBusy(false)
   }
 
-  if (status === 'unsupported') return null
   if (status === 'checking') return null
+  if (status === 'unsupported' && !/Android/.test(navigator.userAgent)) return null
+  const kotakInfo = { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '12px 16px', background: 'var(--gold-bg)', color: 'var(--gold)', borderRadius: 10, fontSize: 14, fontWeight: 600, marginBottom: 18, lineHeight: 1.45 }
+  const tombolPasang = <Link href="/pasang" className="btn btn-primary" style={{ padding: '8px 14px', fontSize: 14, marginLeft: 'auto', textDecoration: 'none' }}>Lihat cara pasang</Link>
+  if (status === 'ios-pasang') return <div style={kotakInfo}>🔔 Notifikasi di iPhone: <b>pasang dulu ke Layar Utama</b>, lalu buka portal dari ikon merah PMI dan aktifkan di sini. {tombolPasang}</div>
+  if (status === 'ios-lama') return <div style={kotakInfo}>🔔 Notifikasi butuh iPhone dengan <b>iOS 16.4 atau lebih baru</b>. Perbarui iOS di Pengaturan → Umum → Pembaruan Perangkat Lunak.</div>
+  if (status === 'unsupported') return <div style={kotakInfo}>🔔 Browser ini belum mendukung notifikasi. Buka portal di <b>Chrome</b> lalu pasang di layar HP. {tombolPasang}</div>
 
   return (
     <div style={{
