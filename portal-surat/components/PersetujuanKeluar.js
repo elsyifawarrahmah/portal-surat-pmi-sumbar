@@ -6,6 +6,7 @@ import { useState } from 'react'
 import Modal from '@/components/Modal'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { fmtWaktu } from '@/lib/format'
+import { kabarkan } from '@/lib/notif'
 import { cetakPengesahanKeluar } from '@/lib/cetak'
 
 export const LABEL_SETUJU = {
@@ -34,6 +35,7 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
     const { error } = await supabase.rpc(fn, args)
     setSibuk(false)
     if (error) { setGalat(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/' + migrasi + ' dulu.' : error.message); return false }
+    kabarkan(rpc, surat.id)
     onChanged && onChanged(); return true
   }
   async function simpanTtd(file) {

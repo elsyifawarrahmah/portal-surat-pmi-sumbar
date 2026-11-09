@@ -6,6 +6,7 @@ import { hariIni } from '@/lib/format'
 import { PETUNJUK, SIFAT_DISPOSISI, KEPUTUSAN, KALIMAT_PESAN, susunInstruksi } from '@/lib/surat'
 import { KalimatCepat, TombolBicara, tambahKalimat } from '@/components/PilihanCepat'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
+import { kabarkan } from '@/lib/notif'
 
 const kodePenanda = () => { const a = new Uint8Array(4); crypto.getRandomValues(a); const h = Array.from(a, x => x.toString(16).padStart(2, '0')).join('').toUpperCase(); return `PMI-${h.slice(0, 4)}-${h.slice(4)}` }
 const cek = r => { if (r.error) throw new Error(r.error.message); return r }
@@ -65,6 +66,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
       const instruksi = susunInstruksi(sifat, petunjuk, pesan, keputusan)
       cek(await supabase.from('surat_disposisi_tujuan').insert(dipilih.map(unit_id => ({ disposisi_id: d.id, unit_id, instruksi, perlu_jawaban: /balas/i.test(petunjuk || '') }))))
       if (induk && ['menunggu', 'dibaca'].includes(induk.status)) await supabase.from('surat_disposisi_tujuan').update({ status: 'diproses' }).eq('id', induk.id)
+      kabarkan('surat', surat.id)
       onSaved && onSaved()
     } catch (e) { setError('Belum bisa dikirim. ' + e.message) }
     setSaving(false)

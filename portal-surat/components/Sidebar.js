@@ -47,6 +47,7 @@ const LINKS = [
   { href: '/bantuan', label: 'Bantuan', icon: 'bantuan', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
   { href: '/pasang', label: 'Pasang di HP', icon: 'tugas', grup: 'lain' },
+  { href: '/cek-kode', label: 'Cek Kode Paraf', icon: 'bantuan', grup: 'lain' },
   { href: '/kotak-saran', label: 'Kotak Saran', icon: 'saran', grup: 'lain' },
   { href: '/disposisi', label: 'Buku Disposisi', icon: 'disposisi', grup: 'lain', penuh: true },
   { href: '/surat-masuk', label: 'Buku Surat Masuk (lengkap)', icon: 'buku', grup: 'lain', penuh: true },
@@ -68,7 +69,7 @@ const LINKS = [
 const SEKSI = [
   { id: 'laporan', judul: 'Pantau & Laporan', ikon: 'laporan', hrefs: ['/pemantauan', '/laporan-bulanan', '/riwayat', '/surat-dibatalkan'] },
   { id: 'buku', judul: 'Buku & Arsip', ikon: 'buku', hrefs: ['/surat-masuk', '/disposisi', '/ekspedisi', '/arsip', '/surat-keputusan', '/perjanjian-kerja-sama', '/sertifikat-piagam'] },
-  { id: 'bantu', judul: 'Bantuan & Saran', ikon: 'bantuan', hrefs: ['/bantuan', '/pasang', '/kotak-saran'] },
+  { id: 'bantu', judul: 'Bantuan & Saran', ikon: 'bantuan', hrefs: ['/bantuan', '/pasang', '/cek-kode', '/kotak-saran'] },
   { id: 'admin', judul: 'Khusus admin web', ikon: 'user', hrefs: ['/data-user', '/log-aktivitas', '/backup', '/diagnosa'] },
 ]
 const sapaan = () => { const j = new Date().getHours(); return j < 11 ? 'Selamat pagi' : j < 15 ? 'Selamat siang' : j < 18 ? 'Selamat sore' : 'Selamat malam' }

@@ -204,6 +204,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
         <tr><td style="width:50mm">Tiba di Lokasi tanggal</td><td style="width:4mm">:</td><td style="width:62mm">.....................................</td><td>(.....................................)</td></tr>
         <tr><td style="padding-top:5mm">Kembali ke Markas tanggal</td><td style="padding-top:5mm">:</td><td style="padding-top:5mm">.....................................</td><td style="padding-top:5mm">(.....................................)</td></tr>
       </table>
+      ${s.tembusan ? `<div style="margin-top:3mm;font-size:10.5pt"><b>Tembusan :</b><br>${String(s.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map((x, i) => `${i + 1}. ${h(x.replace(/^\d+[.)]\s*/, ''))}`).join('<br>')}</div>` : ''}
     </div>
     <div class="ft"><span style="color:#B3282D">Markas PMI Provinsi Sumatera Barat</span> Jl. Sisingamangaraja No. 34 Padang<br>Telepon : 0751-8951757 email: sumatera_barat@pmi.or.id</div>
   </div>`

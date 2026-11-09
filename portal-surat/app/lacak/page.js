@@ -3,6 +3,7 @@
 // tetapi isi surat hanya bisa dibuka oleh unit yang dituju. Dibuat seperti pelacakan naskah di Srikandi.
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { kabarkan } from '@/lib/notif'
 import { createClient } from '@/lib/supabase-browser'
 import { usePeran, useUnits } from '@/lib/peran'
 import KontakModal from '@/components/KontakModal'
@@ -63,7 +64,7 @@ export default function LacakPage() {
   const [kirimSibuk, setKirimSibuk] = useState(false)
   async function kirimKeBiro(daftar) {
     setKirimSibuk(true); let gagal = 0, pesanGagal = ''
-    for (const r of daftar) { const { error } = await supabase.rpc('kirim_ke_biro_umum', { p_surat: r.surat_id }); if (error) { gagal++; pesanGagal = error.message } }
+    for (const r of daftar) { const { error } = await supabase.rpc('kirim_ke_biro_umum', { p_surat: r.surat_id }); if (error) { gagal++; pesanGagal = error.message } else kabarkan('surat', r.surat_id) }
     setKirimSibuk(false)
     if (gagal) alert(`${gagal} surat belum terkirim: ` + (/function|schema cache|does not exist/i.test(pesanGagal) ? 'jalankan supabase/migrasi-tata-usaha.sql dulu.' : pesanGagal))
     load()

@@ -92,6 +92,7 @@ export default function SuratTugasPage() {
     const bersih = v => (v === '' || v === undefined ? null : v)
     const payload = {
       jenis: f.jenis, nomor_surat: f.nomor_surat.trim(), tanggal_surat: f.tanggal_surat, perihal: f.perihal.trim(),
+      ...(('tembusan' in f) || bersih(f.tembusan) ? { tembusan: bersih(f.tembusan) } : {}),
       tujuan_surat: bersih(f.tujuan_surat), dasar: bersih(f.dasar), rincian: bersih(f.rincian), mengetahui: bersih(f.mengetahui),
       anggota: (f.anggota || []).filter(a => (a.nama || '').trim()).map(a => ({ nama: a.nama.trim(), jabatan: (a.jabatan || '').trim() })),
       tanggal_berangkat: bersih(f.tanggal_berangkat), tanggal_kembali: bersih(f.tanggal_kembali),
@@ -237,6 +238,7 @@ export default function SuratTugasPage() {
           {j !== 'tugas' && <div className="field"><label>{j === 'aset' ? 'Uraian Aset' : 'Uraian Pekerjaan'}</label><textarea rows={4} value={form.rincian || ''} onChange={e => set('rincian', e.target.value)} /></div>}
           <div className="field"><label>Dasar Surat Keputusan (opsional)</label>
             <select value={form.sk_id || ''} onChange={e => set('sk_id', e.target.value)}><option value="">— tidak ada —</option>{dokumen.filter(d => d.jenis === 'sk').map(d => <option key={d.id} value={d.id}>{d.nomor} — {d.judul}</option>)}</select></div>
+          {j === 'tugas' && <div className="field"><label>Tembusan (opsional)</label><textarea rows={2} value={form.tembusan || ''} onChange={e => set('tembusan', e.target.value)} placeholder={'Satu baris satu nama, mis.\nKetua PMI Provinsi\nArsip'} /></div>}
           {j === 'kerja_sama' && <div className="field"><label>Terkait Perjanjian Kerja Sama (opsional)</label>
             <select value={form.pks_id || ''} onChange={e => set('pks_id', e.target.value)}><option value="">— tidak ada —</option>{dokumen.filter(d => d.jenis === 'pks').map(d => <option key={d.id} value={d.id}>{d.nomor} — {d.judul}</option>)}</select></div>}
         </Modal>

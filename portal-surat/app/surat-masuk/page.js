@@ -2,6 +2,7 @@
 import { unggahBanyak, simpanLampiran, ketHint } from '@/lib/berkas'
 import { LihatBerkas } from '@/components/PratinjauBerkas'
 import PilihBerkas from '@/components/PilihBerkas'
+import { kabarkan } from '@/lib/notif'
 import DaftarLampiran from '@/components/DaftarLampiran'
 import PeringatanUnit from '@/components/PeringatanUnit'
 import { useEffect, useState, Suspense } from 'react'
@@ -139,7 +140,7 @@ function SuratMasukInner() {
     if (peran.isTataUsaha) {
       const { error: eKirim } = await supabase.rpc('kirim_ke_biro_umum', { p_surat: newSurat.id })
       if (eKirim) alert('Surat tercatat, tetapi belum terkirim ke Biro Umum: ' + (/function|schema cache|does not exist/i.test(eKirim.message) ? 'jalankan supabase/migrasi-tata-usaha.sql dulu.' : eKirim.message) + '\nBuka surat itu lalu tekan "Kirim ke Biro Umum".')
-      else alert('Surat tercatat dan sudah dikirim ke Biro Umum. Pantau lewat menu Lacak Surat.')
+      else { kabarkan('surat', newSurat.id); alert('Surat tercatat dan sudah dikirim ke Biro Umum. Pantau lewat menu Lacak Surat.') }
     }
     // file pertama = berkas utama (kolom lama); file ke-2 dst. disimpan sebagai lampiran
     if (_berkas && _berkas.length > 1) await simpanLampiran(supabase, 'masuk', newSurat.id, _berkas.slice(1))
