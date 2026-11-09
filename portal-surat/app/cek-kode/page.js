@@ -2,7 +2,6 @@
 // Cek keaslian kode penanda (PMI-XXXX-XXXX) pada paraf / persetujuan / tanda tangan disposisi.
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import Sidebar from '@/components/Sidebar'
 import { fmtWaktu } from '@/lib/format'
 
 export default function CekKode() {
@@ -23,7 +22,7 @@ export default function CekKode() {
     setHasil(data || [])
   }
   return (
-    <div className="app"><Sidebar /><div className="main">
+    <div className="app"><div className="main">
       <div className="topbar"><div><h1>Cek Kode Paraf</h1><p className="desc">Pastikan tanda tangan dan paraf di surat memang dibuat lewat portal ini.</p></div></div>
       <div className="panel" style={{ maxWidth: 640 }}><div className="panel-body">
         <form onSubmit={cek}>
