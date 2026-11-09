@@ -38,7 +38,7 @@ export async function POST(request) {
     const { data: tuj } = await db.from('surat_disposisi_tujuan').select('unit_id, status').eq('disposisi_id', d.id)
     penerima = await penggunaUnit((tuj || []).filter(t => t.status === 'menunggu').map(t => t.unit_id))
     judul = '📩 Ada surat untuk kamu'
-    isi = `${s.nomor_agenda ? 'Nomor agenda ' + s.nomor_agenda + '. ' : ''}Buka portal untuk membacanya.`
+    isi = `${s.nomor_agenda ? 'Nomor agenda ' + s.nomor_agenda + '. ' : ''}Buka SATria PMI untuk membacanya.`
     url = `/surat/${id}`
   } else {
     const { data: r } = await sb.from(jenis).select('id, status_persetujuan, petugas_id').eq('id', id).maybeSingle()
@@ -48,7 +48,7 @@ export async function POST(request) {
     if (r.status_persetujuan === 'diajukan') { penerima = await penggunaUnit(await unitTipe('sekretariat')); judul = '📝 Perlu paraf kamu'; isi = `Ada ${nama} yang menunggu paraf.` }
     else if (r.status_persetujuan === 'diparaf') { penerima = await penggunaUnit(await unitTipe('pimpinan')); judul = '✍️ Perlu persetujuan kamu'; isi = `Ada ${nama} yang menunggu persetujuan dan tanda tangan.` }
     else if (r.status_persetujuan === 'disetujui') { penerima = [r.petugas_id, ...(jenis === 'surat_keluar' ? await penggunaUnit(await unitTipe('biro_umum')) : [])]; judul = '✅ Surat sudah disetujui'; isi = `${nama[0].toUpperCase() + nama.slice(1)} sudah disetujui dan bertanda tangan.` }
-    else if (r.status_persetujuan === 'revisi') { penerima = [r.petugas_id]; judul = '↩ Surat dikembalikan'; isi = `Ada ${nama} yang perlu diperbaiki. Buka portal untuk melihat catatannya.` }
+    else if (r.status_persetujuan === 'revisi') { penerima = [r.petugas_id]; judul = '↩ Surat dikembalikan'; isi = `Ada ${nama} yang perlu diperbaiki. Buka SATria PMI untuk melihat catatannya.` }
   }
   penerima = [...new Set(penerima.filter(x => x && x !== saya))]
   if (!penerima.length) return NextResponse.json({ ok: true, terkirim: 0 })

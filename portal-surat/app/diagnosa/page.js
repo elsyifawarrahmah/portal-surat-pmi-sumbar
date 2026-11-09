@@ -46,7 +46,7 @@ export default function DiagnosaPage() {
     <div className="app"><div className="main">
       <div className="topbar"><div><h1>Cek Database</h1><p className="desc">Menguji tiap bagian fitur baru. Kalau ada yang ✗, kirim screenshot halaman ini ke asisten.</p></div><button className="btn btn-primary" onClick={uji} disabled={jalan}>{jalan ? 'Menguji...' : 'Uji ulang'}</button></div>
       <div className="panel"><div className="panel-body" style={{ fontSize: 14 }}>
-        Portal ini terhubung ke project Supabase: <b className="mono">{host}</b><br />
+        SATria PMI terhubung ke project Supabase: <b className="mono">{host}</b><br />
         <span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>Alamat ini harus sama dengan Project URL di Supabase → Project Settings → API (tempat kamu menjalankan SQL).</span>
       </div></div>
       {!jalan && <div style={{ background: gagal.length ? '#FBE7E7' : 'var(--stock-bg)', color: gagal.length ? '#B3261E' : 'var(--stock)', padding: '10px 14px', borderRadius: 10, fontWeight: 700, marginBottom: 16 }}>{gagal.length ? `${gagal.length} dari ${hasil.length} pengujian gagal` : `Semua ${hasil.length} pengujian lolos ✓`}</div>}

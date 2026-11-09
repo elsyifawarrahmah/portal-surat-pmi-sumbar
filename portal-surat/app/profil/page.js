@@ -109,7 +109,7 @@ export default function ProfilPage() {
           <div className="profil-grid">
             <form onSubmit={simpan} className="profil-kartu">
               <h3>Biodata</h3>
-              <p className="ket">Data ini terlihat oleh rekan kerja di portal.</p>
+              <p className="ket">Data ini terlihat oleh rekan kerja di SATria PMI.</p>
               <div className="profil-2kol">
                 <div className="field"><label>Nama lengkap</label><input value={form.nama_lengkap} onChange={e => setForm({ ...form, nama_lengkap: e.target.value })} required /></div>
                 <div className="field"><label>Jabatan</label><input value={form.jabatan} onChange={e => setForm({ ...form, jabatan: e.target.value })} placeholder="mis. Sekretaris" /></div>

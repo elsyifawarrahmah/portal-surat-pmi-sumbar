@@ -123,7 +123,7 @@ export default function LaporanBulananPage() {
           try { const res = await fetch(await urlAman(supabase, b.url)); if (!res.ok) throw new Error(res.status); zip.file(`${folder}/${b.nama.replace(/[\\/:*?"<>|]+/g, '_')}`, await res.blob()) } catch { gagal.push(`${r.s.nomor_surat}: ${b.nama}`) }
         }
       }
-      if (gagal.length) zip.file('GAGAL-DIUNDUH.txt', 'File berikut tidak bisa diambil otomatis, unduh manual dari portal:\n\n' + gagal.join('\n\n'))
+      if (gagal.length) zip.file('GAGAL-DIUNDUH.txt', 'File berikut tidak bisa diambil otomatis, unduh manual dari SATria PMI:\n\n' + gagal.join('\n\n'))
       unduhBlob(`laporan-surat-${bulan}.zip`, await zip.generateAsync({ type: 'blob' }))
       setPesan(gagal.length ? `ZIP terunduh. ${gagal.length} file gagal diambil, daftarnya ada di GAGAL-DIUNDUH.txt.` : '')
     } catch (e) { setPesan(pesanGalat(e)) }

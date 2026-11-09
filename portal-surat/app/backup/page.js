@@ -94,7 +94,7 @@ export default function BackupPage() {
       }))
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetLog), 'Log Aktivitas')
 
-      const filename = `Backup-Portal-Surat-PMI-Sumbar-${new Date().toISOString().slice(0,10)}.xlsx`
+      const filename = `Backup-SATria-PMI-${new Date().toISOString().slice(0,10)}.xlsx`
 
       // Disposisi, panggilan, riwayat, ekspedisi, kotak saran, unit (kosong bila database belum diperbarui)
       const sheet = (rows, nama) => XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), nama)

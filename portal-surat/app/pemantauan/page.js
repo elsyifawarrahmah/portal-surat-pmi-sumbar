@@ -10,7 +10,7 @@ import { labelTahap } from '@/lib/tahap'
 import { fmtTgl, fmtWaktu, hariSejak, sudahLewat, tabelBelumAda, PESAN_MIGRASI, pesanGalat } from '@/lib/format'
 
 const JENIS = {
-  belum_input: 'Surat belum diinput ke portal',
+  belum_input: 'Surat belum diinput ke SATria PMI',
   belum_dikirim: 'Surat belum dikirim / diteruskan ke Markas',
   tindak_lanjut: 'Disposisi belum ditindaklanjuti',
   lainnya: 'Lainnya',
@@ -21,8 +21,8 @@ const cocokUnit = (r, u) => r.unit_id === u.id || norm(r.divisi) === norm(u.nama
 
 function templatePesan(jenis, unit, terakhir) {
   const t = {
-    belum_input: `Mohon segera input surat yang belum tercatat di portal oleh ${unit}.${terakhir ? ` Input terakhir: ${terakhir}.` : ' Belum ada surat yang diinput.'} Jika memang tidak ada surat, mohon balas panggilan ini.`,
-    belum_dikirim: `Mohon surat yang sudah disiapkan oleh ${unit} segera dikirim / diteruskan ke Markas dan dicatat di portal.`,
+    belum_input: `Mohon segera input surat yang belum tercatat di SATria PMI oleh ${unit}.${terakhir ? ` Input terakhir: ${terakhir}.` : ' Belum ada surat yang diinput.'} Jika memang tidak ada surat, mohon balas panggilan ini.`,
+    belum_dikirim: `Mohon surat yang sudah disiapkan oleh ${unit} segera dikirim / diteruskan ke Markas dan dicatat di SATria PMI.`,
     tindak_lanjut: `Mohon tindak lanjuti disposisi yang masih menunggu di ${unit}.`,
     lainnya: '',
   }

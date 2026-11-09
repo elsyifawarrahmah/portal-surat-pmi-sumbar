@@ -28,7 +28,7 @@ export default function BantuanPage() {
   const bold = t => t.split('**').map((x, i) => (i % 2 ? <b key={i}>{x}</b> : x))
   return (
     <div className="app"><div className="main">
-      <div className="topbar"><div><h1>Bantuan</h1><p className="desc">Cara memakai portal ini, langkah demi langkah.</p></div></div>
+      <div className="topbar"><div><h1>Bantuan</h1><p className="desc">Cara memakai SATria PMI, langkah demi langkah.</p></div></div>
 
       <div className="panel"><div className="panel-body" style={{ fontSize: 15, lineHeight: 1.6 }}>
         <h3 style={{ marginTop: 0 }}>Siapa bisa melihat apa?</h3>
