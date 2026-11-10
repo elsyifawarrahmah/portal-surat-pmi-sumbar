@@ -8,6 +8,7 @@ import { usePeran } from '@/lib/peran'
 import NotifikasiButton from '@/components/NotifikasiButton'
 import AjakPasang from '@/components/AjakPasang'
 import PeringatanUnit from '@/components/PeringatanUnit'
+import { ICONS } from '@/components/Sidebar'
 import { fmtTgl, fmtWaktu } from '@/lib/format'
 import { STATUS_SURAT, statusUntukSaya } from '@/lib/surat'
 
@@ -20,6 +21,8 @@ function Kotak({ angka, judul, ket, warna, href }) {
     </Link>
   )
 }
+
+const sapaan = () => { const j = new Date().getHours(); return j < 11 ? 'Selamat pagi' : j < 15 ? 'Selamat siang' : j < 18 ? 'Selamat sore' : 'Selamat malam' }
 
 export default function Beranda() {
   const supabase = createClient()
@@ -58,7 +61,30 @@ export default function Beranda() {
 
   return (
     <div className="app"><div className="main kolom" style={{ '--lebar': '980px' }}>
-      <div className="topbar"><div><h1>Halo, {peran.nama || '...'} 👋</h1><p className="desc">{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''}</p></div></div>
+      <div className="hero">
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div className="hero-sapa">{sapaan()}</div>
+          <h1>Halo, {(peran.nama || '...').split(' ')[0]} 👋</h1>
+          <p>{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''} · SATria PMI</p>
+        </div>
+        <img src="/logo-pmi.png" alt="" className="hero-logo" />
+      </div>
+      <div className="tiles">
+        {[
+          { href: '/surat', label: 'Surat Masuk', ikon: 'masuk', tone: '#1F5E99', pale: '#E4EEF9', badge: penuh ? hit('belum_diteruskan') : hit('belum') },
+          { href: '/surat-keluar', label: 'Surat Keluar', ikon: 'keluar', tone: '#2E7D32', pale: '#E7F4EA' },
+          { href: '/surat-tugas', label: 'Surat Tugas', ikon: 'tugas', tone: '#C2570C', pale: '#FDEBDD' },
+          { href: '/lacak', label: 'Lacak Surat', ikon: 'lacak', tone: '#6B3FB5', pale: '#EEE7FA' },
+          peran.bisaCatatMasuk ? { href: '/surat-masuk?tambah=1', label: 'Catat Surat', ikon: 'buku', tone: '#B3261E', pale: '#FBE7E7' } : { href: '/pasang', label: 'Pasang di HP', ikon: 'bantuan', tone: '#B3261E', pale: '#FBE7E7' },
+          { href: '/bantuan', label: 'Bantuan', ikon: 'bantuan', tone: '#B7791F', pale: '#FBF1DC' },
+        ].map(t => (
+          <Link key={t.label} href={t.href} className="tile" style={{ '--tone': t.tone, '--pale': t.pale }}>
+            <span className="tile-ikon">{ICONS[t.ikon]}</span>
+            {t.label}
+            {t.badge > 0 && <span className="tile-badge">{t.badge > 99 ? '99+' : t.badge}</span>}
+          </Link>
+        ))}
+      </div>
       <PeringatanUnit peran={peran} />
 
       {panggilan.length > 0 && (

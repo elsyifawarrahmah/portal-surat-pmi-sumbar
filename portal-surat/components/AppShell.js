@@ -2,6 +2,7 @@
 // Kerangka tetap: sidebar dipasang SEKALI di sini, jadi tidak hilang-muncul atau kembali ke atas saat pindah halaman.
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import BottomNav from '@/components/BottomNav'
 
 export default function AppShell({ children }) {
   const pathname = usePathname() || ''
@@ -10,6 +11,7 @@ export default function AppShell({ children }) {
     <>
       {!tanpaMenu && <Sidebar />}
       {children}
+      {!tanpaMenu && <BottomNav />}
     </>
   )
 }

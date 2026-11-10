@@ -12,7 +12,7 @@ const Svg = ({ children }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>{children}</svg>
 )
 
-const ICONS = {
+export const ICONS = {
   dashboard: <Svg><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></Svg>,
   masuk: <Svg><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></Svg>,
   keluar: <Svg><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></Svg>,
@@ -80,6 +80,8 @@ export default function Sidebar() {
   const supabase = createClient()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  // tombol "Menu" di kontrol bawah (BottomNav) membuka / menutup menu samping
+  useEffect(() => { const f = () => setMobileOpen(o => !o); window.addEventListener('satria:menu', f); return () => window.removeEventListener('satria:menu', f) }, [])
   const peran = usePeran()
   const [badge, setBadge] = useState({ disposisi: 0, panggilan: 0 })
   const [seksiBuka, setSeksiBuka] = useState({})
