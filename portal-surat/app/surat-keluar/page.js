@@ -226,7 +226,7 @@ function SuratKeluarInner() {
                 {loading ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
                 filtered.length===0 ? <tr><td colSpan={columns.length+5} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Belum ada data.</td></tr> :
                 filtered.map(r => (
-                  <tr key={r.id}>
+                  <tr key={r.id} style={['revisi','ditolak'].includes(r.status_persetujuan) ? { background: '#FFF1F1', boxShadow: 'inset 5px 0 0 #B3261E' } : undefined}>
                     <td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
                     {columns.map(c => <td key={c.k} data-label={c.label}>{r[c.k] ?? '-'}</td>)}
                     <td data-label="Persetujuan"><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,whiteSpace:'normal',textAlign:'left'}} onClick={()=>setModalSetuju(r)}><span style={{color:(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[1],fontWeight:700}}>{(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[0]}</span></button></td>

@@ -158,6 +158,8 @@ body{font-size:10.5pt;line-height:1.33;padding:0}
 .ft{position:absolute;left:20mm;right:20mm;bottom:9mm;font-size:9pt;font-weight:700;line-height:1.35}
 .lamp{margin:0 0 3.5mm}.lamp td{border:none;padding:0 2mm 0 0;vertical-align:top}
 @media print{@page{margin:0}}
+.stempel{position:absolute;top:196mm;left:16mm;transform:rotate(-14deg);border:1.4mm solid #C8102E;color:#C8102E;font-weight:800;font-size:23pt;padding:1mm 6mm;opacity:.72;letter-spacing:.5pt;z-index:5}
+.koreksi{position:absolute;left:20mm;right:20mm;bottom:22mm;border:.4mm solid #C8102E;color:#C8102E;padding:2mm 3mm;font-size:9pt;line-height:1.3}
 `
 
 function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
@@ -174,7 +176,10 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
       ? `<table class="nm"><thead><tr><th style="width:9mm">No</th><th style="width:60mm">Nama</th><th>Jabatan</th></tr></thead><tbody>${anggota.map((a, i) => `<tr><td>${i + 1}</td><td>${h(a.nama)}</td><td>${h(a.jabatan || '')}</td></tr>`).join('')}</tbody></table>`
       : '<div style="margin:1mm 0 3mm 5mm">........................................</div>'
   const kodeSah = sah && s.setuju_kode ? `<div style="font-size:7.5pt;color:#444;margin-top:1mm">Disetujui digital oleh ${h(s.setuju_nama || '')} · Kode ${h(s.setuju_kode)} · ${h(fmtWaktu(s.setuju_pada))}</div>` : ''
-  const halaman1 = `<div class="hal">
+  const merahStatus = ['revisi', 'ditolak'].includes(s.status_persetujuan)
+  const stempel = merahStatus ? `<div class="stempel">${s.status_persetujuan === 'ditolak' ? 'DITOLAK' : 'PERLU DIPERBAIKI'}</div>` : ''
+  const catatanMerah = merahStatus && s.catatan_revisi ? `<div class="koreksi"><b>Catatan koreksi:</b> ${h(s.catatan_revisi)}</div>` : ''
+  const halaman1 = `<div class="hal">${stempel}${catatanMerah}
     <div class="banner"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
     <div class="isi">
       <div class="jdl">SURAT TUGAS</div>
@@ -251,4 +256,24 @@ export function cetakSuratTugas({ surat, skNomor, pksNomor, namaPencetak, namaSe
   <table style="margin-top:4px;border:none"><tr>${blok('Paraf Sekretaris', s.paraf_nama, s.paraf_ttd_url, s.paraf_kode, s.paraf_pada)}${blok(s.setuju_jabatan || 'Kepala Markas / Ketua', s.setuju_nama, s.setuju_ttd_url, s.setuju_kode, s.setuju_pada)}</tr></table>
   ${jejakCetak(namaPencetak)}`
   buka(judul, body)
+}
+
+// Lembar koreksi: seperti naskah yang dicoret pimpinan dengan tinta merah. Dicetak bila surat dikembalikan / ditolak.
+export function cetakLembarKoreksi({ surat, riwayat = [], namaPencetak, jenis = 'Surat Keluar' }) {
+  const merah = '#C8102E', ditolak = surat.status_persetujuan === 'ditolak'
+  const NAMA = { koreksi: 'Perlu diperbaiki', tolak: 'Ditolak (tidak setuju)', ke_sekretaris: 'Dikembalikan ke Sekretaris' }
+  const catatan = riwayat.length ? riwayat.map(r => `<div style="border-left:5px solid ${merah};background:#FFF3F3;color:#8C1010;padding:8px 12px;margin:8px 0"><b>${h(NAMA[r.tipe] || r.tipe)}</b> · ${h(r.oleh_nama || '')} (${h(r.oleh_peran || '')}) · ${h(fmtWaktu(r.created_at))}<div style="color:#5A1010;margin-top:3px">${h(r.catatan)}</div></div>`).join('')
+    : `<div style="border-left:5px solid ${merah};background:#FFF3F3;color:#8C1010;padding:8px 12px">${h(surat.catatan_revisi || '-')}</div>`
+  const body = `${kop()}
+  <div style="border:5px solid ${merah};color:${merah};font-weight:800;font-size:28px;text-align:center;padding:6px 14px;transform:rotate(-5deg);width:max-content;margin:44px auto 26px;opacity:.88">${ditolak ? 'DITOLAK — TIDAK DISETUJUI' : 'PERLU DIPERBAIKI'}</div>
+  <div class="box"><table>
+    <tr><td style="width:50%">${h(jenis)} nomor : ${h(surat.nomor_surat)}</td><td>Tanggal surat : ${h(fmtTgl(surat.tanggal_surat))}</td></tr>
+    <tr><td colspan="2">Perihal : ${h(surat.perihal)}</td></tr>
+    ${surat.tujuan_surat ? `<tr><td colspan="2">Tujuan : ${h(surat.tujuan_surat)}</td></tr>` : ''}
+  </table></div>
+  <h3 style="color:${merah};margin:18px 0 4px">Catatan koreksi</h3>
+  ${catatan}
+  <p style="margin-top:20px;font-size:13px">Setelah diperbaiki, surat diajukan kembali ke Sekretaris untuk diparaf, lalu ke Kepala Markas / Ketua untuk disetujui.</p>
+  ${jejakCetak(namaPencetak)}`
+  buka('Lembar Koreksi', body)
 }

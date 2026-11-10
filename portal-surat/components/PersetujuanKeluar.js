@@ -2,19 +2,21 @@
 // Alur surat keluar: pembuat ajukan -> Sekretaris paraf -> Kepala Markas/Ketua setuju + TTD -> Biro Umum.
 import { KalimatCepat, TombolBicara, tambahKalimat } from '@/components/PilihanCepat'
 import { KALIMAT_TOLAK } from '@/lib/surat'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Modal from '@/components/Modal'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { fmtWaktu } from '@/lib/format'
 import { kabarkan } from '@/lib/notif'
-import { cetakPengesahanKeluar } from '@/lib/cetak'
+import { cetakPengesahanKeluar, cetakLembarKoreksi } from '@/lib/cetak'
 
 export const LABEL_SETUJU = {
-  null: ['Belum diajukan', '#6B6B6B'], revisi: ['Perlu diperbaiki', '#B3261E'], diajukan: ['Menunggu paraf Sekretaris', '#B07A00'],
+  null: ['Belum diajukan', '#6B6B6B'], revisi: ['PERLU DIPERBAIKI', '#B3261E'], ditolak: ['DITOLAK · tidak disetujui', '#B3261E'], diajukan: ['Menunggu paraf Sekretaris', '#B07A00'],
   diparaf: ['Menunggu persetujuan Kepala Markas/Ketua', '#1F5E99'], disetujui: ['Disetujui · di Biro Umum', '#2E7D32'],
 }
 const langkah = [['diajukan', '1. Diajukan'], ['diparaf', '2. Paraf Sekretaris'], ['disetujui', '3. Disetujui + TTD']]
 const urut = { diajukan: 1, diparaf: 2, disetujui: 3 }
+const NAMA_TIPE = { koreksi: 'Perlu diperbaiki', tolak: 'Ditolak (tidak setuju)', ke_sekretaris: 'Dikembalikan ke Sekretaris' }
+const JUDUL_TIPE = { koreksi: 'Apa yang perlu diperbaiki? (surat kembali ke pembuat)', tolak: 'Kenapa surat ini tidak disetujui?', ke_sekretaris: 'Catatan untuk Sekretaris (surat kembali untuk paraf ulang)' }
 
 export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, onClose, onChanged, rpc = 'surat_keluar', cetak = cetakPengesahanKeluar, migrasi = 'migrasi-persetujuan-paraf.sql' }) {
   const st = surat.status_persetujuan || null
@@ -23,11 +25,18 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
   const [ttdUrl, setTtdUrl] = useState(peran.ttdUrl || '')
   const [buat, setBuat] = useState(false)
   const [alasan, setAlasan] = useState('')
-  const [tolak, setTolak] = useState(false)
+  const [tipeKoreksi, setTipeKoreksi] = useState('')
+  const [riwayat, setRiwayat] = useState([])
+  const jenisSurat = rpc === 'surat_tugas' ? 'tugas' : 'keluar'
+  async function muatRiwayat() {
+    const { data, error } = await supabase.from('surat_koreksi').select('*').eq('jenis_surat', jenisSurat).eq('surat_id', surat.id).order('created_at', { ascending: false })
+    if (!error) setRiwayat(data || [])
+  }
+  useEffect(() => { muatRiwayat() }, [surat.id, surat.status_persetujuan])
 
   const bisaParaf = (peran.isAdmin || peran.tipe === 'sekretariat') && st === 'diajukan'
   const bisaSetuju = (peran.isAdmin || peran.tipe === 'pimpinan') && st === 'diparaf'
-  const bisaAjukan = bisaUbah && (!st || st === 'revisi')
+  const bisaAjukan = bisaUbah && (!st || st === 'revisi' || st === 'ditolak')
   const bisaKembali = (peran.isAdmin || ['sekretariat', 'pimpinan'].includes(peran.tipe)) && ['diajukan', 'diparaf'].includes(st)
 
   async function panggil(fn, args) {
@@ -61,7 +70,24 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         {langkah.map(([k, t]) => <span key={k} className="tag" style={{ background: (urut[st] || 0) >= urut[k] ? '#E7F4EA' : '#F1F1F1', color: (urut[st] || 0) >= urut[k] ? '#2E7D32' : '#777', fontSize: 13, padding: '6px 12px' }}>{(urut[st] || 0) >= urut[k] ? '✔ ' : ''}{t}</span>)}
       </div>
       <div style={{ fontWeight: 700, color: warna, marginBottom: 10 }}>Status: {label}</div>
-      {st === 'revisi' && surat.catatan_revisi && <div style={{ background: '#FBE7E7', borderRadius: 10, padding: '8px 12px', marginBottom: 10, fontSize: 14 }}><b>Catatan perbaikan:</b> {surat.catatan_revisi}</div>}
+      {['revisi', 'ditolak'].includes(st) && (
+        <div style={{ background: '#FDECEC', border: '2px solid #B3261E', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
+          <div style={{ color: '#B3261E', fontWeight: 800, fontSize: 16 }}>{st === 'ditolak' ? '⛔ DITOLAK — tidak disetujui' : '✏️ PERLU DIPERBAIKI'}</div>
+          {(surat.catatan_revisi || riwayat[0]?.catatan) && <div style={{ color: '#8C1010', marginTop: 4, fontSize: 15 }}>{surat.catatan_revisi || riwayat[0]?.catatan}</div>}
+          {riwayat[0] && <div style={{ fontSize: 12.5, color: '#8C1010', marginTop: 4 }}>Oleh {riwayat[0].oleh_nama} ({riwayat[0].oleh_peran}) · {fmtWaktu(riwayat[0].created_at)}</div>}
+        </div>
+      )}
+      {riwayat.length > 0 && (
+        <details style={{ marginBottom: 12 }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#B3261E' }}>Riwayat koreksi dan penolakan ({riwayat.length})</summary>
+          {riwayat.map(r => (
+            <div key={r.id} style={{ borderLeft: '4px solid #B3261E', background: '#FFF6F6', padding: '8px 12px', margin: '8px 0', borderRadius: 8, fontSize: 14 }}>
+              <b style={{ color: '#B3261E' }}>{NAMA_TIPE[r.tipe]}</b> · {r.oleh_nama} ({r.oleh_peran}) · {fmtWaktu(r.created_at)}
+              <div style={{ color: '#5A1010' }}>{r.catatan}</div>
+            </div>
+          ))}
+        </details>
+      )}
 
       {surat.paraf_kode && <div style={{ border: '1px solid var(--line)', borderRadius: 12, padding: 12, marginBottom: 10 }}>
         <b>Paraf Sekretaris:</b> {surat.paraf_nama} · {fmtWaktu(surat.paraf_pada)}<br />
@@ -72,11 +98,34 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         {surat.setuju_ttd_url && <img src={surat.setuju_ttd_url} alt="TTD" style={{ height: 64, margin: '6px 0', background: '#fff' }} />}<br />
         <span className="mono" style={{ fontSize: 13 }}>Kode: {surat.setuju_kode}</span></div>}
 
-      {bisaAjukan && <button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk} onClick={() => panggil('ajukan_' + rpc, { p_id: surat.id })}>📨 Ajukan untuk paraf & persetujuan</button>}
+      {bisaAjukan && <button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk} onClick={() => panggil('ajukan_' + rpc, { p_id: surat.id })}>{st === 'revisi' || st === 'ditolak' ? '📨 Ajukan lagi setelah diperbaiki' : '📨 Ajukan untuk paraf & persetujuan'}</button>}
       {bisaParaf && <><div style={{ fontWeight: 700 }}>Paraf Sekretaris</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('paraf_' + rpc, { p_id: surat.id, p_ttd: ttdUrl })}>✍️ Paraf & teruskan ke Kepala Markas/Ketua</button></>}
       {bisaSetuju && <><div style={{ fontWeight: 700 }}>Setujui & tanda tangan</div>{blokTtd}<button className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, width: '100%' }} disabled={sibuk || !ttdUrl} onClick={() => panggil('setujui_' + rpc, { p_id: surat.id, p_ttd: ttdUrl })}>✅ Setujui & tanda tangani</button></>}
-      {bisaKembali && !tolak && <button className="btn btn-ghost" style={{ minHeight: 44, width: '100%', marginTop: 10 }} onClick={() => setTolak(true)}>↩ Kembalikan untuk diperbaiki</button>}
-      {tolak && <div style={{ marginTop: 10 }}><KalimatCepat daftar={KALIMAT_TOLAK} onPilih={k => setAlasan(a => tambahKalimat(a, k))} judul="Sentuh alasan untuk memasukkan:" /><TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setAlasan(a => tambahKalimat(a, t))} /><textarea rows={3} placeholder="Apa yang perlu diperbaiki?" value={alasan} onChange={e => setAlasan(e.target.value)} style={{ fontSize: 16 }} /><button className="btn btn-primary" style={{ minHeight: 44, marginTop: 6 }} disabled={sibuk} onClick={() => panggil('kembalikan_' + rpc, { p_id: surat.id, p_alasan: alasan })}>Kembalikan</button></div>}
+      {bisaKembali && !tipeKoreksi && (
+        <div style={{ marginTop: 12, border: '1px solid #E5B4B4', borderRadius: 12, padding: 12, background: '#FFFAFA' }}>
+          <div style={{ fontWeight: 700, color: '#B3261E', marginBottom: 8 }}>Ada yang tidak sesuai?</div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <button className="btn btn-ghost" style={{ minHeight: 50, fontSize: 15, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => { setTipeKoreksi('koreksi'); setAlasan('') }}>✏️ Perlu diperbaiki (kembali ke pembuat)</button>
+            <button className="btn btn-ghost" style={{ minHeight: 50, fontSize: 15, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => { setTipeKoreksi('tolak'); setAlasan('') }}>⛔ Tidak setuju (tolak surat)</button>
+            {(peran.isAdmin || peran.tipe === 'pimpinan') && st === 'diparaf' && <button className="btn btn-ghost" style={{ minHeight: 50, fontSize: 15, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => { setTipeKoreksi('ke_sekretaris'); setAlasan('') }}>↩ Kembalikan ke Sekretaris (paraf ulang)</button>}
+          </div>
+        </div>
+      )}
+      {tipeKoreksi && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontWeight: 700, color: '#B3261E', marginBottom: 6 }}>{JUDUL_TIPE[tipeKoreksi]}</div>
+          <KalimatCepat daftar={KALIMAT_TOLAK} onPilih={k => setAlasan(a => tambahKalimat(a, k))} judul="Sentuh alasan untuk memasukkan:" />
+          <TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setAlasan(a => tambahKalimat(a, t))} />
+          <textarea rows={3} placeholder="Tulis catatan koreksi (minimal 5 huruf)" value={alasan} onChange={e => setAlasan(e.target.value)} style={{ fontSize: 16 }} />
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            <button className="btn btn-ghost" style={{ minHeight: 46 }} onClick={() => setTipeKoreksi('')}>Batal</button>
+            <button className="btn btn-primary" style={{ minHeight: 46, flex: 1, background: '#B3261E', borderColor: '#B3261E' }} disabled={sibuk || alasan.trim().length < 5}
+              onClick={async () => { const ok = await panggil('koreksi_' + rpc, { p_id: surat.id, p_tipe: tipeKoreksi, p_catatan: alasan }); if (ok) { setTipeKoreksi(''); setAlasan(''); muatRiwayat() } }}>
+              {tipeKoreksi === 'tolak' ? 'Tolak surat' : tipeKoreksi === 'ke_sekretaris' ? 'Kembalikan ke Sekretaris' : 'Kembalikan untuk diperbaiki'}</button>
+          </div>
+        </div>
+      )}
+      {['revisi', 'ditolak'].includes(st) && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 10, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => cetakLembarKoreksi({ surat, riwayat, namaPencetak: peran.nama, jenis: rpc === 'surat_tugas' ? 'Surat Tugas' : 'Surat Keluar' })}>🖨 Cetak lembar koreksi (tanda merah)</button>}
       {st === 'disetujui' && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 8 }} onClick={() => cetak({ surat, namaPencetak: peran.nama })}>🖨 Cetak lembar pengesahan (TTD + kode)</button>}
     </Modal>
   )

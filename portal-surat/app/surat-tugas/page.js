@@ -162,7 +162,7 @@ export default function SuratTugasPage() {
                   tampil.map(r => {
                     const [label, warna] = LABEL_SETUJU[r.status_persetujuan || null] || LABEL_SETUJU.null
                     return (
-                      <tr key={r.id}>
+                      <tr key={r.id} style={['revisi', 'ditolak'].includes(r.status_persetujuan) ? { background: '#FFF1F1', boxShadow: 'inset 5px 0 0 #B3261E' } : undefined}>
                         <td data-label="Tanggal">{fmtTgl(r.tanggal_surat)}</td>
                         <td data-label="Nomor" className="mono">{r.nomor_surat}</td>
                         <td data-label="Perihal">{r.perihal}{sedangTugas(r) && <span className="tag" style={{ marginLeft: 6, background: 'var(--gold-bg)', color: 'var(--gold)' }}>Sedang bertugas</span>}</td>
