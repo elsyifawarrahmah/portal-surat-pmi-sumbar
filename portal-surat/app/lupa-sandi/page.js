@@ -38,6 +38,7 @@ export default function LupaSandi() {
           </form>
         </>
       )}
+      <div style={{ marginTop: 16, background: '#EEF5FB', border: '1px solid #1F6FB2', borderRadius: 12, padding: '10px 14px', fontSize: 14.5, lineHeight: 1.5 }}>Email tidak sampai atau link tidak bisa dibuka? <b>Minta admin web mengatur ulang kata sandimu.</b> Admin akan memberi kata sandi baru, lalu kamu bisa menggantinya di menu Profil.</div>
       <div style={{ textAlign: 'center', marginTop: 18, fontSize: 14 }}><Link href="/login" style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>← Kembali ke halaman masuk</Link></div>
     </div></div>
   )

@@ -35,6 +35,15 @@ export default function DataUserPage() {
 
   const [meId, setMeId] = useState('')
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setMeId(data?.user?.id || '')) }, [])
+  async function aturSandi(u) {
+    const saran = 'Satria' + Math.floor(1000 + Math.random() * 9000)
+    const baru = prompt(`Kata sandi BARU untuk "${u.nama_lengkap}" (${u.email || ''}).\n\nMinimal 8 karakter, ada huruf dan angka. Boleh pakai saran ini:`, saran)
+    if (!baru) return
+    if (baru.length < 8 || !/[A-Za-z]/.test(baru) || !/\d/.test(baru)) { alert('Kata sandi minimal 8 karakter, ada huruf dan angka.'); return }
+    const r = await fetch('/api/admin-sandi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: u.id, sandi: baru }) }).then(x => x.json()).catch(() => ({ ok: false, pesan: 'Tidak tersambung ke server.' }))
+    if (!r.ok) { alert('Belum berhasil: ' + (r.pesan || 'coba lagi')); return }
+    alert(`Kata sandi ${u.nama_lengkap} sudah diganti menjadi:\n\n${baru}\n\nBeri tahu orangnya. Setelah masuk, ia bisa menggantinya di menu Profil.`)
+  }
   async function hapusUser(u) {
     if (u.id === meId) { alert('Kamu tidak bisa menghapus akunmu sendiri.'); return }
     if (!confirm(`Hapus akun "${u.nama_lengkap}" (${u.email || 'tanpa email'})?\n\nAkun ini tidak bisa masuk lagi. Surat yang pernah dia catat tetap ada.\nTindakan ini tidak bisa dibatalkan.`)) return
@@ -114,10 +123,10 @@ export default function DataUserPage() {
           </div>
           <div style={{overflowX:'auto'}}>
             <table>
-              <thead><tr><th>Status</th><th>Nama</th><th>Email</th><th>Role</th><th>Unit / Bidang</th><th>Telepon / WA</th><th>Terakhir Aktif</th><th>Ubah Role</th><th>Hapus</th></tr></thead>
+              <thead><tr><th>Status</th><th>Nama</th><th>Email</th><th>Role</th><th>Unit / Bidang</th><th>Telepon / WA</th><th>Terakhir Aktif</th><th>Ubah Role</th><th>Sandi</th><th>Hapus</th></tr></thead>
               <tbody>
-                {loading ? <tr><td colSpan={9} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
-                filtered.length===0 ? <tr><td colSpan={9} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Tidak ada user ditemukan.</td></tr> :
+                {loading ? <tr><td colSpan={10} style={{textAlign:'center',padding:30}}>Memuat...</td></tr> :
+                filtered.length===0 ? <tr><td colSpan={10} style={{textAlign:'center',padding:30,color:'var(--ink-soft)'}}>Tidak ada user ditemukan.</td></tr> :
                 filtered.map(u => {
                   const online = isOnline(u.last_seen)
                   return (
@@ -145,6 +154,7 @@ export default function DataUserPage() {
                           <option value="viewer">viewer</option>
                         </select>
                       </td>
+                      <td><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>aturSandi(u)}>Atur sandi</button></td>
                       <td>{u.id === meId ? <span style={{fontSize:12,color:'var(--ink-soft)'}}>akunmu</span> : <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,color:'#B3261E',fontWeight:700}} onClick={()=>hapusUser(u)}>Hapus</button>}</td>
                     </tr>
                   )
