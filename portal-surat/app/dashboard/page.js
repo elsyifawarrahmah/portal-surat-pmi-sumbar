@@ -74,6 +74,7 @@ export default function Beranda() {
           { href: '/surat', label: 'Surat Masuk', ikon: 'masuk', tone: '#1F5E99', pale: '#E4EEF9', badge: penuh ? hit('belum_diteruskan') : hit('belum') },
           { href: '/surat-keluar', label: 'Surat Keluar', ikon: 'keluar', tone: '#2E7D32', pale: '#E7F4EA' },
           { href: '/surat-tugas', label: 'Surat Tugas', ikon: 'tugas', tone: '#C2570C', pale: '#FDEBDD' },
+          { href: '/data-aset', label: 'Data Aset', ikon: 'aset', tone: '#B7791F', pale: '#FBF1DC' },
           { href: '/lacak', label: 'Lacak Surat', ikon: 'lacak', tone: '#6B3FB5', pale: '#EEE7FA' },
           peran.bisaCatatMasuk ? { href: '/surat-masuk?tambah=1', label: 'Catat Surat', ikon: 'buku', tone: '#B3261E', pale: '#FBE7E7' } : { href: '/pasang', label: 'Pasang di HP', ikon: 'bantuan', tone: '#B3261E', pale: '#FBE7E7' },
           { href: '/bantuan', label: 'Bantuan', ikon: 'bantuan', tone: '#B7791F', pale: '#FBF1DC' },

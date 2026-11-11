@@ -246,3 +246,34 @@ td{padding:13px 12px;border-bottom:1px solid var(--line);}
 .alur-posisi{font-size:12.5px;color:var(--ink-soft);text-align:right;line-height:1.3;}
 .alur-aksi{min-height:38px !important;padding:6px 14px;font-size:13.5px;}
 @media (max-width:600px){ .alur-sel{align-items:flex-end;min-width:0;max-width:62%;} }
+
+/* ===== Data Aset ===== */
+.aset-tab{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:6px;scrollbar-width:none;}
+.aset-tab::-webkit-scrollbar{display:none;}
+.aset-tab button{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:700;font-size:14.5px;padding:10px 16px;border-radius:999px;cursor:pointer;min-height:44px;}
+.aset-tab button.aktif{background:var(--pmi-red);border-color:var(--pmi-red);color:#fff;box-shadow:0 4px 12px rgba(200,16,46,.28);}
+.aset-jml{min-width:22px;height:22px;border-radius:11px;padding:0 7px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;background:rgba(0,0,0,.08);}
+.aset-tab button.aktif .aset-jml{background:rgba(255,255,255,.25);}
+.aset-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:8px 0 18px;}
+.aset-form{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.aset-form .lebar{grid-column:1/-1;}
+@media (max-width:600px){ .aset-stat{grid-template-columns:1fr 1fr;gap:10px;} .aset-stat .stat:last-child{grid-column:1/-1;} .aset-form{grid-template-columns:1fr;} .tiles .tile:last-child:nth-child(odd){grid-column:1/-1;} }
+
+/* ===== Penyempurnaan tampilan umum ===== */
+.btn{transition:background .15s,box-shadow .15s,transform .1s;}
+.btn:active{transform:scale(.98);}
+.btn-primary{box-shadow:0 3px 10px rgba(200,16,46,.22);}
+.btn-ghost:hover{background:var(--cream);border-color:#C9BDAA;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pmi-red);box-shadow:0 0 0 3px rgba(200,16,46,.14);}
+.panel{border-radius:18px;}
+.panel-head{background:linear-gradient(180deg,#fff,#FCFAF6);}
+tbody tr:hover td{background:#FDFBF7;}
+th{letter-spacing:.04em;}
+.topbar h1{letter-spacing:-.01em;}
+.tag{letter-spacing:.01em;}
+@media (max-width:600px){
+  tr{box-shadow:0 2px 10px rgba(60,40,30,.07);border-radius:16px;padding:8px 4px;}
+  td{padding:8px 14px;}
+  td[data-label]:before{color:#8A7F73;}
+  .topbar h1{font-size:24px;}
+}

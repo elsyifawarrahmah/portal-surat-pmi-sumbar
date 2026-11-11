@@ -3,6 +3,7 @@
 import { KalimatCepat, TombolBicara, tambahKalimat } from '@/components/PilihanCepat'
 import { KALIMAT_TOLAK } from '@/lib/surat'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Modal from '@/components/Modal'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { fmtWaktu } from '@/lib/format'
@@ -154,6 +155,13 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         </div>
       )}
       {['revisi', 'ditolak'].includes(st) && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 10, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => cetakLembarKoreksi({ surat, riwayat, namaPencetak: peran.nama, jenis: rpc === 'surat_tugas' ? 'Surat Tugas' : 'Surat Keluar' })}>Cetak lembar koreksi (tanda merah)</button>}
+      {st === 'disetujui' && jenisSurat === 'keluar' && (
+        <div style={{ marginTop: 12, border: '1px solid #BBD6C0', background: '#F3FAF4', borderRadius: 12, padding: 12 }}>
+          <div style={{ fontWeight: 800, color: '#2E7D32', marginBottom: 4 }}>{kirim.length ? 'Surat sudah dikirim' : 'Langkah berikutnya: kirim surat'}</div>
+          <div style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 8 }}>{kirim.length ? kirim.map(k => `${k.dikirim_via}${k.penerima ? ' kepada ' + k.penerima : ''} (${k.status})`).join('; ') : `Tujuan: ${surat.tujuan_surat}.${surat.tembusan ? ' Tembusan: ' + String(surat.tembusan).split('\n').filter(Boolean).join(', ') + '.' : ''} Biro Umum mengirim, lalu mencatat pengirimannya di Ekspedisi.`}</div>
+          <Link href="/ekspedisi" className="btn btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: 44 }}>{kirim.length ? 'Lihat di Ekspedisi' : 'Catat pengiriman di Ekspedisi'}</Link>
+        </div>
+      )}
       {st === 'disetujui' && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 8 }} onClick={() => cetak({ surat, namaPencetak: peran.nama })}>Cetak lembar pengesahan (TTD + kode)</button>}
     </Modal>
   )

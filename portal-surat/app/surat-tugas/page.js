@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 // Surat Tugas, Surat Aset, Tugas Kerja Sama. Alur persetujuan sama dengan surat keluar (ajukan -> paraf Sekretaris -> setuju + TTD Kepala Markas/Ketua, berkode).
 import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
@@ -140,7 +141,7 @@ export default function SuratTugasPage() {
 
   return (
     <div className="app"><div className="main">
-      <div className="topbar"><div><h1>Surat Tugas & Aset</h1><p className="desc">Surat tugas (anggota, tanggal berangkat–kembali, kendaraan), surat aset, dan tugas kerja sama. Disetujui lewat paraf Sekretaris dan TTD Kepala Markas/Ketua, lalu siap dicetak otomatis.</p></div></div>
+      <div className="topbar"><div><h1>Surat Tugas</h1><p className="desc">Surat tugas (anggota, tanggal berangkat–kembali, kendaraan), surat serah terima aset, dan tugas kerja sama. Data inventaris aset ada di menu Data Aset. Disetujui lewat paraf Sekretaris dan TTD Kepala Markas/Ketua, lalu siap dicetak otomatis.</p></div></div>
       {pesan && <div className="error-box">{pesan}</div>}
       <div className="panel">
         <div className="panel-head">
@@ -149,7 +150,7 @@ export default function SuratTugasPage() {
             <input placeholder="Cari nomor / perihal / nama..." value={cari} onChange={e => setCari(e.target.value)} style={{ maxWidth: 240 }} />
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {tab === 'tugas' && <button className="btn btn-ghost" onClick={() => setModalMobil(true)}>Data Kendaraan</button>}
+            {tab === 'tugas' && <Link href="/data-aset?tab=kendaraan" className="btn btn-ghost" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Kelola Data Aset Kendaraan</Link>}
             {bolehBuat && <button className="btn btn-primary" onClick={() => buka(null)}>+ Buat {JENIS[tab]}</button>}
           </div>
         </div>
@@ -218,7 +219,7 @@ export default function SuratTugasPage() {
                 <option value="">Tanpa kendaraan dinas</option>
                 {kendaraan.map(k => <option key={k.id} value={k.id}>{k.nama} · {k.nopol}{k.sopir ? ' · ' + k.sopir : ''}</option>)}
               </select>
-              {kendaraan.length === 0 && <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>Belum ada data kendaraan. Tambah lewat tombol “Data Kendaraan”.</div>}
+              {kendaraan.length === 0 && <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>Belum ada data kendaraan. Tambah di menu Data Aset → Kendaraan.</div>}
             </div>
           </>}
           {(j === 'tugas' || j === 'kerja_sama') && (
@@ -244,21 +245,6 @@ export default function SuratTugasPage() {
         </Modal>
       )}
 
-      {modalMobil && (
-        <Modal judul="Data Kendaraan" onClose={() => setModalMobil(false)} lebar={560}>
-          {kendaraan.length === 0 && <div style={{ color: 'var(--ink-soft)', marginBottom: 10 }}>Belum ada kendaraan.</div>}
-          {kendaraan.map(k => <div key={k.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', border: '1px solid var(--line)', borderRadius: 12, padding: '8px 12px', marginBottom: 6 }}>
-            <div><b>{k.nama}</b> · {k.nopol}{k.sopir && <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Sopir: {k.sopir}</div>}</div>
-            {(peran.isAdmin || peran.tipe === 'biro_umum') && <button className="btn btn-ghost" style={{ minHeight: 34 }} onClick={() => hapusMobil(k)}>Hapus</button>}
-          </div>)}
-          {bolehBuat && <div style={{ marginTop: 12 }}>
-            <div className="field"><label>Nama kendaraan</label><input value={mobil.nama || ''} onChange={e => setMobil({ ...mobil, nama: e.target.value })} placeholder="Toyota Innova" /></div>
-            <div className="field"><label>Nomor polisi</label><input value={mobil.nopol || ''} onChange={e => setMobil({ ...mobil, nopol: e.target.value })} placeholder="BA 1234 XX" /></div>
-            <div className="field"><label>Sopir (opsional)</label><input value={mobil.sopir || ''} onChange={e => setMobil({ ...mobil, sopir: e.target.value })} /></div>
-            <button className="btn btn-primary" onClick={simpanMobil}>+ Tambah kendaraan</button>
-          </div>}
-        </Modal>
-      )}
     </div></div>
   )
 }
