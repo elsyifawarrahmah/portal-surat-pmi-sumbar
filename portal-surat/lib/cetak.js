@@ -37,15 +37,26 @@ function kop() {
   </div>`
 }
 
+// Padatkan bertahap halaman bertanda data-fit sampai muat satu lembar A4 (diukur di iframe selebar A4).
+function fitHalaman(d) {
+  const batas = 296 * 96 / 25.4
+  d.querySelectorAll('.hal[data-fit]').forEach(el => {
+    for (const k of ['', 'p1', 'p2', 'p3']) {
+      el.classList.remove('p1', 'p2', 'p3'); if (k) el.classList.add(k)
+      if (el.getBoundingClientRect().height <= batas + 1.5) break
+    }
+  })
+}
 function buka(judul, bodyHtml, orientasi = 'portrait', cssTambahan = '') {
   // Cetak lewat iframe tersembunyi: tidak membuka jendela baru, jadi tidak diblokir pemblokir pop-up browser.
   const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><title>${h(judul)}</title><style>${CSS}${cssTambahan} @page{size:A4 ${orientasi}}</style></head><body>${bodyHtml}</body></html>`
   const f = document.createElement('iframe')
   f.setAttribute('aria-hidden', 'true')
-  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:210mm;height:297mm;border:0;visibility:hidden;pointer-events:none'
   document.body.appendChild(f)
   const w = f.contentWindow, d = w.document
   d.open(); d.write(html); d.close()
+  try { fitHalaman(d) } catch (e) {}
   let jalan = false
   const cetak = () => { if (jalan) return; jalan = true; try { w.focus(); w.print() } catch (e) { alert('Gagal membuka cetak: ' + e.message) } setTimeout(() => f.remove(), 120000) }
   const gambar = Array.from(d.images).filter(i => !i.complete)
@@ -132,11 +143,13 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
 // ===== Surat Tugas — format kertas PMI Sumatera Barat (satu halaman: daftar nama masuk di tabel, lampiran hanya bila > 8 orang) =====
 const BULAN_PANJANG = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const tglPanjang = v => { if (!v) return ''; const d = new Date(String(v).slice(0, 10) + 'T00:00:00'); return isNaN(d) ? '' : `${d.getDate()} ${BULAN_PANJANG[d.getMonth()]} ${d.getFullYear()}` }
-const MAKS_NAMA_SATU_HALAMAN = 8
+// Sampai 14 nama tetap satu halaman (tabel otomatis dipadatkan); lebih dari itu baru dipindah ke lampiran.
+const MAKS_NAMA_SATU_HALAMAN = 14
 
 const CSS_TUGAS = `
 body{font-size:10.5pt;line-height:1.33;padding:0}
-.hal{position:relative;width:210mm;height:296mm;overflow:hidden;page-break-after:always}
+.hal{position:relative;width:210mm;min-height:296mm;display:flex;flex-direction:column;page-break-after:always}
+.isi{flex:1 0 auto}
 .hal:last-child{page-break-after:auto}
 .banner{display:flex;align-items:stretch;height:17mm;margin-top:8mm}
 .banner .b1{flex:4.2;background:#DE5B4C}.banner .b2{flex:2.3;background:#E88C80}.banner .b3{flex:1.4;background:#F2B7AF}.banner .b4{flex:1;background:#F8D9D4}
@@ -155,7 +168,11 @@ body{font-size:10.5pt;line-height:1.33;padding:0}
 .ttdarea{height:19mm;display:flex;align-items:center;justify-content:center}
 .ttdarea img{max-height:19mm;max-width:60mm}
 .mgt td{border:none;padding:1.5mm 0;vertical-align:bottom}
-.ft{position:absolute;left:20mm;right:20mm;bottom:9mm;font-size:9pt;font-weight:700;line-height:1.35}
+.ft{margin:auto 20mm 9mm;padding-top:3mm;font-size:9pt;font-weight:700;line-height:1.35;flex-shrink:0}
+/* padat otomatis (diukur saat cetak): p1 ringan, p2 sedang, p3 paling rapat — supaya tetap satu lembar */
+.hal.p1 .isi{padding-top:4mm}.hal.p1 .nm td,.hal.p1 .nm th{padding:.6mm 2mm;font-size:9.8pt}.hal.p1 .kv td{padding:.8mm 0}.hal.p1 .ttdarea{height:15mm}.hal.p1 .ttdbox{margin-top:3mm}.hal.p1 .mgt td{padding:1mm 0}
+.hal.p2 .isi{padding-top:3mm}.hal.p2 .banner{height:15mm;margin-top:6mm}.hal.p2 .banner .lg img{height:12mm}.hal.p2 .nm td,.hal.p2 .nm th{padding:.4mm 2mm;font-size:9.4pt}.hal.p2 .kv td{padding:.5mm 0;font-size:10pt}.hal.p2 .ttdarea{height:12mm}.hal.p2 .ttdbox{margin-top:2mm}.hal.p2 .mgt td{padding:.5mm 0}.hal.p2 .nmr{margin-bottom:3mm}
+.hal.p3 .isi{padding-top:2mm}.hal.p3 .banner{height:13mm;margin-top:4mm}.hal.p3 .banner .lg img{height:10mm}.hal.p3 .nm td,.hal.p3 .nm th{padding:.2mm 2mm;font-size:9pt}.hal.p3 .kv td{padding:.3mm 0;font-size:9.5pt}.hal.p3 .ttdarea{height:9mm}.hal.p3 .ttdbox{margin-top:1mm;font-size:9.5pt}.hal.p3 .mgt td{padding:.3mm 0;font-size:9.5pt}.hal.p3 p{font-size:9.5pt}.hal.p3 .nmr{margin-bottom:2mm}
 .lamp{margin:0 0 3.5mm}.lamp td{border:none;padding:0 2mm 0 0;vertical-align:top}
 @media print{@page{margin:0}}
 .stempel{position:absolute;top:196mm;left:16mm;transform:rotate(-14deg);border:1.4mm solid #C8102E;color:#C8102E;font-weight:800;font-size:23pt;padding:1mm 6mm;opacity:.72;letter-spacing:.5pt;z-index:5}
@@ -179,7 +196,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   const merahStatus = ['revisi', 'ditolak'].includes(s.status_persetujuan)
   const stempel = merahStatus ? `<div class="stempel">${s.status_persetujuan === 'ditolak' ? 'DITOLAK' : 'PERLU DIPERBAIKI'}</div>` : ''
   const catatanMerah = merahStatus && s.catatan_revisi ? `<div class="koreksi"><b>Catatan koreksi:</b> ${h(s.catatan_revisi)}</div>` : ''
-  const halaman1 = `<div class="hal">${stempel}${catatanMerah}
+  const halaman1 = `<div class="hal" data-fit="1">${stempel}${catatanMerah}
     <div class="banner"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
     <div class="isi">
       <div class="jdl">SURAT TUGAS</div>

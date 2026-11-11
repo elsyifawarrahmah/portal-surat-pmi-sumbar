@@ -1,25 +1,25 @@
 {
-  "name": "Satria PMI Prov Sumbar",
-  "short_name": "Satria PMI",
+  "name": "SATRIA PMI PROV. SUMBAR",
+  "short_name": "SATRIA PMI PROV. SUMBAR",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#FAF6EF",
+  "background_color": "#B01028",
   "theme_color": "#C8102E",
   "icons": [
     {
-      "src": "/icon-satria-192.png",
+      "src": "/icon-satria-v3-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-satria-512.png",
+      "src": "/icon-satria-v3-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-satria-maskable-512.png",
+      "src": "/icon-satria-v3-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -36,7 +36,7 @@
       "url": "/surat",
       "icons": [
         {
-          "src": "/icon-satria-192.png",
+          "src": "/icon-satria-v3-192.png",
           "sizes": "192x192"
         }
       ]
@@ -46,7 +46,7 @@
       "url": "/lacak",
       "icons": [
         {
-          "src": "/icon-satria-192.png",
+          "src": "/icon-satria-v3-192.png",
           "sizes": "192x192"
         }
       ]

@@ -277,3 +277,69 @@ th{letter-spacing:.04em;}
   td[data-label]:before{color:#8A7F73;}
   .topbar h1{font-size:24px;}
 }
+
+/* ===== Tema lengkung merah–putih PMI (gradasi, lengkungan lembut) ===== */
+:root{
+  --grad-pmi:linear-gradient(135deg,#DA1431 0%,#B01028 45%,#7A0B1F 100%);
+  --ombak-putih:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 170' preserveAspectRatio='none'%3E%3Cpath d='M0 70 C 90 20, 170 120, 260 70 S 360 30, 400 60 V170 H0Z' fill='%23ffffff' fill-opacity='.35'/%3E%3Cpath d='M0 105 C 100 60, 180 150, 270 105 S 360 80, 400 100 V170 H0Z' fill='%23ffffff'/%3E%3C/svg%3E");
+  --ombak-krem:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 70 6, 140 52, 210 30 S 340 6, 400 28 V60 H0Z' fill='%23FAF6EF' fill-opacity='.45'/%3E%3Cpath d='M0 42 C 80 20, 150 60, 220 40 S 340 22, 400 40 V60 H0Z' fill='%23FAF6EF'/%3E%3C/svg%3E");
+}
+body{background:var(--cream) radial-gradient(circle at 100% 0,rgba(200,16,46,.06) 0 220px,transparent 221px) no-repeat;}
+
+/* Tombol utama bergradasi */
+.btn-primary{background:var(--grad-pmi);}
+.btn-primary:hover{background:linear-gradient(135deg,#C8102E 0%,#8C0F24 100%);}
+.btn{border-radius:14px;}
+
+/* Halaman masuk (login, lupa sandi, dll): latar merah bergradasi, ombak putih di bawah, kartu melengkung */
+.login-wrap{position:relative;overflow:hidden;flex-direction:column;
+  background:radial-gradient(circle at 88% 6%,rgba(255,255,255,.15) 0 120px,transparent 121px),radial-gradient(circle at 4% 94%,rgba(255,255,255,.10) 0 170px,transparent 171px),linear-gradient(165deg,#DA1431 0%,#A80F29 52%,#650919 100%);}
+.login-wrap::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24vh;min-height:130px;background:var(--ombak-putih) bottom/100% 100% no-repeat;pointer-events:none;}
+.login-card{position:relative;z-index:1;border-radius:32px;box-shadow:0 22px 60px rgba(60,0,10,.38);overflow:hidden;}
+.login-card::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--grad-pmi);}
+.login-card .btn-primary{border-radius:16px;}
+
+/* Beranda: kepala bergradasi dengan lengkung ombak di bawah */
+.hero{border-radius:28px 28px 50% 50% / 28px 28px 44px 44px;background:radial-gradient(circle at 92% 8%,rgba(255,255,255,.16) 0 70px,transparent 71px),radial-gradient(circle at 6% 120%,rgba(255,255,255,.10) 0 90px,transparent 91px),var(--grad-pmi);padding-bottom:64px;}
+.hero::after{display:none;}
+.hero > div:first-child{z-index:1;}
+.hero-logo{box-shadow:0 8px 20px rgba(60,0,10,.28);}
+.tile{border-radius:26px;}
+.tile-ikon{border-radius:20px;}
+
+/* Menu samping: tepi kanan melengkung */
+.sidebar{border-radius:0 30px 30px 0;}
+.profil-banner{border-radius:0 0 46% 46% / 0 0 26px 26px;background:radial-gradient(circle at 90% 0,rgba(255,255,255,.14) 0 80px,transparent 81px),var(--grad-pmi);}
+.panel,.profil-kartu,.profil-kepala{border-radius:22px;}
+.stat{border-radius:18px;}
+
+/* HP: bilah atas bergradasi, bawahnya melengkung */
+@media (max-width:768px){
+  .app::before{content:"SATRIA PMI  ·  PROV. SUMBAR";background:radial-gradient(circle at 94% -30%,rgba(255,255,255,.2) 0 90px,transparent 91px),var(--grad-pmi);color:#fff;border-bottom:none;border-radius:0 0 30px 30px;box-shadow:0 8px 22px rgba(122,11,31,.32);letter-spacing:.05em;font-size:16px;padding-top:env(safe-area-inset-top,0px);height:calc(72px + env(safe-area-inset-top,0px));}
+  .hamburger-btn{top:calc(13px + env(safe-area-inset-top,0px));border:none;background:rgba(255,255,255,.96);}
+  .main,body.menu-tutup .main{padding-top:calc(92px + env(safe-area-inset-top,0px));}
+  .sidebar{border-radius:0 32px 32px 0;}
+}
+
+/* ===== Splash dalam aplikasi (hanya saat dibuka dari ikon layar HP) ===== */
+#splash{display:none;position:fixed;inset:0;z-index:2000;align-items:center;justify-content:center;flex-direction:column;
+  background:radial-gradient(circle at 90% 4%,rgba(255,255,255,.12) 0 38vmin,transparent calc(38vmin + 1px)),radial-gradient(circle at 0 70%,rgba(255,255,255,.08) 0 30vmin,transparent calc(30vmin + 1px)),linear-gradient(165deg,#DA1431 0%,#A80F29 52%,#650919 100%);color:#fff;transition:opacity .5s ease,visibility .5s;}
+html.tampil-splash #splash{display:flex;}
+html.splash-pudar #splash{opacity:0;visibility:hidden;}
+.splash-isi{display:flex;flex-direction:column;align-items:center;margin-top:-8vh;animation:splashmasuk .7s ease both;}
+.splash-ikon{width:min(42vw,220px);height:auto;border-radius:23%;box-shadow:0 18px 40px rgba(60,0,10,.45);}
+.splash-nama{margin-top:7vmin;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:min(7vw,34px);letter-spacing:.14em;}
+.splash-prov{margin-top:6px;font-weight:600;font-size:min(3.6vw,16px);letter-spacing:.3em;opacity:.9;}
+.splash-ombak{position:absolute;left:0;bottom:0;width:100%;height:17vh;}
+@keyframes splashmasuk{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+
+/* ===== Dialog konfirmasi keluar / isian belum disimpan ===== */
+.kk-latar{position:fixed;inset:0;z-index:3000;background:rgba(40,6,12,.55);display:flex;align-items:center;justify-content:center;padding:20px;animation:kkmasuk .18s ease;}
+.kk-kotak{width:100%;max-width:360px;background:#fff;border-radius:28px;padding:28px 24px 22px;text-align:center;box-shadow:0 24px 60px rgba(40,0,8,.4);position:relative;overflow:hidden;}
+.kk-kotak::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--grad-pmi);}
+.kk-ikon{width:62px;height:62px;margin:2px auto 12px;border-radius:50%;background:var(--grad-pmi);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(176,16,40,.3);}
+.kk-kotak h3{margin:0 0 6px;font-size:20px;}
+.kk-kotak p{margin:0 0 18px;color:var(--ink-soft);font-size:15.5px;line-height:1.5;}
+.kk-aksi{display:flex;flex-direction:column;gap:10px;}
+.kk-aksi .btn{width:100%;min-height:50px;font-size:16px;}
+@keyframes kkmasuk{from{opacity:0}to{opacity:1}}

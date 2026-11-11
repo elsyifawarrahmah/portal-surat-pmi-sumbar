@@ -4,12 +4,16 @@ import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import BottomNav from '@/components/BottomNav'
 import PullToRefresh from '@/components/PullToRefresh'
+import SplashScreen from '@/components/SplashScreen'
+import KonfirmasiKeluar from '@/components/KonfirmasiKeluar'
 
 export default function AppShell({ children }) {
   const pathname = usePathname() || ''
   const tanpaMenu = pathname === '/' || pathname.startsWith('/login') || pathname === '/pasang'
   return (
     <>
+      <SplashScreen />
+      <KonfirmasiKeluar />
       <PullToRefresh />
       {!tanpaMenu && <Sidebar />}
       {children}
