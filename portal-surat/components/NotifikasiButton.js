@@ -61,9 +61,9 @@ export default function NotifikasiButton() {
   if (status === 'unsupported' && !/Android/.test(navigator.userAgent)) return null
   const kotakInfo = { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '12px 16px', background: 'var(--gold-bg)', color: 'var(--gold)', borderRadius: 10, fontSize: 14, fontWeight: 600, marginBottom: 18, lineHeight: 1.45 }
   const tombolPasang = <Link href="/pasang" className="btn btn-primary" style={{ padding: '8px 14px', fontSize: 14, marginLeft: 'auto', textDecoration: 'none' }}>Lihat cara pasang</Link>
-  if (status === 'ios-pasang') return <div style={kotakInfo}>🔔 Notifikasi di iPhone: <b>pasang dulu ke Layar Utama</b>, lalu buka SATria PMI dari ikon merah PMI dan aktifkan di sini. {tombolPasang}</div>
-  if (status === 'ios-lama') return <div style={kotakInfo}>🔔 Notifikasi butuh iPhone dengan <b>iOS 16.4 atau lebih baru</b>. Perbarui iOS di Pengaturan → Umum → Pembaruan Perangkat Lunak.</div>
-  if (status === 'unsupported') return <div style={kotakInfo}>🔔 Browser ini belum mendukung notifikasi. Buka SATria PMI di <b>Chrome</b> lalu pasang di layar HP. {tombolPasang}</div>
+  if (status === 'ios-pasang') return <div style={kotakInfo}>Notifikasi di iPhone: <b>pasang dulu ke Layar Utama</b>, lalu buka SATria PMI dari ikon merah PMI dan aktifkan di sini. {tombolPasang}</div>
+  if (status === 'ios-lama') return <div style={kotakInfo}>Notifikasi butuh iPhone dengan <b>iOS 16.4 atau lebih baru</b>. Perbarui iOS di Pengaturan → Umum → Pembaruan Perangkat Lunak.</div>
+  if (status === 'unsupported') return <div style={kotakInfo}>Browser ini belum mendukung notifikasi. Buka SATria PMI di <b>Chrome</b> lalu pasang di layar HP. {tombolPasang}</div>
 
   return (
     <div style={{
@@ -72,16 +72,16 @@ export default function NotifikasiButton() {
       color: status === 'on' ? 'var(--stock)' : 'var(--gold)',
       borderRadius: 10, fontSize: 12.5, fontWeight: 600, marginBottom: 18,
     }}>
-      {status === 'on' && '🔔 Notifikasi HP sudah aktif untuk akun ini'}
+      {status === 'on' && 'Notifikasi HP sudah aktif untuk akun ini'}
       {status === 'off' && (
         <>
-          🔕 Notifikasi HP belum aktif
+          Notifikasi HP belum aktif
           <button className="btn btn-primary" style={{ padding: '5px 12px', fontSize: 12, marginLeft: 'auto' }} onClick={aktifkan} disabled={busy}>
             {busy ? 'Memproses...' : 'Aktifkan Sekarang'}
           </button>
         </>
       )}
-      {status === 'denied' && '🚫 Notifikasi diblokir di browser ini — aktifkan lewat setting izin situs di browser HP kamu.'}
+      {status === 'denied' && 'Notifikasi diblokir di browser ini — aktifkan lewat setting izin situs di browser HP kamu.'}
     </div>
   )
 }

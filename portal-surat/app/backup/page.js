@@ -123,7 +123,7 @@ export default function BackupPage() {
 
         <div className="panel">
           <div className="panel-body" style={{padding:28, textAlign:'center'}}>
-            <div style={{fontSize:40, marginBottom:10}}>🗄️</div>
+            
             <h3 style={{margin:'0 0 8px'}}>Backup Lengkap SATria PMI</h3>
             <p style={{color:'var(--ink-soft)', fontSize:13.5, maxWidth:440, margin:'0 auto 20px'}}>
               File Excel ini berisi 9 sheet: Surat Masuk, Alur Surat Masuk, Surat Keluar, Perjanjian Kerja Sama, Sertifikat & Piagam, Surat Keputusan, Register Arsip, Data User, dan Log Aktivitas.
@@ -141,7 +141,7 @@ export default function BackupPage() {
         </div>
 
         <div style={{fontSize:12, color:'var(--ink-soft)', background:'var(--cream)', padding:12, borderRadius:10}}>
-          💡 <strong>Saran:</strong> jadwalkan 1 orang (misal Sekretaris) untuk klik tombol ini setiap hari Jumat, lalu simpan filenya di Google Drive bersama PMI Sumbar. Ini jaga-jaga kalau ada masalah teknis di server.
+          <strong>Saran:</strong> jadwalkan 1 orang (misal Sekretaris) untuk klik tombol ini setiap hari Jumat, lalu simpan filenya di Google Drive bersama PMI Sumbar. Ini jaga-jaga kalau ada masalah teknis di server.
         </div>
       </div>
     </div>

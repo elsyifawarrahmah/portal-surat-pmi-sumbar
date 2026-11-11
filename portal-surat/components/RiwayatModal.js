@@ -29,10 +29,10 @@ export default function RiwayatModal({ supabase, jenis, surat, peran, onClose })
 
   return (
     <Modal judul={`Riwayat Surat ${masuk ? 'Masuk' : 'Keluar'}`} onClose={onClose} lebar={680}
-      footer={<><button className="btn btn-ghost" onClick={onClose}>Tutup</button><button className="btn btn-primary" disabled={loading || !!pesan} onClick={() => cetakRiwayat({ jenis, surat, riwayat, namaPencetak: peran?.nama })}>🖨 Cetak Riwayat</button></>}>
+      footer={<><button className="btn btn-ghost" onClick={onClose}>Tutup</button><button className="btn btn-primary" disabled={loading || !!pesan} onClick={() => cetakRiwayat({ jenis, surat, riwayat, namaPencetak: peran?.nama })}>Cetak Riwayat</button></>}>
       <div style={{ background: 'var(--cream)', borderRadius: 12, padding: '12px 14px', marginBottom: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '6px 18px', fontSize: 13.5 }}>
         {info.map(([a, b]) => <div key={a}><span style={{ color: 'var(--ink-soft)', fontSize: 12 }}>{a}</span><br /><b>{b}</b></div>)}
-        {surat.file_bukti_url && <div><span style={{ color: 'var(--ink-soft)', fontSize: 12 }}>Berkas</span><br /><LihatBerkas url={surat.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</LihatBerkas></div>}
+        {surat.file_bukti_url && <div><span style={{ color: 'var(--ink-soft)', fontSize: 12 }}>Berkas</span><br /><LihatBerkas url={surat.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>Lihat surat</LihatBerkas></div>}
       </div>
       {pesan && <div className="error-box">{pesan}</div>}
       {loading && <div style={{ color: 'var(--ink-soft)' }}>Memuat riwayat...</div>}

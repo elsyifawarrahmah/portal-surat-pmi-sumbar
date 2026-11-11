@@ -70,12 +70,12 @@ function Isi() {
           </button>
         ))}
       </div>
-      <input placeholder="🔍 Cari surat (perihal, pengirim, nomor)..." value={cari} onChange={e => setCari(e.target.value)} style={{ fontSize: 16, minHeight: 50, marginBottom: 14 }} />
+      <input placeholder="Cari surat (perihal, pengirim, nomor)..." value={cari} onChange={e => setCari(e.target.value)} style={{ fontSize: 16, minHeight: 50, marginBottom: 14 }} />
 
       {loading && <div style={{ padding: 30, color: 'var(--ink-soft)' }}>Memuat...</div>}
       {!loading && tampil.length === 0 && (
         <div style={{ background: '#fff', border: '1px dashed var(--line)', borderRadius: 16, padding: 30, textAlign: 'center', fontSize: 16, color: 'var(--ink-soft)' }}>
-          {daftar.length === 0 ? (peran.unitId || peran.isAdmin ? 'Belum ada surat.' : 'Belum ada surat yang bisa kamu lihat.') : 'Tidak ada surat di bagian ini. 👍'}
+          {daftar.length === 0 ? (peran.unitId || peran.isAdmin ? 'Belum ada surat.' : 'Belum ada surat yang bisa kamu lihat.') : 'Tidak ada surat di bagian ini. '}
         </div>
       )}
       {tampil.slice(0, 200).map(({ s, kunci }) => {

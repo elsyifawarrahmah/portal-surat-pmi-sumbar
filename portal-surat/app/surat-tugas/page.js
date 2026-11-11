@@ -149,7 +149,7 @@ export default function SuratTugasPage() {
             <input placeholder="Cari nomor / perihal / nama..." value={cari} onChange={e => setCari(e.target.value)} style={{ maxWidth: 240 }} />
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {tab === 'tugas' && <button className="btn btn-ghost" onClick={() => setModalMobil(true)}>🚗 Data Kendaraan</button>}
+            {tab === 'tugas' && <button className="btn btn-ghost" onClick={() => setModalMobil(true)}>Data Kendaraan</button>}
             {bolehBuat && <button className="btn btn-primary" onClick={() => buka(null)}>+ Buat {JENIS[tab]}</button>}
           </div>
         </div>
@@ -172,10 +172,10 @@ export default function SuratTugasPage() {
                           <td data-label="Kendaraan" style={{ fontSize: 13 }}>{r.kendaraan_nama ? <>{r.kendaraan_nama}<br />{r.kendaraan_nopol}</> : '-'}</td>
                         </>}
                         {tab !== 'tugas' && <td data-label="Pihak">{r.tujuan_surat || '-'}</td>}
-                        {tab === 'kerja_sama' && <td data-label="Pekerjaan">{r.status_pekerjaan === 'selesai' ? '✅ Selesai' : '📝 Disiapkan'}{r.status_persetujuan === 'disetujui' && <div><button className="btn btn-ghost" style={{ minHeight: 30, fontSize: 12, padding: '2px 8px' }} onClick={() => statusKerja(r, r.status_pekerjaan === 'selesai' ? 'disiapkan' : 'selesai')}>{r.status_pekerjaan === 'selesai' ? 'Buka lagi' : 'Tandai selesai'}</button></div>}</td>}
+                        {tab === 'kerja_sama' && <td data-label="Pekerjaan">{r.status_pekerjaan === 'selesai' ? 'Selesai' : 'Disiapkan'}{r.status_persetujuan === 'disetujui' && <div><button className="btn btn-ghost" style={{ minHeight: 30, fontSize: 12, padding: '2px 8px' }} onClick={() => statusKerja(r, r.status_pekerjaan === 'selesai' ? 'disiapkan' : 'selesai')}>{r.status_pekerjaan === 'selesai' ? 'Buka lagi' : 'Tandai selesai'}</button></div>}</td>}
                         <td data-label="Persetujuan"><button className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: 34, fontSize: 12.5, whiteSpace: 'normal', textAlign: 'left' }} onClick={() => setSetuju(r)}><span style={{ color: warna, fontWeight: 700 }}>{label}</span></button></td>
                         <td style={{ whiteSpace: 'nowrap' }}>
-                          <button className="btn btn-ghost" style={{ padding: '4px 8px', marginRight: 4 }} onClick={() => cetak(r)}>🖨 Cetak</button>
+                          <button className="btn btn-ghost" style={{ padding: '4px 8px', marginRight: 4 }} onClick={() => cetak(r)}>Cetak</button>
                           {bisaUbah(r) && <button className="btn btn-ghost" style={{ padding: '4px 8px', marginRight: 4 }} onClick={() => buka(r)}>Edit</button>}
                           {bisaHapus(r) && <button className="btn btn-ghost" style={{ padding: '4px 8px' }} onClick={() => hapus(r)}>Hapus</button>}
                         </td>
@@ -192,7 +192,7 @@ export default function SuratTugasPage() {
 
       {form && (
         <Modal judul={`${editing ? 'Edit' : 'Buat'} ${JENIS[j]}`} onClose={() => setForm(null)} lebar={680}
-          footer={<><button className="btn btn-ghost" onClick={() => setForm(null)}>Batal</button><button className="btn btn-ghost" onClick={() => simpan(false)}>Simpan</button><button className="btn btn-primary" onClick={() => simpan(true)}>🖨 Simpan & Cetak</button></>}>
+          footer={<><button className="btn btn-ghost" onClick={() => setForm(null)}>Batal</button><button className="btn btn-ghost" onClick={() => simpan(false)}>Simpan</button><button className="btn btn-primary" onClick={() => simpan(true)}>Simpan & Cetak</button></>}>
           {error && <div className="error-box" style={{ whiteSpace: 'pre-wrap' }}>{error}</div>}
           <div className="field"><label>Tanggal Surat *</label><input type="date" value={form.tanggal_surat || ''} onChange={e => set('tanggal_surat', e.target.value)} /></div>
           <div className="field"><label>Nomor Surat *</label>

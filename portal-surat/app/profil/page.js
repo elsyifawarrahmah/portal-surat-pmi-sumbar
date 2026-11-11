@@ -91,19 +91,19 @@ export default function ProfilPage() {
             <div className="profil-isi">
               <div className="profil-foto">
                 <Avatar url={p?.foto_url} nama={p?.nama_lengkap} ukuran={122} />
-                <label className="profil-kamera" title={p?.foto_url ? 'Ganti foto' : 'Pasang foto'} style={{ cursor: fotoSibuk ? 'wait' : 'pointer' }}>{fotoSibuk ? '…' : '📷'}<input type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} onChange={ubahFoto} disabled={fotoSibuk} /></label>
+                <label className="profil-kamera" title={p?.foto_url ? 'Ganti foto' : 'Pasang foto'} style={{ cursor: fotoSibuk ? 'wait' : 'pointer' }}>{fotoSibuk ? '…' : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>}<input type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} onChange={ubahFoto} disabled={fotoSibuk} /></label>
               </div>
               <div className="profil-nama">
                 <h1>{p?.nama_lengkap}</h1>
                 <div className="profil-sub">{p?.jabatan || (admin ? 'Admin web' : unit?.nama || 'Belum ada jabatan')}</div>
                 <div>
-                  <span className="chip" style={{ background: admin ? '#FBE7E7' : 'var(--gold-bg)', color: admin ? 'var(--pmi-red-dark)' : 'var(--gold)' }}>{admin ? '🛡 Admin web' : '🏢 ' + (unit?.nama || 'Belum ada unit')}</span>
+                  <span className="chip" style={{ background: admin ? '#FBE7E7' : 'var(--gold-bg)', color: admin ? 'var(--pmi-red-dark)' : 'var(--gold)' }}>{admin ? 'Admin web' : '' + (unit?.nama || 'Belum ada unit')}</span>
                   <span className="chip" style={{ background: 'var(--stock-bg)', color: 'var(--stock)' }}>● Aktif</span>
                   {p?.foto_url && <a href="#" onClick={e => { e.preventDefault(); hapusFoto() }} style={{ fontSize: 13, color: 'var(--ink-soft)', textDecoration: 'underline', marginLeft: 4 }}>Hapus foto</a>}
                 </div>
               </div>
             </div>
-            <div className="profil-catatan">📷 Klik ikon kamera untuk {p?.foto_url ? 'mengganti' : 'memasang'} foto. {ketHint('foto')}</div>
+            <div className="profil-catatan">Klik ikon kamera untuk {p?.foto_url ? 'mengganti' : 'memasang'} foto. {ketHint('foto')}</div>
           </div>
 
           <div className="profil-grid">
@@ -139,7 +139,7 @@ export default function ProfilPage() {
                 <p className="ket">Dipakai saat meneruskan / mendisposisikan surat.</p>
                 {p?.ttd_url && !buatTtd && <img src={p.ttd_url} alt="Tanda tangan" style={{ maxWidth: '100%', height: 90, background: '#fff', border: '1px solid var(--line)', borderRadius: 8, padding: 4 }} />}
                 {!buatTtd
-                  ? <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }} onClick={() => setBuatTtd(true)}>✍️ {p?.ttd_url ? 'Buat ulang tanda tangan' : 'Buat tanda tangan'}</button>
+                  ? <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }} onClick={() => setBuatTtd(true)}>{p?.ttd_url ? 'Buat ulang tanda tangan' : 'Buat tanda tangan'}</button>
                   : <div style={{ marginTop: 12 }}><TandaTangan onSimpan={simpanTtd} onBatal={() => setBuatTtd(false)} simpanLabel="Simpan tanda tangan" /></div>}
               </div>
 
@@ -148,7 +148,7 @@ export default function ProfilPage() {
                 <p className="ket">Jaga akunmu tetap aman.</p>
                 <Baris a="Kata sandi">••••••••</Baris>
                 {!sandi
-                  ? <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }} onClick={() => setSandi(true)}>🔑 Ganti kata sandi</button>
+                  ? <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 12 }} onClick={() => setSandi(true)}>Ganti kata sandi</button>
                   : <div style={{ marginTop: 14 }}><GantiSandi onSelesai={() => setTimeout(() => setSandi(false), 1500)} /></div>}
               </div>
             </div>

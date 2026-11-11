@@ -165,7 +165,7 @@ export default function PemantauanPage() {
     <div className="app"><div className="main">
       <div className="topbar">
         <div><h1>Pemantauan</h1><p className="desc">{peran.bisaPantau ? 'Biro Umum memantau keaktifan tiap bidang. Bidang yang belum input surat bisa dipanggil.' : 'Panggilan dari Biro Umum untuk unit kamu.'}</p></div>
-        {peran.bisaPantau && <button className="btn btn-primary" onClick={panggilSemua}>📣 Panggil Semua yang Belum Aktif</button>}
+        {peran.bisaPantau && <button className="btn btn-primary" onClick={panggilSemua}>Panggil Semua yang Belum Aktif</button>}
       </div>
 
       {peran.migrasiBelum && <Info>Pembaruan database belum dijalankan. {PESAN_MIGRASI}</Info>}
@@ -174,9 +174,9 @@ export default function PemantauanPage() {
       {/* Panggilan untuk unit saya */}
       {peran.unitId && !peran.isBiroUmum && (
         <div className="panel">
-          <div className="panel-head"><h3>📣 Panggilan untuk {peran.unit?.nama || 'unit kamu'}</h3></div>
+          <div className="panel-head"><h3>Panggilan untuk {peran.unit?.nama || 'unit kamu'}</h3></div>
           <div className="panel-body">
-            {panggilanSaya.length === 0 ? <div style={{ color: 'var(--ink-soft)' }}>Tidak ada panggilan. Terima kasih sudah aktif 👍</div> :
+            {panggilanSaya.length === 0 ? <div style={{ color: 'var(--ink-soft)' }}>Tidak ada panggilan. Terima kasih sudah aktif </div> :
               panggilanSaya.map(p => { const s = statusPanggilan(p); return (
                 <div key={p.id} style={{ borderBottom: '1px solid var(--line)', padding: '10px 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}><b>{JENIS[p.jenis]}</b><span className="tag" style={s.s}>{s.l}</span></div>
@@ -184,8 +184,8 @@ export default function PemantauanPage() {
                   <div style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>{fmtWaktu(p.created_at)} · {p.pembuat?.nama_lengkap || 'Biro Umum'}{p.surat?.nomor_surat ? ` · surat ${p.surat.nomor_surat}` : ''}</div>
                   {p.balasan && <div style={{ fontSize: 13.5, background: 'var(--stock-bg)', borderRadius: 8, padding: '6px 10px', marginTop: 6 }}><b>Balasan:</b> {p.balasan}</div>}
                   {!p.selesai_pada && <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                    {!p.dibaca_pada && <button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => tandaiBaca(p)}>👁 Tandai sudah dibaca</button>}
-                    <button className="btn btn-primary" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => setBalas({ p, teks: '' })}>✅ Sudah ditindaklanjuti…</button>
+                    {!p.dibaca_pada && <button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => tandaiBaca(p)}>Tandai sudah dibaca</button>}
+                    <button className="btn btn-primary" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => setBalas({ p, teks: '' })}>Sudah ditindaklanjuti…</button>
                     {p.jenis === 'belum_input' && <Link href="/surat-keluar" className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 13, textDecoration: 'none' }}>Input surat keluar →</Link>}
                   </div>}
                 </div>) })}
@@ -217,7 +217,7 @@ export default function PemantauanPage() {
                           <td data-label="Diproses">{b.proses}</td>
                           <td data-label="Lewat batas" style={b.lewat ? { color: '#B3261E', fontWeight: 700 } : null}>{b.lewat}</td>
                           <td data-label="Status">{b.tidakAktif ? <span className="tag" style={{ background: '#FBE7E7', color: '#B3261E' }}>Perlu dipanggil</span> : <span className="tag" style={{ background: 'var(--stock-bg)', color: 'var(--stock)' }}>Aktif</span>}{b.terbuka > 0 && <span style={{ fontSize: 12, color: 'var(--ink-soft)', marginLeft: 6 }}>{b.terbuka} panggilan terbuka</span>}</td>
-                          <td data-label="" style={{ whiteSpace: 'nowrap' }}><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaPanggil(b.u)}>📣 Panggil</button><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => setKontak(b.u)}>📞</button></td>
+                          <td data-label="" style={{ whiteSpace: 'nowrap' }}><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaPanggil(b.u)}>Panggil</button><button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => setKontak(b.u)}></button></td>
                         </tr>
                       ))}
                 </tbody>
@@ -227,27 +227,27 @@ export default function PemantauanPage() {
 
           <div className="panel">
             <div className="panel-head">
-              <h3>📍 Posisi surat — tertahan di siapa?</h3>
+              <h3>Posisi surat — tertahan di siapa?</h3>
               <label style={{ textTransform: 'none', margin: 0, display: 'flex', gap: 8, alignItems: 'center', fontSize: 13.5 }}>Tertahan ≥
                 <select value={tertahanHari} onChange={e => setTertahanHari(Number(e.target.value))} style={{ width: 'auto', padding: '5px 8px' }}>{[1, 2, 3, 5, 7].map(n => <option key={n} value={n}>{n} hari</option>)}</select>
               </label>
             </div>
             <div style={{ overflowX: 'auto' }}><table>
               <thead><tr><th>Surat</th><th>Sedang di</th><th>Sejak</th><th>Lama</th><th>Hubungi</th></tr></thead>
-              <tbody>{tertahan.length === 0 ? <tr><td colSpan={5} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada surat yang tertahan. 👍</td></tr> : tertahan.slice(0, 60).map(x => (
+              <tbody>{tertahan.length === 0 ? <tr><td colSpan={5} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada surat yang tertahan. </td></tr> : tertahan.slice(0, 60).map(x => (
                 <tr key={x.m.id}>
-                  <td data-label="Surat">{x.m.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{x.m.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{x.m.asal_surat} — {x.m.perihal}</span></>}</td>
+                  <td data-label="Surat">{x.m.sifat === 'Rahasia' && !peran.isAdmin ? 'Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{x.m.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{x.m.asal_surat} — {x.m.perihal}</span></>}</td>
                   <td data-label="Sedang di"><b>{labelTahap(x.tahap)}</b></td>
                   <td data-label="Sejak">{fmtTgl(x.sejak)}</td>
                   <td data-label="Lama"><span className="tag" style={{ background: x.hari >= 5 ? '#FBE7E7' : 'var(--gold-bg)', color: x.hari >= 5 ? '#B3261E' : 'var(--gold)' }}>{x.hari} hari</span></td>
-                  <td data-label="Hubungi">{x.unitList.length === 0 ? <span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>-</span> : x.unitList.map(u => <button key={u.id} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: 34, fontSize: 12.5, marginRight: 4, marginBottom: 4 }} onClick={() => setKontak(u)}>📞 {u.nama.replace(/^Bidang /, '')}</button>)}</td>
+                  <td data-label="Hubungi">{x.unitList.length === 0 ? <span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>-</span> : x.unitList.map(u => <button key={u.id} className="btn btn-ghost" style={{ padding: '4px 10px', minHeight: 34, fontSize: 12.5, marginRight: 4, marginBottom: 4 }} onClick={() => setKontak(u)}>{u.nama.replace(/^Bidang /, '')}</button>)}</td>
                 </tr>))}</tbody>
             </table></div>
           </div>
 
           <div className="panel">
             <div className="panel-head">
-              <h3>🗄 Selesai — otomatis masuk arsip bulanan</h3>
+              <h3>Selesai — otomatis masuk arsip bulanan</h3>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span className="tag" style={{ background: menungguArsip.length ? 'var(--gold-bg)' : 'var(--stock-bg)', color: menungguArsip.length ? 'var(--gold)' : 'var(--stock)' }}>{menungguArsip.length}</span>
                 {menungguArsip.length > 0 && <button className="btn btn-primary" style={{ minHeight: 36, padding: '6px 14px', fontSize: 13 }} onClick={arsipkanSemua}>Arsipkan semua</button>}
@@ -258,8 +258,8 @@ export default function PemantauanPage() {
               <tbody>{menungguArsip.length === 0 ? <tr><td colSpan={4} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada yang tertahan.</td></tr> : menungguArsip.slice(0, 80).map(t => (
                 <tr key={t.id}>
                   <td data-label="Selesai">{fmtWaktu(t.selesai_pada)}</td><td data-label="Unit"><b>{t.unit?.nama}</b></td>
-                  <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>
-                  <td data-label=""><button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 34, fontSize: 13 }} onClick={() => arsipkan(t.id)}>🗄 Arsipkan</button></td>
+                  <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? 'Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>
+                  <td data-label=""><button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 34, fontSize: 13 }} onClick={() => arsipkan(t.id)}>Arsipkan</button></td>
                 </tr>))}</tbody>
             </table></div>
           </div>
@@ -268,10 +268,10 @@ export default function PemantauanPage() {
             <div className="panel-head"><h3>Surat masuk belum didisposisi (≥ 1 hari)</h3><span className="tag" style={{ background: belumDisposisi.length ? '#FBE7E7' : 'var(--stock-bg)', color: belumDisposisi.length ? '#B3261E' : 'var(--stock)' }}>{belumDisposisi.length}</span></div>
             <div style={{ overflowX: 'auto' }}><table>
               <thead><tr><th>Dicatat</th><th>Agenda</th><th>No. Surat</th><th>Asal</th><th>Perihal</th><th>Sudah</th><th></th></tr></thead>
-              <tbody>{belumDisposisi.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Semua surat masuk sudah didisposisi 👍</td></tr> : belumDisposisi.slice(0, 50).map(m => (
+              <tbody>{belumDisposisi.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Semua surat masuk sudah didisposisi </td></tr> : belumDisposisi.slice(0, 50).map(m => (
                 <tr key={m.id}>
                   <td data-label="Dicatat">{fmtWaktu(m.created_at)}</td><td data-label="Agenda" className="mono">{m.nomor_agenda || '-'}</td><td data-label="No. Surat" className="mono">{m.sifat === 'Rahasia' && !peran.isAdmin ? '••••' : m.nomor_surat}</td>
-                  <td data-label="Asal">{m.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : m.asal_surat}</td><td data-label="Perihal">{m.sifat === 'Rahasia' && !peran.isAdmin ? '-' : m.perihal}</td>
+                  <td data-label="Asal">{m.sifat === 'Rahasia' && !peran.isAdmin ? 'Rahasia' : m.asal_surat}</td><td data-label="Perihal">{m.sifat === 'Rahasia' && !peran.isAdmin ? '-' : m.perihal}</td>
                   <td data-label="Sudah"><span className="tag" style={{ background: '#FBE7E7', color: '#B3261E' }}>{hariSejak(m.created_at)} hari</span></td>
                   <td data-label=""><Link href={`/surat/${m.id}`} style={{ color: 'var(--pmi-red)', fontWeight: 700, textDecoration: 'none' }}>Lihat →</Link></td>
                 </tr>))}</tbody>
@@ -285,7 +285,7 @@ export default function PemantauanPage() {
               <tbody>{menungguJawaban.length === 0 ? <tr><td colSpan={4} style={{ textAlign: 'center', padding: 22, color: 'var(--ink-soft)' }}>Tidak ada surat jawaban yang tertunggak.</td></tr> : menungguJawaban.map(t => (
                 <tr key={t.id}>
                   <td data-label="Unit"><b>{t.unit?.nama}</b></td>
-                  <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>
+                  <td data-label="Surat">{t.surat?.sifat === 'Rahasia' && !peran.isAdmin ? 'Rahasia' : `${t.surat?.nomor_surat} — ${t.surat?.perihal}`}</td>
                   <td data-label="Batas" style={t.status !== 'selesai' && sudahLewat(t.batas_waktu) ? { color: '#B3261E', fontWeight: 700 } : null}>{t.batas_waktu ? fmtTgl(t.batas_waktu) : '-'}</td>
                   <td data-label="Status">{t.status}</td>
                 </tr>))}</tbody>
@@ -312,7 +312,7 @@ export default function PemantauanPage() {
 
       {panggil && (
         <Modal judul={`Panggil ${panggil.unit.nama}`} onClose={() => setPanggil(null)} lebar={520}
-          footer={<><button className="btn btn-ghost" onClick={() => setPanggil(null)}>Batal</button><button className="btn btn-primary" disabled={sibuk} onClick={kirim}>{sibuk ? 'Mengirim...' : '📣 Kirim Panggilan'}</button></>}>
+          footer={<><button className="btn btn-ghost" onClick={() => setPanggil(null)}>Batal</button><button className="btn btn-primary" disabled={sibuk} onClick={kirim}>{sibuk ? 'Mengirim...' : 'Kirim Panggilan'}</button></>}>
           {error && <div className="error-box">{error}</div>}
           <div className="field"><label>Keperluan</label>
             <select value={panggil.jenis} onChange={e => { const b = baris.find(x => x.u.id === panggil.unit.id); setPanggil({ ...panggil, jenis: e.target.value, pesan: templatePesan(e.target.value, panggil.unit.nama, b?.terakhir ? fmtWaktu(b.terakhir) : '') }) }}>

@@ -78,7 +78,7 @@ export default function RiwayatPage() {
             <input type="date" value={sampai} onChange={e => setSampai(e.target.value)} style={{ maxWidth: 160 }} aria-label="Sampai tanggal" />
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={() => cetakDaftar({ judul: fJenis === 'masuk' ? 'Buku Agenda Surat Masuk' : fJenis === 'keluar' ? 'Buku Agenda Surat Keluar' : 'Buku Agenda Surat Masuk & Keluar', subjudul, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak Buku Agenda</button>
+            <button className="btn btn-primary" onClick={() => cetakDaftar({ judul: fJenis === 'masuk' ? 'Buku Agenda Surat Masuk' : fJenis === 'keluar' ? 'Buku Agenda Surat Keluar' : 'Buku Agenda Surat Masuk & Keluar', subjudul, kolom, baris: baris(), namaPencetak: peran.nama })}>Cetak Buku Agenda</button>
             <button className="btn btn-ghost" onClick={() => unduhCsv('riwayat-surat', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function RiwayatPage() {
                         <td data-label="Jenis"><span className="tag" style={r.jenis === 'masuk' ? { background: 'var(--stock-bg)', color: 'var(--stock)' } : { background: 'var(--gold-bg)', color: 'var(--gold)' }}>{r.jenis === 'masuk' ? 'Masuk' : 'Keluar'}</span></td>
                         <td data-label="Agenda" className="mono">{r.agenda || '-'}</td>
                         <td data-label="No. Surat" className="mono">{sem ? '••••••' : r.nomor}</td>
-                        <td data-label="Asal/Tujuan">{sem ? '🔒 Rahasia' : r.pihak}</td>
+                        <td data-label="Asal/Tujuan">{sem ? 'Rahasia' : r.pihak}</td>
                         <td data-label="Perihal">{sem ? 'Hanya admin yang bisa lihat' : r.perihal}</td>
                         <td data-label="Status">{sem ? '-' : t ? <>{t.aksi}<div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{fmtWaktu(t.waktu)}</div></> : '-'}</td>
                       </tr>

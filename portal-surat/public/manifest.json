@@ -1,6 +1,6 @@
 {
-  "name": "SATria PMI",
-  "short_name": "SATria PMI",
+  "name": "SATria PMI Prov Sumbar",
+  "short_name": "SATria PMI Prov Sumbar",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#FAF6EF",

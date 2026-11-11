@@ -24,7 +24,7 @@ export const ICONS = {
   log: <Svg><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Svg>,
   backup: <Svg><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></Svg>,
   disposisi: <Svg><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></Svg>,
-  ekspedisi: <Svg><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></Svg>,
+  ekspedisi: <Svg><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></Svg>,
   riwayat: <Svg><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15 14"/></Svg>,
   pantau: <Svg><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></Svg>,
   saran: <Svg><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></Svg>,
@@ -164,7 +164,7 @@ export default function Sidebar() {
           </div>
           <div style={{fontSize:15,fontWeight:800,opacity:.95,marginTop:10,letterSpacing:'.02em'}}>{NAMA_APLIKASI}</div>
         </div>
-        {peran.nama && <div className="sapa"><span>{sapaan()},</span><b>{peran.nama.split(' ')[0]}</b> 👋</div>}
+        {peran.nama && <div className="sapa"><span>{sapaan()},</span><b>{peran.nama.split(' ')[0]}</b></div>}
         <div className="nav">
           {(() => {
             const bisaLihat = l => !(l.grup === 'admin' && !peran.isAdmin && !peran.loading) && !(l.penuh && !peran.aksesPenuh && !peran.loading)

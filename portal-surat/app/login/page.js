@@ -88,7 +88,7 @@ export default function LoginPage() {
           {mode === 'signin' ? 'Masuk dengan email dan kata sandi kamu.' : mode === 'signup' ? 'Setelah mendaftar, admin akan menempatkan akunmu di bidang yang sesuai.' : 'Tanpa kata sandi: kami kirim link masuk ke emailmu.'}
         </p>
         {error && <div className="error-box">{error}</div>}
-        {kirimUlang && email.trim() && <button type="button" className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginBottom: 14 }} onClick={kirimUlangEmail}>📧 Kirim ulang email konfirmasi</button>}
+        {kirimUlang && email.trim() && <button type="button" className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginBottom: 14 }} onClick={kirimUlangEmail}>Kirim ulang email konfirmasi</button>}
         {info && <div style={{ background: 'var(--stock-bg)', color: 'var(--stock)', padding: '12px 14px', borderRadius: 12, fontSize: 14.5, lineHeight: 1.5, marginBottom: 14 }}>✓ {info}</div>}
 
         {mode !== 'link' && (prov.google || prov.facebook) && (
@@ -115,7 +115,7 @@ export default function LoginPage() {
 
         <div style={{textAlign:'center',marginTop:16,fontSize:14.5,lineHeight:2}}>
           {mode === 'signin' && <><Link href="/lupa-sandi" style={{color:'var(--pmi-red)',fontWeight:700}}>Lupa kata sandi?</Link><br /><a href="#" onClick={e=>{e.preventDefault();setMode('link');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:600}}>Masuk tanpa kata sandi (kirim link ke email)</a><br /></>}
-          {mode === 'signin' ? <><Link href="/pasang" style={{color:'var(--pmi-red)',fontWeight:700}}>📲 Pasang di layar HP</Link><br />Belum punya akun? <a href="#" onClick={e=>{e.preventDefault();setMode('signup');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>Daftar di sini</a></>
+          {mode === 'signin' ? <><Link href="/pasang" style={{color:'var(--pmi-red)',fontWeight:700}}>Pasang di layar HP</Link><br />Belum punya akun? <a href="#" onClick={e=>{e.preventDefault();setMode('signup');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>Daftar di sini</a></>
             : <a href="#" onClick={e=>{e.preventDefault();setMode('signin');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>← Kembali ke halaman masuk</a>}
         </div>
       </div>

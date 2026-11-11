@@ -96,7 +96,7 @@ function Isi() {
 
       <PeringatanUnit peran={peran} />
       {peran.migrasiBelum && <Info warna="gold">Pembaruan database belum dijalankan. {PESAN_MIGRASI}</Info>}
-      {peran.isBiroUmum && <Info warna="gold">👁 Biro Umum memantau semua disposisi dan bertugas mengarsipkan yang sudah selesai (tombol “Arsipkan”). Tindak lanjut dilakukan oleh bidang tujuan.</Info>}
+      {peran.isBiroUmum && <Info warna="gold">Biro Umum memantau semua disposisi dan bertugas mengarsipkan yang sudah selesai (tombol “Arsipkan”). Tindak lanjut dilakukan oleh bidang tujuan.</Info>}
       {pesan && <div className="error-box">{pesan}</div>}
 
       <div className="grid4">
@@ -118,7 +118,7 @@ function Isi() {
             </select>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Disposisi', subjudul: `${namaUnit} · ${fStatus === 'aktif' ? 'belum selesai' : fStatus === 'semua' ? 'semua status' : (STATUS_DISPOSISI[fStatus]?.label || fStatus)}`, kolom: kolomCetak, baris: barisCetak(), namaPencetak: peran.nama })}>🖨 Cetak Buku Disposisi</button>
+            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Disposisi', subjudul: `${namaUnit} · ${fStatus === 'aktif' ? 'belum selesai' : fStatus === 'semua' ? 'semua status' : (STATUS_DISPOSISI[fStatus]?.label || fStatus)}`, kolom: kolomCetak, baris: barisCetak(), namaPencetak: peran.nama })}>Cetak Buku Disposisi</button>
             <button className="btn btn-ghost" onClick={() => unduhCsv('disposisi', kolomCetak.map(k => k.judul), barisCetak().map(b => kolomCetak.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
@@ -134,13 +134,13 @@ function Isi() {
                       <tr key={r.id} className="row-click" onClick={() => { if (!sembunyi) router.push(`/surat/${s.id}`) }}>
                         <td data-label="Diteruskan">{fmtTgl(r.disposisi.tanggal_diteruskan)}</td>
                         <td data-label="Agenda" className="mono">{s.nomor_agenda || '-'}</td>
-                        <td data-label="Surat">{sembunyi ? '🔒 Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{s.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{s.asal_surat} — {s.perihal}</span></>}</td>
+                        <td data-label="Surat">{sembunyi ? 'Rahasia' : <><b className="mono" style={{ fontSize: 13 }}>{s.nomor_surat}</b><br /><span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>{s.asal_surat} — {s.perihal}</span></>}</td>
                         <td data-label="Dari">{r.disposisi.dari_nama || '-'}</td>
                         <td data-label="Kepada"><b>{r.unit?.nama}</b></td>
                         <td data-label="Disposisi">{sembunyi ? '-' : (r.instruksi || '-')}{r.perlu_jawaban && !sembunyi && <span className="tag" style={{ marginLeft: 6, background: 'var(--gold-bg)', color: 'var(--gold)' }}>perlu jawaban</span>}</td>
                         <td data-label="Batas" style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{r.batas_waktu ? fmtTgl(r.batas_waktu) : '-'}</td>
-                        <td data-label="Status" onClick={e => e.stopPropagation()}><span className="tag" style={st.style}>{st.label}</span>{r.status === 'selesai' && !r.diarsipkan_pada && peran.bisaArsip && <div><button className="btn btn-primary" style={{ padding: '3px 10px', minHeight: 32, fontSize: 12, marginTop: 4 }} onClick={() => arsipkan(r)}>🗄 Arsipkan</button></div>}</td>
-                        <td data-label="Scan" onClick={e => e.stopPropagation()}>{r.disposisi.file_scan_url && !sembunyi ? <LihatBerkas url={r.disposisi.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat</LihatBerkas> : '-'}</td>
+                        <td data-label="Status" onClick={e => e.stopPropagation()}><span className="tag" style={st.style}>{st.label}</span>{r.status === 'selesai' && !r.diarsipkan_pada && peran.bisaArsip && <div><button className="btn btn-primary" style={{ padding: '3px 10px', minHeight: 32, fontSize: 12, marginTop: 4 }} onClick={() => arsipkan(r)}>Arsipkan</button></div>}</td>
+                        <td data-label="Scan" onClick={e => e.stopPropagation()}>{r.disposisi.file_scan_url && !sembunyi ? <LihatBerkas url={r.disposisi.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>Lihat</LihatBerkas> : '-'}</td>
                       </tr>
                     )
                   })}
@@ -155,7 +155,7 @@ function Isi() {
           {daftarSurat.filter(s => `${s.nomor_surat} ${s.nomor_agenda} ${s.asal_surat} ${s.perihal}`.toLowerCase().includes(cari.toLowerCase())).slice(0, 50).map(s => (
             <div key={s.id} className="row-click" onClick={() => { setPilih(false); bukaSuratId(s.id) }} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '9px 12px', marginBottom: 6 }}>
               <div style={{ fontWeight: 700 }}>{s.nomor_surat} <span style={{ fontWeight: 400, color: 'var(--ink-soft)' }}>· Agenda {s.nomor_agenda || '-'} · {fmtTgl(s.tanggal_diterima_kantor)}</span></div>
-              <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>{s.sifat === 'Rahasia' && !peran.isAdmin ? '🔒 Rahasia' : `${s.asal_surat} — ${s.perihal}`}</div>
+              <div style={{ fontSize: 13.5, color: 'var(--ink-soft)' }}>{s.sifat === 'Rahasia' && !peran.isAdmin ? 'Rahasia' : `${s.asal_surat} — ${s.perihal}`}</div>
             </div>
           ))}
           {daftarSurat.length === 0 && <div style={{ color: 'var(--ink-soft)' }}>Belum ada surat masuk. Catat dulu di menu Surat Masuk.</div>}
@@ -166,7 +166,7 @@ function Isi() {
         <Modal judul={`Disposisi — ${detail.nomor_surat}`} onClose={() => setDetail(null)} lebar={760}>
           <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, marginBottom: 14 }}>
             <b>{detail.asal_surat}</b> — {detail.perihal}<br /><span style={{ color: 'var(--ink-soft)' }}>Agenda {detail.nomor_agenda || '-'} · diterima {fmtTgl(detail.tanggal_diterima_kantor)}{detail.file_bukti_url ? '' : ''}</span>
-            {detail.file_bukti_url && <> · <LihatBerkas url={detail.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</LihatBerkas></>}
+            {detail.file_bukti_url && <> · <LihatBerkas url={detail.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>Lihat surat</LihatBerkas></>}
           </div>
           <DisposisiPanel supabase={supabase} surat={detail} units={units} peran={peran} onChanged={load} />
         </Modal>

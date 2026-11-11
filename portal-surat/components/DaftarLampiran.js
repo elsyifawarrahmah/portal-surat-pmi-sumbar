@@ -40,19 +40,19 @@ export default function DaftarLampiran({ supabase, jenis, suratId, fileUtamaUrl,
       {semua.length === 0 && <div style={{ fontSize: 14, color: 'var(--ink-soft)', marginBottom: 8 }}>Belum ada berkas.</div>}
       {semua.map((l, i) => (
         <div key={l.id} style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--line)', borderRadius: 12, padding: '10px 14px', marginBottom: 8 }}>
-          <LihatBerkas url={l.url} style={{ color: 'var(--pmi-red)', fontWeight: 700, fontSize: 15 }}>📄 {i + 1}. {l.nama || 'Berkas'}</LihatBerkas>
+          <LihatBerkas url={l.url} style={{ color: 'var(--pmi-red)', fontWeight: 700, fontSize: 15 }}>{i + 1}. {l.nama || 'Berkas'}</LihatBerkas>
           {!l.utama && (boleh || l.dibuat_oleh === peran?.userId) && <button className="btn btn-ghost" style={{ minHeight: 34, fontSize: 13 }} onClick={() => hapus(l)}>Hapus</button>}
         </div>
       ))}
       {boleh && (
         <div style={{ marginTop: 8 }}>
           <label className="btn btn-ghost" style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', cursor: 'pointer', textTransform: 'none' }}>
-            {sibuk ? 'Mengunggah...' : '➕ Tambah berkas (boleh banyak)'}
+            {sibuk ? 'Mengunggah...' : 'Tambah berkas (boleh banyak)'}
             <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} onChange={e => tambah(e, 'surat')} disabled={sibuk} />
           </label>
           {' '}
           <label className="btn btn-ghost" style={{ minHeight: 44, display: 'inline-flex', alignItems: 'center', cursor: 'pointer', textTransform: 'none' }}>
-            {sibuk ? 'Mengunggah...' : '📑 Tambah PDF (surat > 2 lembar)'}
+            {sibuk ? 'Mengunggah...' : 'Tambah PDF (surat > 2 lembar)'}
             <input type="file" multiple accept=".pdf,application/pdf" style={{ display: 'none' }} onChange={e => tambah(e, 'dokumen')} disabled={sibuk} />
           </label>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>{ketHint('surat')}</div>

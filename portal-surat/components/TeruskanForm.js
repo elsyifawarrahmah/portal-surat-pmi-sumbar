@@ -127,7 +127,7 @@ export default function TeruskanForm({ supabase, surat, units, peran, induk, sud
       <div style={{ marginTop: 18, border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px' }}>
         <label style={{ display: 'flex', gap: 10, alignItems: 'center', textTransform: 'none', fontSize: 16, color: 'var(--ink)', margin: 0, cursor: 'pointer' }}>
           <input type="checkbox" style={{ width: 22, height: 22 }} checked={pakaiTtd} onChange={e => { setPakaiTtd(e.target.checked); if (e.target.checked && !ttdUrl) setBuatTtd(true) }} />
-          <b>✍️ Bubuhkan tanda tangan digital saya</b>
+          <b>Bubuhkan tanda tangan digital saya</b>
         </label>
         {pakaiTtd && ttdUrl && !buatTtd && (
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>

@@ -100,7 +100,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
     <div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
         {peran.bisaDisposisi && <button className="btn btn-primary" onClick={() => setForm({})}>+ Buat Disposisi</button>}
-        <button className="btn btn-ghost" onClick={() => cetakLembarDisposisi({ surat, namaPencetak: peran.nama })}>🖨 Cetak Lembar Kosong (isi tangan)</button>
+        <button className="btn btn-ghost" onClick={() => cetakLembarDisposisi({ surat, namaPencetak: peran.nama })}>Cetak Lembar Kosong (isi tangan)</button>
       </div>
 
       {loading && <div style={{ padding: 12, color: 'var(--ink-soft)' }}>Memuat...</div>}
@@ -118,7 +118,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
               <div style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>Diteruskan {fmtTgl(d.tanggal_diteruskan)} · dicatat {fmtWaktu(d.created_at)}{d.pembuat?.nama_lengkap ? ' oleh ' + d.pembuat.nama_lengkap : ''}</div>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button className="btn btn-ghost" style={{ ...kecil, minHeight: 34, fontSize: 12.5 }} onClick={() => cetakLembarDisposisi({ surat, disposisi: d, tujuan: d.tujuan, namaPencetak: peran.nama })}>🖨 Cetak Lembar</button>
+              <button className="btn btn-ghost" style={{ ...kecil, minHeight: 34, fontSize: 12.5 }} onClick={() => cetakLembarDisposisi({ surat, disposisi: d, tujuan: d.tujuan, namaPencetak: peran.nama })}>Cetak Lembar</button>
               {(peran.bisaDisposisi || d.dibuat_oleh === peran.userId) && <button className="btn btn-ghost" style={{ ...kecil, minHeight: 34, fontSize: 12.5 }} onClick={() => setForm({ disposisi: d })}>Ubah</button>}
               {peran.isAdmin && <button className="btn btn-ghost" style={{ ...kecil, minHeight: 34, fontSize: 12.5 }} onClick={() => hapus(d)}>Hapus</button>}
             </div>
@@ -127,7 +127,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
             {d.catatan && <div style={{ fontSize: 13.5, marginBottom: 10 }}><b>Catatan:</b> {d.catatan}</div>}
             <div style={{ fontSize: 13.5, marginBottom: 12, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
               {d.file_scan_url
-                ? <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat scan lembar disposisi{d.file_scan_nama ? ` (${d.file_scan_nama})` : ''}</LihatBerkas>
+                ? <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>Lihat scan lembar disposisi{d.file_scan_nama ? ` (${d.file_scan_nama})` : ''}</LihatBerkas>
                 : <span style={{ color: 'var(--ink-soft)' }}>Belum ada scan lembar disposisi.</span>}
               {(peran.bisaDisposisi || d.dibuat_oleh === peran.userId) && <label style={{ textTransform: 'none', fontSize: 13, margin: 0, color: 'var(--pmi-red)', cursor: 'pointer', fontWeight: 600 }}>⬆ {d.file_scan_url ? 'Ganti' : 'Unggah'} scan<input type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => unggahScan(d, e)} /></label>}
             </div>
@@ -144,7 +144,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
                   </div>
                   <div style={{ fontSize: 14, margin: '4px 0' }}>{t.instruksi || '-'}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    {t.batas_waktu && <span style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{telat ? '⚠ Lewat batas: ' : 'Batas: '}{fmtTgl(t.batas_waktu)}</span>}
+                    {t.batas_waktu && <span style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{telat ? 'Lewat batas: ' : 'Batas: '}{fmtTgl(t.batas_waktu)}</span>}
                     {t.dibaca_pada && <span>Sampai & dibaca {fmtWaktu(t.dibaca_pada)}</span>}
                     {t.selesai_pada && <span>Selesai {fmtWaktu(t.selesai_pada)}</span>}
                     {t.diarsipkan_pada && <span>Diarsipkan Biro Umum {fmtWaktu(t.diarsipkan_pada)}</span>}
@@ -155,14 +155,14 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
 
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                     {aksi && selesai?.t.id !== t.id && <>
-                      {t.status === 'menunggu' && <button className="btn btn-ghost" disabled={sibuk} style={kecil} onClick={() => ubahStatus(t, 'dibaca')}>👁 Surat sudah sampai di saya</button>}
+                      {t.status === 'menunggu' && <button className="btn btn-ghost" disabled={sibuk} style={kecil} onClick={() => ubahStatus(t, 'dibaca')}>Surat sudah sampai di saya</button>}
                       {['menunggu', 'dibaca'].includes(t.status) && <button className="btn btn-ghost" disabled={sibuk} style={kecil} onClick={() => ubahStatus(t, 'diproses')}>▶ Mulai proses</button>}
                       {t.status !== 'selesai' && <button className="btn btn-ghost" disabled={sibuk} style={kecil} onClick={() => setForm({ induk: t })}>↪ Teruskan ke bidang lain</button>}
-                      {t.status !== 'selesai' && <button className="btn btn-primary" disabled={sibuk} style={kecil} onClick={() => bukaSelesai(t)}>✅ Selesai + tulis kata-kata…</button>}
+                      {t.status !== 'selesai' && <button className="btn btn-primary" disabled={sibuk} style={kecil} onClick={() => bukaSelesai(t)}>Selesai + tulis kata-kata…</button>}
                       {t.status === 'selesai' && !t.diarsipkan_pada && <button className="btn btn-ghost" disabled={sibuk} style={kecil} onClick={() => ubahStatus(t, 'diproses')}>↩ Buka kembali</button>}
                     </>}
-                    {t.status === 'selesai' && !t.diarsipkan_pada && peran.bisaArsip && <button className="btn btn-primary" disabled={sibuk} style={kecil} onClick={() => arsipkan(t)}>🗄 Arsipkan (Biro Umum)</button>}
-                    {t.status !== 'selesai' && t.unit && <button className="btn btn-ghost" style={kecil} onClick={() => setKontak(t.unit)}>📞 Hubungi {t.unit.nama.replace(/^Bidang /, '')}</button>}
+                    {t.status === 'selesai' && !t.diarsipkan_pada && peran.bisaArsip && <button className="btn btn-primary" disabled={sibuk} style={kecil} onClick={() => arsipkan(t)}>Arsipkan (Biro Umum)</button>}
+                    {t.status !== 'selesai' && t.unit && <button className="btn btn-ghost" style={kecil} onClick={() => setKontak(t.unit)}>Hubungi {t.unit.nama.replace(/^Bidang /, '')}</button>}
                   </div>
 
                   {selesai?.t.id === t.id && (
@@ -192,7 +192,7 @@ export default function DisposisiPanel({ supabase, surat, units, peran, onChange
       {/* Catatan bersama: siapa pun yang punya unit bisa menulis, semua orang bisa melihat */}
       {!loading && (
         <div style={{ borderTop: '2px solid var(--line)', marginTop: 8, paddingTop: 14 }}>
-          <h4 style={{ margin: '0 0 10px' }}>💬 Catatan pada surat ini</h4>
+          <h4 style={{ margin: '0 0 10px' }}>Catatan pada surat ini</h4>
           {catatan.length === 0 && <div style={{ fontSize: 13.5, color: 'var(--ink-soft)', marginBottom: 10 }}>Belum ada catatan.</div>}
           {catatan.map(c => (
             <div key={c.id} style={{ background: 'var(--cream)', borderRadius: 10, padding: '8px 12px', marginBottom: 8 }}>

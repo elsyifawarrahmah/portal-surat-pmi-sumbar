@@ -3,12 +3,14 @@
 import { usePathname } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import BottomNav from '@/components/BottomNav'
+import PullToRefresh from '@/components/PullToRefresh'
 
 export default function AppShell({ children }) {
   const pathname = usePathname() || ''
   const tanpaMenu = pathname === '/' || pathname.startsWith('/login') || pathname === '/pasang'
   return (
     <>
+      <PullToRefresh />
       {!tanpaMenu && <Sidebar />}
       {children}
       {!tanpaMenu && <BottomNav />}

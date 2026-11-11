@@ -13,7 +13,7 @@ import { kodeDivisi } from '@/lib/divisi'
 import { unduhBerkasZip } from '@/lib/zip'
 import { usePeran, useUnits } from '@/lib/peran'
 import RiwayatModal from '@/components/RiwayatModal'
-import PersetujuanKeluar, { LABEL_SETUJU } from '@/components/PersetujuanKeluar'
+import PersetujuanKeluar, { LABEL_SETUJU, POSISI, aksiSaya } from '@/components/PersetujuanKeluar'
 import { PESAN_MIGRASI } from '@/lib/format'
 
 export default function SuratKeluarPage() {
@@ -206,7 +206,7 @@ function SuratKeluarInner() {
         <PeringatanUnit peran={peran} />
         {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 {peran.isBiroUmum ? 'Biro Umum hanya memantau: surat keluar dicatat oleh tiap bidang / Sekretaris.' : 'Akun kamu hanya bisa melihat data. Minta admin mengatur unit/bidang kamu di menu Data User agar bisa mencatat surat keluar.'}
+            {peran.isBiroUmum ? 'Biro Umum hanya memantau: surat keluar dicatat oleh tiap bidang / Sekretaris.' : 'Akun kamu hanya bisa melihat data. Minta admin mengatur unit/bidang kamu di menu Data User agar bisa mencatat surat keluar.'}
           </div>
         )}
         {peran.migrasiBelum && <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>{PESAN_MIGRASI}</div>}
@@ -215,7 +215,7 @@ function SuratKeluarInner() {
           <div className="panel-head">
             <input placeholder="Cari..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:260}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : 'Unduh Semua Berkas (ZIP)'}</button>
               <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
@@ -229,9 +229,16 @@ function SuratKeluarInner() {
                   <tr key={r.id} style={['revisi','ditolak'].includes(r.status_persetujuan) ? { background: '#FFF1F1', boxShadow: 'inset 5px 0 0 #B3261E' } : undefined}>
                     <td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
                     {columns.map(c => <td key={c.k} data-label={c.label}>{r[c.k] ?? '-'}</td>)}
-                    <td data-label="Persetujuan"><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,whiteSpace:'normal',textAlign:'left'}} onClick={()=>setModalSetuju(r)}><span style={{color:(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[1],fontWeight:700}}>{(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[0]}</span></button></td>
+                    <td data-label="Persetujuan">
+                      <div className="alur-sel">
+                        <button className="btn btn-ghost alur-status" onClick={()=>setModalSetuju(r)} style={{color:(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[1]}}>{(LABEL_SETUJU[r.status_persetujuan||null]||LABEL_SETUJU.null)[0]}</button>
+                        <div className="alur-bar" aria-hidden="true">{['diajukan','diparaf','disetujui'].map((k,i) => <span key={k} className={'alur-titik' + (({diajukan:1,diparaf:2,disetujui:3})[r.status_persetujuan] >= i+1 ? ' ok' : '')} />)}</div>
+                        <div className="alur-posisi">{(POSISI[r.status_persetujuan||null]||POSISI.null)[0]}</div>
+                        {aksiSaya(r.status_persetujuan||null, peran, bisaUbah(r)) && <button className="btn btn-primary alur-aksi" onClick={()=>setModalSetuju(r)}>{aksiSaya(r.status_persetujuan||null, peran, bisaUbah(r))}</button>}
+                      </div>
+                    </td>
                     <td data-label="Jawaban untuk" className="mono">{r.jawab?.nomor_surat || '-'}</td>
-                    <td data-label="Bukti">{r.file_bukti_url || jumlahLampiran[r.id] ? <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,color:'var(--pmi-red)',fontWeight:700}} onClick={()=>setModalBerkas(r)}>📎 {(r.file_bukti_url?1:0)+(jumlahLampiran[r.id]||0)} berkas</button> : '-'}</td>
+                    <td data-label="Bukti">{r.file_bukti_url || jumlahLampiran[r.id] ? <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,color:'var(--pmi-red)',fontWeight:700}} onClick={()=>setModalBerkas(r)}>{(r.file_bukti_url?1:0)+(jumlahLampiran[r.id]||0)} berkas</button> : '-'}</td>
                     <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{whiteSpace:'nowrap'}}>
                       <button className="btn btn-ghost" style={{padding:'4px 8px',marginRight:4}} onClick={()=>setModalRiwayat(r)}>Riwayat</button>

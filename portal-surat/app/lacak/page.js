@@ -17,9 +17,9 @@ const WARNA = {
 }
 // Penanda keadaan per penerima: ikon + warna, supaya jelas sudah dibaca atau belum
 const CHIP = {
-  'belum dibuka': ['🔴', 'Belum dibuka', '#FBE7E7', '#B3261E'],
-  'sudah dibaca': ['👁️', 'Sudah dibaca', 'var(--gold-bg)', 'var(--gold)'],
-  'sedang diproses': ['⚙️', 'Sedang diproses', '#E4EEF9', '#1F5E99'],
+  'belum dibuka': ['', 'Belum dibuka', '#FBE7E7', '#B3261E'],
+  'sudah dibaca': ['', 'Sudah dibaca', 'var(--gold-bg)', 'var(--gold)'],
+  'sedang diproses': ['', 'Sedang diproses', '#E4EEF9', '#1F5E99'],
 }
 function uraiPosisi(teks) {
   return String(teks || '').split(/,\s*/).map(x => { const m = x.match(/^(.*?)\s*\(([^)]+)\)\s*$/); return m ? { unit: m[1].trim(), status: m[2].trim().toLowerCase() } : { unit: x.trim(), status: '' } }).filter(x => x.unit)
@@ -102,8 +102,8 @@ export default function LacakPage() {
 
       {peran.isTataUsaha && dasar.filter(belumLapor).length > 0 && (
         <div style={{ background: '#FBE7E7', border: '2px solid #B3261E', borderRadius: 14, padding: '14px 18px', marginBottom: 16, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 16 }}>⚠️ <b>{dasar.filter(belumLapor).length} surat belum dikirim ke Biro Umum.</b> Biro Umum belum tahu surat ini sudah masuk.</div>
-          <button className="btn btn-primary" style={{ minHeight: 48 }} disabled={kirimSibuk} onClick={() => kirimKeBiro(dasar.filter(belumLapor))}>{kirimSibuk ? 'Mengirim...' : '📤 Kirim semua ke Biro Umum'}</button>
+          <div style={{ fontSize: 16 }}><b>{dasar.filter(belumLapor).length} surat belum dikirim ke Biro Umum.</b> Biro Umum belum tahu surat ini sudah masuk.</div>
+          <button className="btn btn-primary" style={{ minHeight: 48 }} disabled={kirimSibuk} onClick={() => kirimKeBiro(dasar.filter(belumLapor))}>{kirimSibuk ? 'Mengirim...' : 'Kirim semua ke Biro Umum'}</button>
         </div>
       )}
 
@@ -117,11 +117,11 @@ export default function LacakPage() {
         <div className="panel-head">
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
             <input placeholder="Cari nomor agenda atau nama bidang..." value={cari} onChange={e => setCari(e.target.value)} style={{ maxWidth: 300 }} />
-            {(peran.isTataUsaha ? [...FILTER.filter(([k]) => k !== 'saya'), ['belum_lapor', '⚠️ Belum dikirim ke Biro']] : FILTER).map(([k, l]) => <button key={k} type="button" className={'btn ' + (filter === k ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 40, padding: '6px 14px', fontSize: 13.5 }} onClick={() => setFilter(k)}>{l}</button>)}
+            {(peran.isTataUsaha ? [...FILTER.filter(([k]) => k !== 'saya'), ['belum_lapor', 'Belum dikirim ke Biro']] : FILTER).map(([k, l]) => <button key={k} type="button" className={'btn ' + (filter === k ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 40, padding: '6px 14px', fontSize: 13.5 }} onClick={() => setFilter(k)}>{l}</button>)}
           </div>
         </div>
         <div style={{ padding: '10px 20px', fontSize: 14, color: 'var(--ink-soft)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <span>🔴 <b>Belum dibuka</b></span><span>👁️ <b>Sudah dibaca</b></span><span>⚙️ <b>Sedang diproses</b></span><span>✅ <b>Selesai</b></span>
+          <span><b>Belum dibuka</b></span><span><b>Sudah dibaca</b></span><span><b>Sedang diproses</b></span><span><b>Selesai</b></span>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table>
@@ -135,17 +135,17 @@ export default function LacakPage() {
                     return (
                       <tr key={r.jenis + r.surat_id}>
                         <td data-label="No. Agenda"><b className="mono">{r.nomor_agenda || '-'}</b><div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{r.jenis === 'masuk' ? 'Surat masuk' : 'Surat keluar'} · {fmtTgl(r.tanggal)}</div></td>
-                        <td data-label="Ditujukan ke">{r.jenis === 'keluar' ? <>Dari <b>{r.dari}</b></> : belumLapor(r) ? <b style={{ color: '#B3261E' }}>⚠️ Belum dikirim ke Biro Umum</b> : r.untuk}</td>
+                        <td data-label="Ditujukan ke">{r.jenis === 'keluar' ? <>Dari <b>{r.dari}</b></> : belumLapor(r) ? <b style={{ color: '#B3261E' }}>Belum dikirim ke Biro Umum</b> : r.untuk}</td>
                         <td data-label="Sekarang di">{belumLapor(r) ? <b>Masih di Tata Usaha</b> : uraiPosisi(r.posisi).map((x, i) => { const c = CHIP[x.status]; return <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}><b>{x.unit}</b>{c && <span className="tag" style={{ background: c[2], color: c[3] }}>{c[0]} {c[1]}</span>}</div> })}</td>
-                        <td data-label="Keadaan"><span className="tag" style={{ background: bg, color: fg }}>{({ 'Belum dibuka': '🔴 ', 'Sudah dibaca': '👁️ ', 'Sedang diproses': '⚙️ ', 'Selesai': '✅ ', 'Diarsipkan': '🗄️ ' })[r.status] || ''}{r.status}</span></td>
+                        <td data-label="Keadaan"><span className="tag" style={{ background: bg, color: fg }}>{({ 'Belum dibuka': '', 'Sudah dibaca': '', 'Sedang diproses': '', 'Selesai': '', 'Diarsipkan': '' })[r.status] || ''}{r.status}</span></td>
                         <td data-label="Lama" style={telat ? { color: '#B3261E', fontWeight: 700 } : null}>{r.hari <= 0 ? 'hari ini' : r.hari + ' hari'}</td>
                         <td data-label="" style={{ whiteSpace: 'nowrap' }}>
                           <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} onClick={() => bukaJejak(r)}>Jejak</button>
-                          {belumLapor(r) && <button className="btn btn-primary" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} disabled={kirimSibuk} onClick={() => kirimKeBiro([r])}>📤 Kirim ke Biro Umum</button>}
-                          {!belumLapor(r) && !['Selesai', 'Diarsipkan', 'Diterima', 'Dikirim'].includes(r.status) && <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6, ...(telat || r.status === 'Belum dibuka' ? { borderColor: '#B3261E', color: '#B3261E' } : {}) }} onClick={() => bukaHubungi(r)}>📞 Hubungi</button>}
+                          {belumLapor(r) && <button className="btn btn-primary" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6 }} disabled={kirimSibuk} onClick={() => kirimKeBiro([r])}>Kirim ke Biro Umum</button>}
+                          {!belumLapor(r) && !['Selesai', 'Diarsipkan', 'Diterima', 'Dikirim'].includes(r.status) && <button className="btn btn-ghost" style={{ padding: '4px 12px', minHeight: 36, fontSize: 13, marginRight: 6, ...(telat || r.status === 'Belum dibuka' ? { borderColor: '#B3261E', color: '#B3261E' } : {}) }} onClick={() => bukaHubungi(r)}>Hubungi</button>}
                           {r.boleh_baca
                             ? <Link href={r.jenis === 'masuk' ? `/surat/${r.surat_id}` : '/surat-keluar'} className="btn btn-primary" style={{ padding: '6px 12px', minHeight: 36, fontSize: 13, textDecoration: 'none' }}>Buka surat</Link>
-                            : <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>🔒 isi hanya untuk yang dituju</span>}
+                            : <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>isi hanya untuk yang dituju</span>}
                         </td>
                       </tr>
                     )
@@ -179,7 +179,7 @@ export default function LacakPage() {
             ))}
           </ol>
           {!muatGaris && garis.length === 0 && <div style={{ color: 'var(--ink-soft)' }}>Belum ada jejak tercatat.</div>}
-          {!jejak.boleh_baca && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 4 }}>🔒 Isi dan catatan surat hanya terlihat oleh unit yang dituju.</div>}
+          {!jejak.boleh_baca && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 4 }}>Isi dan catatan surat hanya terlihat oleh unit yang dituju.</div>}
         </Modal>
       )}
     </div></div>

@@ -30,10 +30,10 @@ export default function PilihBerkas({ supabase, value = [], onChange, onSibuk, d
     <div className="field">
       <label>{judul}</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <label className="btn btn-ghost" style={tombol}>➕ Pilih foto / PDF
+        <label className="btn btn-ghost" style={tombol}>Pilih foto / PDF
           <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp" style={{ display: 'none' }} disabled={sibuk} onChange={e => pilih(e, 'surat')} />
         </label>
-        {denganDokumen && <label className="btn btn-ghost" style={tombol}>➕ PDF surat panjang (lebih dari 2 lembar)
+        {denganDokumen && <label className="btn btn-ghost" style={tombol}>PDF surat panjang (lebih dari 2 lembar)
           <input type="file" multiple accept=".pdf,application/pdf" style={{ display: 'none' }} disabled={sibuk} onChange={e => pilih(e, 'dokumen')} />
         </label>}
       </div>
@@ -45,7 +45,7 @@ export default function PilihBerkas({ supabase, value = [], onChange, onSibuk, d
           <div key={(b.id || b.url) + i} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--line)', borderRadius: 12, padding: '8px 12px', marginBottom: 6, background: '#fff' }}>
             <span style={{ fontWeight: 800, color: 'var(--ink-soft)' }}>{i + 1}</span>
             <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 14.5 }}>
-              <LihatBerkas url={b.url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>{/\.pdf$/i.test(b.nama || '') ? '📄' : '🖼️'} {b.nama || 'Berkas'}</LihatBerkas>
+              <LihatBerkas url={b.url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>{b.nama || 'Berkas'}</LihatBerkas>
             </span>
             <button type="button" onClick={() => batal(i)} className="btn btn-ghost" aria-label={'Batalkan ' + (b.nama || 'berkas')} style={{ minHeight: 40, minWidth: 40, padding: '0 12px', color: '#B3261E', fontWeight: 800, fontSize: 15 }}>✕ Batalkan</button>
           </div>

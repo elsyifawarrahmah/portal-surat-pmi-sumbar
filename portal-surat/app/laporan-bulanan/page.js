@@ -149,7 +149,7 @@ export default function LaporanBulananPage() {
                 <button className="btn btn-primary" onClick={unduhZip} disabled={loading}>⬇ Unduh Lengkap (ZIP + semua file)</button>
                 <button className="btn btn-ghost" onClick={unduhWord}>⬇ Word</button>
                 <button className="btn btn-ghost" onClick={unduhExcel}>⬇ Excel</button>
-                <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: `Laporan Surat Masuk Selesai — ${judulBulan}`, subjudul: `${baris().length} surat selesai`, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak / PDF</button>
+                <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: `Laporan Surat Masuk Selesai — ${judulBulan}`, subjudul: `${baris().length} surat selesai`, kolom, baris: baris(), namaPencetak: peran.nama })}>Cetak / PDF</button>
               </div>
             )}
           </div>
@@ -165,7 +165,7 @@ export default function LaporanBulananPage() {
                 {rows === null ? <tr><td colSpan={6} style={{ textAlign: 'center', padding: 30, color: 'var(--ink-soft)' }}>Pilih bulan lalu tekan “Tampilkan laporan”.</td></tr> :
                   rows.length === 0 ? <tr><td colSpan={6} style={{ textAlign: 'center', padding: 30, color: 'var(--ink-soft)' }}>Tidak ada surat yang selesai pada {judulBulan}.</td></tr> :
                     rows.map(r => {
-                      if (rahasia(r)) return <tr key={r.s.id}><td colSpan={6}>🔒 Surat rahasia — hanya admin yang bisa melihat.</td></tr>
+                      if (rahasia(r)) return <tr key={r.s.id}><td colSpan={6}>Surat rahasia — hanya admin yang bisa melihat.</td></tr>
                       return (
                         <tr key={r.s.id}>
                           <td data-label="Surat" style={{ minWidth: 220 }}>
@@ -176,7 +176,7 @@ export default function LaporanBulananPage() {
                           <td data-label="Disposisi" style={{ whiteSpace: 'pre-wrap', fontSize: 13, minWidth: 220 }}>{teksDisposisi(r) || '-'}</td>
                           <td data-label="Hasil" style={{ whiteSpace: 'pre-wrap', fontSize: 13, minWidth: 180 }}>{teksHasil(r) || '-'}</td>
                           <td data-label="Catatan" style={{ whiteSpace: 'pre-wrap', fontSize: 13, minWidth: 200 }}>{teksCatatan(r) || '-'}</td>
-                          <td data-label="File" style={{ fontSize: 13, minWidth: 150 }}>{r.berkas.length === 0 ? '-' : r.berkas.map((b, i) => <div key={i}><LihatBerkas url={b.url} judul={b.nama} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 {b.nama}</LihatBerkas></div>)}</td>
+                          <td data-label="File" style={{ fontSize: 13, minWidth: 150 }}>{r.berkas.length === 0 ? '-' : r.berkas.map((b, i) => <div key={i}><LihatBerkas url={b.url} judul={b.nama} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>{b.nama}</LihatBerkas></div>)}</td>
                         </tr>
                       )
                     })}

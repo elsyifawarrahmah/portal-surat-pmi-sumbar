@@ -64,7 +64,7 @@ export default function Beranda() {
       <div className="hero">
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div className="hero-sapa">{sapaan()}</div>
-          <h1>Halo, {(peran.nama || '...').split(' ')[0]} 👋</h1>
+          <h1>Halo, {(peran.nama || '...').split(' ')[0]} </h1>
           <p>{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''} · SATria PMI</p>
         </div>
         <img src="/logo-pmi.png" alt="" className="hero-logo" />
@@ -89,7 +89,7 @@ export default function Beranda() {
 
       {panggilan.length > 0 && (
         <div style={{ background: '#FBE7E7', border: '1px solid #B3261E', borderRadius: 16, padding: '14px 18px', marginBottom: 18 }}>
-          <div style={{ fontWeight: 800, fontSize: 17, color: '#B3261E', marginBottom: 4 }}>📣 Ada panggilan dari Biro Umum</div>
+          <div style={{ fontWeight: 800, fontSize: 17, color: '#B3261E', marginBottom: 4 }}>Ada panggilan dari Biro Umum</div>
           {panggilan.slice(0, 2).map(p => <div key={p.id} style={{ fontSize: 15.5, marginBottom: 4 }}>{p.pesan}</div>)}
           <Link href="/pemantauan" className="btn btn-primary" style={{ textDecoration: 'none', minHeight: 46, marginTop: 6 }}>Lihat dan tanggapi →</Link>
         </div>
@@ -109,7 +109,7 @@ export default function Beranda() {
 
       <h3 style={{ fontSize: 19, margin: '0 0 10px' }}>{penuh ? 'Surat yang perlu diteruskan' : 'Surat baru untuk kamu'}</h3>
       {loading ? <div style={{ color: 'var(--ink-soft)' }}>Memuat...</div> : terbaru.length === 0 ? (
-        <div style={{ background: '#fff', border: '1px dashed var(--line)', borderRadius: 16, padding: 24, textAlign: 'center', fontSize: 16, color: 'var(--ink-soft)' }}>Tidak ada surat baru. 👍</div>
+        <div style={{ background: '#fff', border: '1px dashed var(--line)', borderRadius: 16, padding: 24, textAlign: 'center', fontSize: 16, color: 'var(--ink-soft)' }}>Tidak ada surat baru. </div>
       ) : terbaru.map(({ s, kunci }) => (
         <div key={s.id} onClick={() => router.push(`/surat/${s.id}`)} className="row-click" style={{ background: '#fff', border: '1px solid var(--pmi-red)', borderLeft: '6px solid var(--pmi-red)', borderRadius: 14, padding: '14px 18px', marginBottom: 10, cursor: 'pointer' }}>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{s.perihal}</div>

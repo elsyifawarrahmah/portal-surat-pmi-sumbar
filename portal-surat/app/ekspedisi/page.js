@@ -79,7 +79,7 @@ export default function EkspedisiPage() {
       <div className="topbar"><div><h1>Ekspedisi</h1><p className="desc">Buku pengiriman surat keluar: kapan dikirim, lewat apa, siapa penerimanya, dan tanda terimanya.</p></div></div>
       {peran.migrasiBelum && <Info>Pembaruan database belum dijalankan. {PESAN_MIGRASI}</Info>}
       {pesan && <div className="error-box">{pesan}</div>}
-      {!peran.bisaEkspedisi && !peran.loading && <Info>👁 Akun kamu belum terhubung ke unit/bidang, jadi hanya bisa melihat. Minta admin mengatur unit kamu di menu Data User.</Info>}
+      {!peran.bisaEkspedisi && !peran.loading && <Info>Akun kamu belum terhubung ke unit/bidang, jadi hanya bisa melihat. Minta admin mengatur unit kamu di menu Data User.</Info>}
 
       <div className="grid4">
         {['belum', 'dikirim', 'diterima', 'kembali'].map(s => <div key={s} className="stat" style={{ '--accent': s === 'diterima' ? 'var(--stock)' : s === 'belum' ? '#B3261E' : 'var(--gold)' }}><div className="lbl">{ST[s].l}</div><div className="val">{hitung(s)}</div></div>)}
@@ -92,7 +92,7 @@ export default function EkspedisiPage() {
             <select value={fStatus} onChange={e => setFStatus(e.target.value)} style={{ maxWidth: 220 }}><option value="semua">Semua status</option>{Object.entries(ST).map(([k, v]) => <option key={k} value={k}>{v.l}</option>)}</select>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Ekspedisi', subjudul: fStatus === 'semua' ? 'Semua surat keluar' : ST[fStatus].l, kolom, baris: baris(), namaPencetak: peran.nama })}>🖨 Cetak Buku Ekspedisi</button>
+            <button className="btn btn-ghost" onClick={() => cetakDaftar({ judul: 'Buku Ekspedisi', subjudul: fStatus === 'semua' ? 'Semua surat keluar' : ST[fStatus].l, kolom, baris: baris(), namaPencetak: peran.nama })}>Cetak Buku Ekspedisi</button>
             <button className="btn btn-ghost" onClick={() => unduhCsv('ekspedisi', kolom.map(k => k.judul), baris().map(b => kolom.map(k => b[k.k])))}>⬇ Excel</button>
           </div>
         </div>
@@ -107,10 +107,10 @@ export default function EkspedisiPage() {
                     return (
                       <tr key={r.id}>
                         <td data-label="Tgl Surat">{fmtTgl(r.tanggal_surat)}</td><td data-label="Agenda" className="mono">{r.nomor_agenda || '-'}</td>
-                        <td data-label="No. Surat" className="mono">{sem ? '••••••' : r.nomor_surat}</td><td data-label="Tujuan">{sem ? '🔒 Rahasia' : r.tujuan_surat}</td><td data-label="Perihal">{sem ? '-' : r.perihal}</td>
+                        <td data-label="No. Surat" className="mono">{sem ? '••••••' : r.nomor_surat}</td><td data-label="Tujuan">{sem ? 'Rahasia' : r.tujuan_surat}</td><td data-label="Perihal">{sem ? '-' : r.perihal}</td>
                         <td data-label="Pengiriman">{r.eks ? <>{fmtTgl(r.eks.tanggal_kirim)} · {r.eks.dikirim_via}<div style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>{r.eks.penerima ? 'Penerima: ' + r.eks.penerima : ''}{r.eks.pengantar ? ' · oleh ' + r.eks.pengantar : ''}</div></> : '-'}</td>
                         <td data-label="Status"><span className="tag" style={ST[r.st].s}>{ST[r.st].l}</span>{r.eks?.tanggal_diterima && <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{fmtTgl(r.eks.tanggal_diterima)}</div>}</td>
-                        <td data-label="Tanda terima">{r.eks?.tanda_terima_url ? <a href={r.eks.tanda_terima_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 Lihat</a> : '-'}</td>
+                        <td data-label="Tanda terima">{r.eks?.tanda_terima_url ? <a href={r.eks.tanda_terima_url} target="_blank" rel="noreferrer" style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>Lihat</a> : '-'}</td>
                         <td data-label="">{peran.bisaEkspedisi && !sem && <button className="btn btn-ghost" style={{ padding: '5px 12px', minHeight: 36, fontSize: 13 }} onClick={() => buka(r)}>{r.eks ? 'Ubah / Tanda Terima' : 'Catat Kirim'}</button>}</td>
                       </tr>
                     )

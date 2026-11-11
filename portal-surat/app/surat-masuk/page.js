@@ -283,7 +283,7 @@ function SuratMasukInner() {
         <PeringatanUnit peran={peran} />
         {!bolehCatat && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretaris. Buka kolom “Disposisi” untuk melihat disposisi surat.
+            Akun kamu hanya bisa melihat surat masuk. Surat masuk dicatat oleh Sekretaris. Buka kolom “Disposisi” untuk melihat disposisi surat.
           </div>
         )}
         {peran.migrasiBelum && (
@@ -294,7 +294,7 @@ function SuratMasukInner() {
           <div className="panel-head">
             <input placeholder="Cari nomor surat / asal / perihal..." value={search} onChange={e=>setSearch(e.target.value)} style={{maxWidth:280}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : 'Unduh Semua Berkas (ZIP)'}</button>
               <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
@@ -311,12 +311,12 @@ function SuratMasukInner() {
                     <td data-label="Tgl Diterima">{s.tanggal_diterima_kantor}</td>
                     <td data-label="Agenda" className="mono">{s.nomor_agenda || '-'}</td>
                     <td data-label="No. Surat" className="mono">{isRahasia ? '••••••' : s.nomor_surat}{!isRahasia && s.macam_surat && <div style={{fontSize:11.5,color:'var(--ink-soft)',fontFamily:'inherit'}}>{s.macam_surat}</div>}</td>
-                    <td data-label="Asal">{isRahasia ? '🔒 Rahasia' : s.asal_surat}</td>
+                    <td data-label="Asal">{isRahasia ? 'Rahasia' : s.asal_surat}</td>
                     <td data-label="Perihal">{isRahasia ? 'Hanya admin yang bisa lihat' : s.perihal}</td>
                     <td data-label="Sifat"><span className="tag" style={sifatStyle(s.sifat)}>{s.sifat}</span></td>
                     <td data-label="Status">{isRahasia ? '-' : (() => { const st = statusSurat(tahapMap[s.id]); return st ? <span className="tag" style={st.tone === 'ok' ? { background: 'var(--stock-bg)', color: 'var(--stock)' } : { background: 'var(--gold-bg)', color: 'var(--gold)' }}>{st.label}</span> : '-' })()}</td>
                     <td data-label="Disposisi" onClick={e=>e.stopPropagation()}>{isRahasia ? '-' : (() => { const d = disposisiMap[s.id]; return <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>setModalDisposisi(s)}>{d ? <span style={{color: d.selesai === d.total ? 'var(--stock)' : 'var(--gold)',fontWeight:700}}>{d.total} tujuan · {d.selesai} selesai</span> : (peran.bisaDisposisi ? '+ Disposisi' : 'Belum')}</button> })()}</td>
-                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,color:'var(--pmi-red)',fontWeight:700}} onClick={()=>setModalBerkas(s)}>📎 Ruang file</button> : '-'}</td>
+                    <td data-label="Bukti" onClick={e=>e.stopPropagation()}>{!isRahasia && s.file_bukti_url ? <button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,color:'var(--pmi-red)',fontWeight:700}} onClick={()=>setModalBerkas(s)}>Ruang file</button> : '-'}</td>
                     <td data-label="Petugas">{s.profiles?.nama_lengkap || '-'}</td>
                     <td data-label="" style={{color:'var(--ink-soft)',textAlign:'right',whiteSpace:'nowrap'}} onClick={e=>e.stopPropagation()}>{isRahasia ? '' : <><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5,marginRight:6}} onClick={()=>setModalRiwayat(s)}>Riwayat</button><button className="btn btn-ghost" style={{padding:'4px 10px',minHeight:34,fontSize:12.5}} onClick={()=>openTahap(s.id)}>Alur →</button></>}</td>
                   </tr>
@@ -325,7 +325,7 @@ function SuratMasukInner() {
             </table>
             {surat.some(s => s.sifat === 'Rahasia') && !isAdmin && (
               <div style={{padding:'10px 20px',fontSize:12,color:'var(--ink-soft)',borderTop:'1px solid var(--line)'}}>
-                🔒 Sebagian surat ditandai Rahasia dan hanya bisa dibuka oleh admin (Kabid).
+                Sebagian surat ditandai Rahasia dan hanya bisa dibuka oleh admin (Kabid).
               </div>
             )}
           </div>
@@ -378,7 +378,7 @@ function SuratMasukInner() {
           <div style={{ background: 'var(--cream)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, marginBottom: 14 }}>
             <b>{modalDisposisi.asal_surat}</b> — {modalDisposisi.perihal}<br />
             <span style={{ color: 'var(--ink-soft)' }}>Agenda {modalDisposisi.nomor_agenda || '-'} · diterima {fmtTgl(modalDisposisi.tanggal_diterima_kantor)}</span>
-            {modalDisposisi.file_bukti_url && <> · <LihatBerkas url={modalDisposisi.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>📎 Lihat surat</LihatBerkas></>}
+            {modalDisposisi.file_bukti_url && <> · <LihatBerkas url={modalDisposisi.file_bukti_url} style={{ color: 'var(--pmi-red)', fontWeight: 700 }}>Lihat surat</LihatBerkas></>}
           </div>
           <DisposisiPanel supabase={supabase} surat={modalDisposisi} units={units} peran={peran} onChanged={load} />
         </Modal>
@@ -400,7 +400,7 @@ function SuratMasukInner() {
                   <div key={idx} style={{border:'1px solid var(--line)',borderRadius:12,padding:14,opacity: belumSampai ? 0.45 : 1}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,flexWrap:'wrap',gap:6}}>
                       <strong>{idx+1}. {labelTahap(t.nama_tahap)}</strong>
-                      {tertahan !== null && tertahan >= 2 && <span style={{background:'#FBE7E7',color:'#B3261E',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>⚠ Tertahan {tertahan} hari</span>}
+                      {tertahan !== null && tertahan >= 2 && <span style={{background:'#FBE7E7',color:'#B3261E',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>Tertahan {tertahan} hari</span>}
                       {tertahan !== null && tertahan < 2 && <span style={{background:'var(--gold-bg)',color:'var(--gold)',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>Sedang di sini</span>}
                       {t.tanggal_diteruskan && <span style={{background:'var(--stock-bg)',color:'var(--stock)',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:20}}>✓ Selesai diteruskan</span>}
                     </div>
@@ -422,7 +422,7 @@ function SuratMasukInner() {
                         {bolehAlur && (
                           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                             {!t.tanggal_diterima && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>terimaSekarang(idx)}>Tandai Diterima Sekarang</button>}
-                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? '✅ Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? '✅ Proses Selesai' : isSelesai(t.nama_tahap) ? 'Serahkan ke Biro Umum untuk Diarsip' : isPengarsipan(t.nama_tahap) ? 'Sudah Diarsip → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}
+                            {t.tanggal_diterima && !t.tanggal_diteruskan && <button className="btn btn-primary" style={{padding:'5px 10px',fontSize:12}} onClick={()=>teruskanSekarang(idx)}>{idx === tahapanList.length - 1 ? 'Selesai — Arsip Diterima Biro Umum' : isTujuan(t.nama_tahap) ? 'Proses Selesai' : isSelesai(t.nama_tahap) ? 'Serahkan ke Biro Umum untuk Diarsip' : isPengarsipan(t.nama_tahap) ? 'Sudah Diarsip → Kembali ke Biro Umum' : 'Teruskan ke Tahap Berikutnya'}</button>}
                             {canTambah(idx) && <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>tambahTahapLain(idx)}>+ Teruskan ke tahap lain dulu</button>}
                             <button className="btn btn-ghost" style={{padding:'5px 10px',fontSize:12}} onClick={()=>saveTahap(idx)}>Simpan</button>
                           </div>

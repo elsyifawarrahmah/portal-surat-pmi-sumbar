@@ -74,17 +74,17 @@ export default function PasangPage() {
       <h1 style={{ fontSize: 28, margin: '14px 0 6px' }}>Pasang di layar HP</h1>
       <p style={{ fontSize: 17, color: 'var(--ink-soft)', margin: '0 0 18px' }}>Dengan ini, ikon merah PMI muncul di layar HP. Cukup <b>sentuh sekali</b>, SATria PMI langsung terbuka seperti aplikasi, tanpa mengetik alamat.</p>
 
-      {terpasang && <div style={{ ...kartu, background: 'var(--stock-bg, #E8F5E9)', borderColor: '#2E7D32', fontSize: 18 }}>✅ <b>Sudah terpasang.</b> SATria PMI sedang dibuka dari ikon di layar HP.</div>}
+      {terpasang && <div style={{ ...kartu, background: 'var(--stock-bg, #E8F5E9)', borderColor: '#2E7D32', fontSize: 18 }}><b>Sudah terpasang.</b> SATria PMI sedang dibuka dari ikon di layar HP.</div>}
 
-      {tawaran && !terpasang && <button className="btn btn-primary" style={{ width: '100%', minHeight: 64, fontSize: 20, marginBottom: 16 }} onClick={pasang}>📲 Pasang sekarang</button>}
+      {tawaran && !terpasang && <button className="btn btn-primary" style={{ width: '100%', minHeight: 64, fontSize: 20, marginBottom: 16 }} onClick={pasang}>Pasang sekarang</button>}
 
-      {jenis && <div style={{ ...kartu, background: '#EEF5FB', borderColor: '#1F6FB2', fontSize: 17 }}>📱 Kamu sedang memakai: <b>{{ ios: 'iPhone', samsung: 'Samsung Internet', chrome: 'Chrome (Android)', android: 'Android, browser lain', lain: 'Komputer / laptop' }[jenis]}</b>. Ikuti kotak yang <b>berbingkai merah</b> di bawah.</div>}
+      {jenis && <div style={{ ...kartu, background: '#EEF5FB', borderColor: '#1F6FB2', fontSize: 17 }}>Kamu sedang memakai: <b>{{ ios: 'iPhone', samsung: 'Samsung Internet', chrome: 'Chrome (Android)', android: 'Android, browser lain', lain: 'Komputer / laptop' }[jenis]}</b>. Ikuti kotak yang <b>berbingkai merah</b> di bawah.</div>}
 
       {jenis === 'samsung' && <div style={{ ...kartu, borderColor: 'var(--pmi-red)', borderWidth: 2 }}>
-        <h2 style={{ fontSize: 21, margin: 0 }}>🟣 Samsung Internet</h2>
+        <h2 style={{ fontSize: 21, margin: 0 }}>Samsung Internet</h2>
         <div style={{ background: '#FBF1D6', borderRadius: 12, padding: '10px 14px', margin: '10px 0', fontSize: 16, lineHeight: 1.45 }}>Kalau muncul tulisan <b>“Aplikasi yang tidak aman diblokir”</b> dari Google Play Protect: <b>SATria PMI aman</b>. Itu aturan HP untuk pemasangan lewat Samsung Internet. Pilih salah satu cara di bawah.</div>
         <div style={{ fontWeight: 800, fontSize: 18, margin: '12px 0 4px' }}>Cara A (paling mudah): pakai Chrome</div>
-        <a className="btn btn-primary" style={{ minHeight: 60, fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', margin: '8px 0' }} href={`intent://${typeof window !== 'undefined' ? window.location.host : ''}/pasang#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(alamat)};end`}>🌐 Buka di Chrome</a>
+        <a className="btn btn-primary" style={{ minHeight: 60, fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', margin: '8px 0' }} href={`intent://${typeof window !== 'undefined' ? window.location.host : ''}/pasang#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(alamat)};end`}>Buka di Chrome</a>
         <div style={langkah}><span style={no}>1</span><span>Setelah terbuka di Chrome, sentuh <b>⋮</b> di pojok kanan atas.</span></div>
         <div style={langkah}><span style={no}>2</span><span>Pilih <b>“Pasang aplikasi”</b>, lalu <b>Pasang</b>.</span></div>
         <div style={{ fontWeight: 800, fontSize: 18, margin: '16px 0 4px' }}>Cara B: tetap di Samsung Internet</div>
@@ -96,25 +96,25 @@ export default function PasangPage() {
       </div>}
 
       {jenis === 'ios' && <div style={{ ...kartu, borderColor: 'var(--pmi-red)', borderWidth: 2 }}>
-        <h2 style={{ fontSize: 21, margin: 0 }}>🍎 iPhone (Safari)</h2>
+        <h2 style={{ fontSize: 21, margin: 0 }}>iPhone (Safari)</h2>
         <div style={langkah}><span style={no}>1</span><span>Buka SATria PMI di <b>Safari</b> (ikon kompas biru), bukan Chrome atau aplikasi lain.</span></div>
         <div style={langkah}><span style={no}>2</span><span>Sentuh tombol <b>Bagikan</b> di bagian bawah layar.</span></div>
         <IlustrasiBagikan />
         <div style={langkah}><span style={no}>3</span><span>Geser menunya ke atas, pilih <b>“Tambah ke Layar Utama”</b>.</span></div>
         <IlustrasiLayarUtama />
         <div style={langkah}><span style={no}>4</span><span>Sentuh <b>Tambah</b> di pojok kanan atas. Ikon merah PMI muncul di layar HP.</span></div>
-        <div style={{ background: '#FBF1D6', borderRadius: 12, padding: '12px 14px', marginTop: 12, fontSize: 16, lineHeight: 1.5 }}>🔔 <b>Notifikasi di iPhone</b> baru bisa dinyalakan <b>setelah</b> ikon terpasang. Caranya: buka SATria PMI <b>dari ikon merah itu</b>, masuk, lalu di <b>Beranda</b> sentuh <b>“Aktifkan Sekarang”</b>. Butuh iPhone dengan iOS 16.4 atau lebih baru.</div>
+        <div style={{ background: '#FBF1D6', borderRadius: 12, padding: '12px 14px', marginTop: 12, fontSize: 16, lineHeight: 1.5 }}><b>Notifikasi di iPhone</b> baru bisa dinyalakan <b>setelah</b> ikon terpasang. Caranya: buka SATria PMI <b>dari ikon merah itu</b>, masuk, lalu di <b>Beranda</b> sentuh <b>“Aktifkan Sekarang”</b>. Butuh iPhone dengan iOS 16.4 atau lebih baru.</div>
       </div>}
 
       {(jenis === 'chrome' || jenis === 'android' || jenis === 'lain' || !jenis) && <div style={{ ...kartu, borderColor: jenis === 'chrome' ? 'var(--pmi-red)' : 'var(--line)', borderWidth: jenis === 'chrome' ? 2 : 1 }}>
-        <h2 style={{ fontSize: 21, margin: 0 }}>🤖 HP Android (Chrome)</h2>
+        <h2 style={{ fontSize: 21, margin: 0 }}>HP Android (Chrome)</h2>
         <div style={langkah}><span style={no}>1</span><span>Buka SATria PMI di <b>Chrome</b>.</span></div>
         <div style={langkah}><span style={no}>2</span><span>Sentuh titik tiga <b>⋮</b> di pojok kanan atas.</span></div>
         <div style={langkah}><span style={no}>3</span><span>Pilih <b>“Pasang aplikasi”</b> atau <b>“Tambahkan ke layar utama”</b>, lalu <b>Pasang</b>.</span></div>
       </div>}
 
       {jenis !== 'ios' && jenis !== 'samsung' && <details style={{ ...kartu, padding: '14px 22px' }}>
-        <summary style={{ fontSize: 18, fontWeight: 700, cursor: 'pointer' }}>🍎 Punya iPhone? Lihat caranya</summary>
+        <summary style={{ fontSize: 18, fontWeight: 700, cursor: 'pointer' }}>Punya iPhone? Lihat caranya</summary>
         <div style={langkah}><span style={no}>1</span><span>Buka SATria PMI di <b>Safari</b>.</span></div>
         <div style={langkah}><span style={no}>2</span><span>Sentuh <b>Bagikan</b> di bagian bawah layar.</span></div>
         <IlustrasiBagikan />
@@ -123,11 +123,11 @@ export default function PasangPage() {
       </details>}
 
       <div style={kartu}>
-        <h2 style={{ fontSize: 21, margin: '0 0 10px' }}>🔗 Bagikan ke orang lain</h2>
+        <h2 style={{ fontSize: 21, margin: '0 0 10px' }}>Bagikan ke orang lain</h2>
         <div style={{ background: 'var(--cream, #FAF6EF)', borderRadius: 12, padding: '12px 14px', fontSize: 16, wordBreak: 'break-all', marginBottom: 10 }}>{alamat}</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button className="btn btn-ghost" style={{ minHeight: 52, fontSize: 16 }} onClick={salinLink}>{salin ? '✓ Tersalin' : '📋 Salin link'}</button>
-          <a className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href={`https://wa.me/?text=${encodeURIComponent('SATria PMI, surat digital PMI Sumatera Barat: ' + alamat)}`} target="_blank" rel="noreferrer">💬 Kirim lewat WhatsApp</a>
+          <button className="btn btn-ghost" style={{ minHeight: 52, fontSize: 16 }} onClick={salinLink}>{salin ? '✓ Tersalin' : 'Salin link'}</button>
+          <a className="btn btn-primary" style={{ minHeight: 52, fontSize: 16, display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }} href={`https://wa.me/?text=${encodeURIComponent('SATria PMI, surat digital PMI Sumatera Barat: ' + alamat)}`} target="_blank" rel="noreferrer">Kirim lewat WhatsApp</a>
         </div>
         {qr && <div style={{ textAlign: 'center', marginTop: 18 }}><img src={qr} alt="Kode QR SATria PMI" width={220} height={220} /><div style={{ fontSize: 15, color: 'var(--ink-soft)' }}>Arahkan kamera HP ke kode ini untuk membuka SATria PMI.</div></div>}
       </div>

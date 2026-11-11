@@ -30,8 +30,8 @@ export default function KontakModal({ supabase, unit, pesan, onClose }) {
             <>
               <div style={{ fontSize: 13, color: 'var(--ink-soft)', margin: '2px 0 8px' }}>{o.telepon}</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <a className="btn btn-primary" href={`tel:${bersih(o.telepon)}`} style={{ textDecoration: 'none', minHeight: 40, padding: '8px 16px' }}>📞 Telepon</a>
-                <a className="btn btn-ghost" href={`https://wa.me/${keWa(o.telepon)}?text=${teksWa}`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', minHeight: 40, padding: '8px 16px' }}>💬 WhatsApp</a>
+                <a className="btn btn-primary" href={`tel:${bersih(o.telepon)}`} style={{ textDecoration: 'none', minHeight: 40, padding: '8px 16px' }}>Telepon</a>
+                <a className="btn btn-ghost" href={`https://wa.me/${keWa(o.telepon)}?text=${teksWa}`} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', minHeight: 40, padding: '8px 16px' }}>WhatsApp</a>
               </div>
             </>
           ) : <div style={{ fontSize: 13, color: '#B3261E' }}>Nomor telepon belum diisi (admin bisa mengisinya di Data User, atau orangnya sendiri lewat menu samping).</div>}

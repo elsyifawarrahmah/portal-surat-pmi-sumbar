@@ -219,7 +219,7 @@ export default function ArsipPage() {
 
         {!bisaArsip && !peran.loading && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat arsip. Pengarsipan dilakukan oleh Biro Umum.
+            Akun kamu hanya bisa melihat arsip. Pengarsipan dilakukan oleh Biro Umum.
           </div>
         )}
         {loadError && <div className="error-box" style={{marginBottom:18}}>{loadError}</div>}
@@ -232,7 +232,7 @@ export default function ArsipPage() {
 
         <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:6,marginBottom:12}}>
           <button className={'btn ' + (fBulan === 'semua' ? 'btn-primary' : 'btn-ghost')} style={{whiteSpace:'nowrap'}} onClick={() => setFBulan('semua')}>Semua bulan</button>
-          {bulanList.map(b => <button key={b} className={'btn ' + (fBulan === b ? 'btn-primary' : 'btn-ghost')} style={{whiteSpace:'nowrap'}} onClick={() => setFBulan(fBulan === b ? 'semua' : b)}>🗂 {namaBulan(b)} ({rows.filter(r => r.bulan === b).length})</button>)}
+          {bulanList.map(b => <button key={b} className={'btn ' + (fBulan === b ? 'btn-primary' : 'btn-ghost')} style={{whiteSpace:'nowrap'}} onClick={() => setFBulan(fBulan === b ? 'semua' : b)}>{namaBulan(b)} ({rows.filter(r => r.bulan === b).length})</button>)}
         </div>
 
         <div className="panel">
@@ -253,7 +253,7 @@ export default function ArsipPage() {
               </select>
             </div>
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-              <button className="btn btn-ghost" onClick={unduhBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={unduhBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : 'Unduh Berkas (ZIP)'}</button>
               <button className="btn btn-ghost" onClick={exportCSV}>⬇ Register Arsip (Excel)</button>
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function ArsipPage() {
                       <td data-label="Jenis">{JENIS[r.jenis]}</td>
                       <td data-label="Tanggal">{tgl(r.tanggal)}</td>
                       <td data-label="Nomor" className="mono">{tutup ? '••••••' : (r.nomor || '-')}</td>
-                      <td data-label="Perihal">{tutup ? '🔒 Rahasia' : (r.judul || '-')}{!tutup && r.divisi ? <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{r.divisi}</div> : null}</td>
+                      <td data-label="Perihal">{tutup ? 'Rahasia' : (r.judul || '-')}{!tutup && r.divisi ? <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{r.divisi}</div> : null}</td>
                       <td data-label="Asal/Tujuan">{tutup ? '-' : (r.pihak || '-')}</td>
                       <td data-label="Status">
                         <span className="tag" style={STATUS_STYLE[r.status]}>{STATUS_LABEL[r.status]}</span>
@@ -278,7 +278,7 @@ export default function ArsipPage() {
                         {r.status === 'arsip' && r.tglArsip && <div style={{fontSize:11.5,color:'var(--ink-soft)',marginTop:3}}>{tgl(r.tglArsip)}{r.otomatis ? ' · otomatis' : ''}</div>}
                       </td>
                       <td data-label="Lokasi Arsip">{r.catat?.lokasi_arsip || '-'}{r.catat?.catatan ? <div style={{fontSize:11.5,color:'var(--ink-soft)'}}>{r.catat.catatan}</div> : null}</td>
-                      <td data-label="Berkas">{!tutup && r.file ? <a href={r.file} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</a> : '-'}</td>
+                      <td data-label="Berkas">{!tutup && r.file ? <a href={r.file} target="_blank" rel="noreferrer" style={{color:'var(--pmi-red)',fontWeight:600}}>Lihat</a> : '-'}</td>
                       {bisaArsip && (
                         <td data-label="">
                           {r.status === 'siap' && <button className="btn btn-primary" style={{padding:'4px 10px',fontSize:12}} onClick={() => bukaArsip(r)}>Arsipkan</button>}

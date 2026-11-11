@@ -97,7 +97,7 @@ export default function DataUserPage() {
         <div className="main">
           <div className="topbar"><div><h1>Data User</h1><p className="desc">Halaman ini khusus admin.</p></div></div>
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'12px 16px',borderRadius:10,fontSize:13,fontWeight:600}}>
-            🔒 Kamu tidak punya akses ke halaman ini. Hubungi admin (Kabid) kalau butuh akses.
+            Kamu tidak punya akses ke halaman ini. Hubungi admin (Kabid) kalau butuh akses.
           </div>
         </div>
       </div>

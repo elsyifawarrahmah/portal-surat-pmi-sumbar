@@ -28,7 +28,7 @@ export function TombolBicara({ onTeks, tampil = false }) {
     setAktif(true)
     try { r.start() } catch { setAktif(false) }
   }
-  return <button type="button" className={'btn ' + (aktif ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 48, fontSize: 16, marginBottom: 8 }} onClick={mulai} disabled={aktif}>{aktif ? '🎤 Mendengarkan... silakan bicara' : '🎤 Bicara (suara jadi tulisan)'}</button>
+  return <button type="button" className={'btn ' + (aktif ? 'btn-primary' : 'btn-ghost')} style={{ minHeight: 48, fontSize: 16, marginBottom: 8 }} onClick={mulai} disabled={aktif}>{aktif ? 'Mendengarkan... silakan bicara' : 'Bicara (suara jadi tulisan)'}</button>
 }
 
 export const tambahKalimat = (lama, baru) => { const a = String(lama || '').trim(); return a ? (/[.!?]$/.test(a) ? a + ' ' : a + '. ') + baru : baru }

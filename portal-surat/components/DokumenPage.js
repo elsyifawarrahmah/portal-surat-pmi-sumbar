@@ -172,7 +172,7 @@ export default function DokumenPage({ config }) {
 
         {!isAdmin && (
           <div style={{background:'var(--gold-bg)',color:'var(--gold)',padding:'10px 14px',borderRadius:10,fontSize:12.5,fontWeight:600,marginBottom:18}}>
-            👁 Akun kamu hanya bisa melihat data. Untuk menambah atau mengubah, hubungi admin (Kabid).
+            Akun kamu hanya bisa melihat data. Untuk menambah atau mengubah, hubungi admin (Kabid).
           </div>
         )}
 
@@ -184,7 +184,7 @@ export default function DokumenPage({ config }) {
           <div className="panel-head">
             <input placeholder={config.cari || 'Cari...'} value={search} onChange={e => setSearch(e.target.value)} style={{maxWidth:260}} />
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : '📦 Unduh Semua Berkas (ZIP)'}</button>
+              <button className="btn btn-ghost" onClick={unduhSemuaBerkas} disabled={!!zipProg}>{zipProg ? `Menyiapkan ${zipProg.n}/${zipProg.total}...` : 'Unduh Semua Berkas (ZIP)'}</button>
               <button className="btn btn-ghost" onClick={exportCSV}>⬇ Export Laporan (Excel)</button>
             </div>
           </div>
@@ -208,7 +208,7 @@ export default function DokumenPage({ config }) {
                       {config.masaBerlaku && (
                         <td data-label="Status">{st ? <span className="tag" style={st.style}>{st.label}</span> : '-'}</td>
                       )}
-                      <td data-label="Bukti">{r.file_bukti_url ? <LihatBerkas url={r.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>📎 Lihat</LihatBerkas> : '-'}</td>
+                      <td data-label="Bukti">{r.file_bukti_url ? <LihatBerkas url={r.file_bukti_url} style={{color:'var(--pmi-red)',fontWeight:600}}>Lihat</LihatBerkas> : '-'}</td>
                       <td data-label="Petugas">{r.profiles?.nama_lengkap || '-'}</td>
                       {isAdmin && (
                         <td data-label="">

@@ -44,7 +44,7 @@ export default function DiagnosaPage() {
   const gagal = hasil.filter(h => !h.ok)
   return (
     <div className="app"><div className="main">
-      <div className="topbar"><div><h1>Cek Database</h1><p className="desc">Menguji tiap bagian fitur baru. Kalau ada yang ✗, kirim screenshot halaman ini ke asisten.</p></div><button className="btn btn-primary" onClick={uji} disabled={jalan}>{jalan ? 'Menguji...' : 'Uji ulang'}</button></div>
+      <div className="topbar"><div><h1>Cek Database</h1><p className="desc">Menguji tiap bagian fitur baru. Kalau ada yang , kirim screenshot halaman ini ke asisten.</p></div><button className="btn btn-primary" onClick={uji} disabled={jalan}>{jalan ? 'Menguji...' : 'Uji ulang'}</button></div>
       <div className="panel"><div className="panel-body" style={{ fontSize: 14 }}>
         SATria PMI terhubung ke project Supabase: <b className="mono">{host}</b><br />
         <span style={{ color: 'var(--ink-soft)', fontSize: 13 }}>Alamat ini harus sama dengan Project URL di Supabase → Project Settings → API (tempat kamu menjalankan SQL).</span>
@@ -54,7 +54,7 @@ export default function DiagnosaPage() {
         <thead><tr><th style={{ width: 40 }}></th><th>Bagian</th><th>Keterangan</th></tr></thead>
         <tbody>{hasil.map(h => (
           <tr key={h.nama}>
-            <td style={{ fontSize: 18 }}>{h.ok ? '✅' : '❌'}</td>
+            <td style={{ fontSize: 18 }}>{h.ok ? '✓' : '✗'}</td>
             <td><b>{h.nama}</b></td>
             <td style={{ fontSize: 13, color: h.ok ? 'var(--ink-soft)' : '#B3261E' }}>{h.ok ? 'OK' : <>{h.error?.message}{h.error?.code ? <> <span className="mono">[{h.error.code}]</span></> : null}{h.error?.hint ? <div style={{ color: 'var(--ink-soft)' }}>Petunjuk: {h.error.hint}</div> : null}</>}</td>
           </tr>))}</tbody>

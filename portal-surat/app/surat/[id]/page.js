@@ -22,7 +22,7 @@ const judulKartu = { margin: '0 0 12px', fontSize: 18 }
 function TombolBesar({ ikon, judul, ket, onClick, href, utama, hijau }) {
   const warna = hijau ? '#1E7B3A' : 'var(--pmi-red)'
   const gaya = { display: 'flex', alignItems: 'center', gap: 14, width: '100%', textAlign: 'left', padding: '14px 16px', marginBottom: 10, borderRadius: 14, minHeight: 64, textDecoration: 'none', cursor: 'pointer', border: '2px solid ' + (utama || hijau ? warna : 'var(--line)'), background: utama || hijau ? warna : '#fff', color: utama || hijau ? '#fff' : 'var(--ink)', font: 'inherit' }
-  const isi = <><span style={{ fontSize: 26 }}>{ikon}</span><span><b style={{ fontSize: 17 }}>{judul}</b><br /><span style={{ fontSize: 13.5, opacity: 0.85 }}>{ket}</span></span></>
+  const isi = <><span style={{ width: 38, height: 38, borderRadius: 12, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: utama || hijau ? 'rgba(255,255,255,.22)' : 'var(--cream)', color: utama || hijau ? '#fff' : warna }}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span><b style={{ fontSize: 17 }}>{judul}</b><br /><span style={{ fontSize: 13.5, opacity: 0.85 }}>{ket}</span></span></>
   return href ? <Link href={href} style={gaya}>{isi}</Link> : <button type="button" onClick={onClick} style={gaya}>{isi}</button>
 }
 
@@ -208,26 +208,26 @@ export default function DetailSurat() {
               <div><span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Diterima</span><br /><b>{fmtTgl(surat.tanggal_diterima_kantor)}</b></div>
               {surat.sifat && surat.sifat !== 'Biasa' && <div><span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>Sifat</span><br /><b>{surat.sifat}</b></div>}
             </div>
-            {(peran.bisaCatatMasuk && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)) && <button className="btn btn-ghost" style={{ minHeight: 44 }} onClick={() => setEditSurat({ ...surat })}>✏️ Ubah data surat</button>}
+            {(peran.bisaCatatMasuk && (peran.isAdmin || surat.petugas_id === peran.userId || peran.isBiroUmum)) && <button className="btn btn-ghost" style={{ minHeight: 44 }} onClick={() => setEditSurat({ ...surat })}>Ubah data surat</button>}
           </div>
 
           {/* Tindak Lanjut — pilihan utama di atas, sisanya dilipat di "Lainnya" */}
           {(bisaTeruskan || peran.bisaCatatan || (peran.bisaArsip && menungguArsip.length > 0) || bolehBatal || peran.isTataUsaha) && (
             <div style={kartu}>
               <h3 style={judulKartu}>Apa yang mau kamu lakukan?</h3>
-              {tuBelumKirim && <TombolBesar utama ikon="📤" judul="Kirim ke Biro Umum" ket="Surat ini belum dikirim." onClick={kirimBiro} />}
-              {peran.isTataUsaha && unitBiro && <TombolBesar ikon="📞" judul="Hubungi Biro Umum" ket="Kalau surat belum dibaca atau tertahan." onClick={() => setKontak(unitBiro)} />}
-              {milik.length > 0 && <TombolBesar hijau ikon="✅" judul="Selesai" ket="Surat sudah saya kerjakan. Setelah semua tujuan selesai, otomatis masuk arsip bulanan." onClick={bukaSelesai} />}
-              {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar hijau ikon="🗄️" judul="Arsipkan" ket="Surat sudah selesai. Simpan ke arsip." onClick={arsipkan} />}
-              {bisaTeruskan && <TombolBesar ikon="➡️" judul="Teruskan ke bidang lain" ket="Pilih siapa yang mengerjakan." onClick={() => setTeruskan(true)} />}
+              {tuBelumKirim && <TombolBesar utama  judul="Kirim ke Biro Umum" ket="Surat ini belum dikirim." onClick={kirimBiro} />}
+              {peran.isTataUsaha && unitBiro && <TombolBesar  judul="Hubungi Biro Umum" ket="Kalau surat belum dibaca atau tertahan." onClick={() => setKontak(unitBiro)} />}
+              {milik.length > 0 && <TombolBesar hijau  judul="Selesai" ket="Surat sudah saya kerjakan. Setelah semua tujuan selesai, otomatis masuk arsip bulanan." onClick={bukaSelesai} />}
+              {peran.bisaArsip && menungguArsip.length > 0 && <TombolBesar hijau  judul="Arsipkan" ket="Surat sudah selesai. Simpan ke arsip." onClick={arsipkan} />}
+              {bisaTeruskan && <TombolBesar  judul="Teruskan ke bidang lain" ket="Pilih siapa yang mengerjakan." onClick={() => setTeruskan(true)} />}
               {(milik.length > 0 && peran.bisaCatatKeluar) || peran.bisaCatatan || bolehBatal ? (
                 <button type="button" className="btn btn-ghost" style={{ width: '100%', minHeight: 48, fontSize: 15 }} onClick={() => setLainnya(v => !v)}>{lainnya ? '▲ Tutup' : '▼ Pilihan lain'}</button>
               ) : null}
               {lainnya && (
                 <div style={{ marginTop: 10 }}>
-                  {milik.length > 0 && peran.bisaCatatKeluar && <TombolBesar ikon="✉️" judul="Balas dengan surat" ket="Buat surat jawaban." href={`/surat-keluar?jawab=${surat.id}`} />}
-                  {peran.bisaCatatan && <TombolBesar ikon="💬" judul="Tulis catatan" ket="Bertanya atau memberi arahan." onClick={() => document.getElementById('catatan')?.scrollIntoView({ behavior: 'smooth' })} />}
-                  {bolehBatal && <TombolBesar ikon="🗑️" judul="Batalkan surat ini" ket="Salah input atau dobel. Bisa dipulihkan." onClick={() => setBatal({ alasan: '' })} />}
+                  {milik.length > 0 && peran.bisaCatatKeluar && <TombolBesar  judul="Balas dengan surat" ket="Buat surat jawaban." href={`/surat-keluar?jawab=${surat.id}`} />}
+                  {peran.bisaCatatan && <TombolBesar  judul="Tulis catatan" ket="Bertanya atau memberi arahan." onClick={() => document.getElementById('catatan')?.scrollIntoView({ behavior: 'smooth' })} />}
+                  {bolehBatal && <TombolBesar  judul="Batalkan surat ini" ket="Salah input atau dobel. Bisa dipulihkan." onClick={() => setBatal({ alasan: '' })} />}
                 </div>
               )}
             </div>
@@ -235,7 +235,7 @@ export default function DetailSurat() {
 
           {/* Berkas / lampiran (boleh banyak) */}
           <div style={kartu}>
-            <h3 style={judulKartu}>📎 Berkas surat</h3>
+            <h3 style={judulKartu}>Berkas surat</h3>
             <DaftarLampiran supabase={supabase} jenis="masuk" suratId={surat.id} fileUtamaUrl={surat.file_bukti_url} fileUtamaNama={surat.file_bukti_nama} boleh={peran.bisaCatatMasuk || milik.length > 0 || peran.isAdmin} peran={peran} />
           </div>
 
@@ -258,12 +258,12 @@ export default function DetailSurat() {
                       </div>
                       <div style={{ fontSize: 15, margin: '4px 0' }}>{t.instruksi}</div>
                       {t.tanggapan && <div style={{ fontSize: 14.5, background: 'var(--stock-bg)', borderRadius: 10, padding: '8px 12px', marginTop: 6 }}><b>Hasil dari {t.unit?.nama}:</b> {t.tanggapan}</div>}
-                      {t.jawaban && <div style={{ fontSize: 13.5, marginTop: 6 }}>✉️ Surat jawaban: <b>{t.jawaban.nomor_surat}</b></div>}
+                      {t.jawaban && <div style={{ fontSize: 13.5, marginTop: 6 }}>Surat jawaban: <b>{t.jawaban.nomor_surat}</b></div>}
                       {(d.dibuat_oleh === peran.userId || peran.isAdmin) && ['menunggu', 'dibaca'].includes(t.status) && <span style={{ display: 'inline-flex', gap: 8, marginRight: 8 }}>
-                        <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setEditTujuan({ t, instruksi: t.instruksi || '', batas: t.batas_waktu || '' })}>✏️ Ubah</button>
+                        <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setEditTujuan({ t, instruksi: t.instruksi || '', batas: t.batas_waktu || '' })}>Ubah</button>
                         <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14, color: '#B3261E' }} onClick={() => tarikTujuan(t)}>↩ Tarik kembali</button>
                       </span>}
-                      {t.status !== 'selesai' && t.unit && t.unit_id !== peran.unitId && <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setKontak(t.unit)}>📞 Hubungi {t.unit.nama.replace(/^Bidang /, '')}</button>}
+                      {t.status !== 'selesai' && t.unit && t.unit_id !== peran.unitId && <button className="btn btn-ghost" style={{ marginTop: 8, minHeight: 40, fontSize: 14 }} onClick={() => setKontak(t.unit)}>Hubungi {t.unit.nama.replace(/^Bidang /, '')}</button>}
                     </div>
                   )
                 })}
@@ -294,7 +294,7 @@ export default function DetailSurat() {
 
           {/* Catatan */}
           <div style={kartu} id="catatan">
-            <h3 style={judulKartu}>💬 Catatan</h3>
+            <h3 style={judulKartu}>Catatan</h3>
             {catatan.length === 0 && <div style={{ fontSize: 15, color: 'var(--ink-soft)', marginBottom: 10 }}>Belum ada catatan.</div>}
             {catatan.map(c => (
               <div key={c.id} style={{ background: 'var(--cream)', borderRadius: 12, padding: '10px 14px', marginBottom: 8 }}>
@@ -302,7 +302,7 @@ export default function DetailSurat() {
                 {editCat?.id === c.id
                   ? <div><textarea rows={3} style={{ fontSize: 16 }} value={editCat.isi} onChange={e => setEditCat({ ...editCat, isi: e.target.value })} /><div style={{ display: 'flex', gap: 8, marginTop: 6 }}><button className="btn btn-primary" style={{ minHeight: 40 }} onClick={simpanEditCatatan}>Simpan</button><button className="btn btn-ghost" style={{ minHeight: 40 }} onClick={() => setEditCat(null)}>Batal</button></div></div>
                   : <div style={{ fontSize: 15.5, whiteSpace: 'pre-wrap' }}>{c.isi}{c.diubah_pada && <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}> (diedit)</span>}</div>}
-                {(c.dibuat_oleh === peran.userId || peran.isAdmin) && editCat?.id !== c.id && <div style={{ marginTop: 4 }}><button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => setEditCat({ id: c.id, isi: c.isi })}>✏️ Ubah</button> <button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => hapusCatatan(c)}>Hapus</button></div>}
+                {(c.dibuat_oleh === peran.userId || peran.isAdmin) && editCat?.id !== c.id && <div style={{ marginTop: 4 }}><button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => setEditCat({ id: c.id, isi: c.isi })}>Ubah</button> <button className="btn btn-ghost" style={{ minHeight: 32, fontSize: 12.5, padding: '2px 10px' }} onClick={() => hapusCatatan(c)}>Hapus</button></div>}
               </div>
             ))}
             {peran.bisaCatatan && (
@@ -319,8 +319,8 @@ export default function DetailSurat() {
               <b>Lembar disposisi kertas:</b>{' '}
               {disposisi.map(d => (
                 <span key={d.id} style={{ marginRight: 14 }}>
-                  <a href="#" style={{ color: 'var(--pmi-red)', fontWeight: 600 }} onClick={e => { e.preventDefault(); cetakLembarDisposisi({ surat, disposisi: d, tujuan: d.tujuan, namaPencetak: peran.nama }) }}>🖨 Cetak ({fmtTgl(d.tanggal_diteruskan)})</a>
-                  {d.file_scan_url && <> · <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>📎 scan</LihatBerkas></>}
+                  <a href="#" style={{ color: 'var(--pmi-red)', fontWeight: 600 }} onClick={e => { e.preventDefault(); cetakLembarDisposisi({ surat, disposisi: d, tujuan: d.tujuan, namaPencetak: peran.nama }) }}>Cetak ({fmtTgl(d.tanggal_diteruskan)})</a>
+                  {d.file_scan_url && <> · <LihatBerkas url={d.file_scan_url} style={{ color: 'var(--pmi-red)', fontWeight: 600 }}>scan</LihatBerkas></>}
                   {peran.bisaDisposisi && <> · <label style={{ textTransform: 'none', display: 'inline', fontSize: 14, color: 'var(--pmi-red)', cursor: 'pointer', fontWeight: 600 }}>⬆ unggah scan<input type="file" accept="image/*,.pdf" style={{ display: 'none' }} onChange={e => unggahScan(d, e)} /></label></>}
                 </span>
               ))}
