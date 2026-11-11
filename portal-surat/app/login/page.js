@@ -69,55 +69,60 @@ export default function LoginPage() {
     if (error) setError('Belum bisa masuk dengan ' + (provider === 'google' ? 'Google' : 'Facebook') + '. ' + error.message)
   }
 
-  const judul = mode === 'signin' ? 'Masuk' : mode === 'signup' ? 'Daftar Akun Baru' : 'Masuk lewat link email'
-  const besar = { fontSize: 16, minHeight: 50 }
+  const judul = mode === 'signin' ? 'Selamat Datang' : mode === 'signup' ? 'Daftar Akun Baru' : 'Masuk lewat Email'
+  const sub = mode === 'signin' ? 'Masuk untuk melanjutkan' : mode === 'signup' ? 'Setelah mendaftar, admin akan menempatkan akunmu di bidang yang sesuai.' : 'Tanpa kata sandi: kami kirim link masuk ke emailmu.'
+  const Ik = ({ children }) => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+  const ikUser = <Ik><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></Ik>
+  const ikMail = <Ik><rect x="3" y="5" width="18" height="14" rx="3" /><polyline points="3 7 12 13 21 7" /></Ik>
+  const ikKunci = <Ik><rect x="4" y="11" width="16" height="10" rx="3" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /><circle cx="12" cy="16" r="1.2" /></Ik>
+  const ikMata = lihat ? <Ik><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" /><circle cx="12" cy="12" r="3" /></Ik> : <Ik><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19c-7 0-11-7-11-7a19.8 19.8 0 0 1 5.1-5.9M9.9 4.2A10.7 10.7 0 0 1 12 4c7 0 11 7 11 7a19.9 19.9 0 0 1-3.2 4.2" /><line x1="1" y1="1" x2="23" y2="23" /></Ik>
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <div style={{marginBottom:18}}>
-          <div className="brand-logo" style={{gap:12}}>
-            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={56} height={56} />
-            <div className="brand-name" style={{color:'#000',fontSize:21}}>Palang<br />Merah<br />Indonesia</div>
-            <div className="brand-vline" style={{color:'#000'}} />
-            <div className="brand-prov" style={{color:'#000',fontSize:16}}>Provinsi<br />Sumatera Barat</div>
-          </div>
-          <div style={{fontSize:16,fontWeight:800,color:'var(--pmi-red-dark)',letterSpacing:'.02em',marginTop:10}}>{NAMA_APLIKASI}</div>
-        </div>
-        <h1 style={{fontSize:21,margin:'0 0 4px'}}>{judul}</h1>
-        <p style={{fontSize:14,color:'var(--ink-soft)',margin:'0 0 16px'}}>
-          {mode === 'signin' ? 'Masuk dengan email dan kata sandi kamu.' : mode === 'signup' ? 'Setelah mendaftar, admin akan menempatkan akunmu di bidang yang sesuai.' : 'Tanpa kata sandi: kami kirim link masuk ke emailmu.'}
-        </p>
+    <div className="lg2">
+      <i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" />
+      <div className="lg2-isi">
+        <div className="lg2-logo"><img src="/icon-satria-v3-512.png" alt={NAMA_APLIKASI + ' - Palang Merah Indonesia Provinsi Sumatera Barat'} /></div>
+        <h1 className="lg2-judul">{judul}</h1>
+        <p className={'lg2-sub' + (mode === 'signin' ? ' spasi' : '')}>{sub}</p>
         {error && <div className="error-box">{error}</div>}
         {kirimUlang && email.trim() && <button type="button" className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginBottom: 14 }} onClick={kirimUlangEmail}>Kirim ulang email konfirmasi</button>}
-        {info && <div style={{ background: 'var(--stock-bg)', color: 'var(--stock)', padding: '12px 14px', borderRadius: 12, fontSize: 14.5, lineHeight: 1.5, marginBottom: 14 }}>✓ {info}</div>}
+        {info && <div style={{ background: 'var(--stock-bg)', color: 'var(--stock)', padding: '12px 14px', borderRadius: 16, fontSize: 14.5, lineHeight: 1.5, marginBottom: 14 }}>✓ {info}</div>}
+
+        <form onSubmit={handleSubmit} className="lg2-form">
+          {mode === 'signup' && (
+            <label className="lg2-kolom"><span className="lg2-ik">{ikUser}</span><input value={nama} onChange={e => setNama(e.target.value)} required placeholder="Nama lengkap, cth: Rina Andayani" aria-label="Nama lengkap" /></label>
+          )}
+          <label className="lg2-kolom"><span className="lg2-ik">{ikMail}</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="Email" aria-label="Email" autoComplete="email" /></label>
+          {mode !== 'link' && (
+            <label className="lg2-kolom"><span className="lg2-ik">{ikKunci}</span>
+              <input type={lihat ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required minLength={8} placeholder={mode === 'signup' ? 'Kata sandi (min. 8, huruf + angka)' : 'Kata sandi'} aria-label="Kata sandi" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
+              <button type="button" className="lg2-mata" onClick={() => setLihat(v => !v)} aria-label={lihat ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{ikMata}</button>
+            </label>
+          )}
+          {mode === 'signin' && <div className="lg2-lupa"><Link href="/lupa-sandi">Lupa kata sandi?</Link></div>}
+          <button className="lg2-tombol" disabled={loading}>
+            <span>{loading ? 'Memproses...' : mode === 'signin' ? 'Masuk' : mode === 'signup' ? 'Daftar' : 'Kirim link masuk'}</span>
+            <span className="lg2-panah" aria-hidden="true"><Ik><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></Ik></span>
+          </button>
+        </form>
 
         {mode !== 'link' && (prov.google || prov.facebook) && (
           <>
-            {prov.google && <button type="button" onClick={() => lewat('google')} className="btn btn-ghost" style={{ ...besar, width: '100%', display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>{Glogo} Lanjut dengan Google</button>}
-            {prov.facebook && <button type="button" onClick={() => lewat('facebook')} className="btn btn-ghost" style={{ ...besar, width: '100%', display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}><span style={{ color: '#1877F2', fontWeight: 900, fontSize: 20 }}>f</span> Lanjut dengan Facebook</button>}
-            <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--ink-soft)', margin: '10px 0' }}>— atau pakai email —</div>
+            <div className="lg2-atau"><span>ATAU LANJUTKAN DENGAN</span></div>
+            <div className="lg2-sosial">
+              {prov.google && <button type="button" onClick={() => lewat('google')} aria-label="Lanjut dengan Google">{Glogo}</button>}
+              {prov.facebook && <button type="button" onClick={() => lewat('facebook')} aria-label="Lanjut dengan Facebook"><span style={{ color: '#1877F2', fontWeight: 900, fontSize: 26 }}>f</span></button>}
+            </div>
           </>
         )}
 
-        <form onSubmit={handleSubmit}>
-          {mode==='signup' && (
-            <div className="field"><label>Nama Lengkap</label><input value={nama} onChange={e=>setNama(e.target.value)} required placeholder="cth: Rina Andayani" style={besar} /></div>
-          )}
-          <div className="field"><label>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} required placeholder="nama@email.com" style={besar} autoComplete="email" /></div>
-          {mode !== 'link' && (
-            <div className="field"><label>Kata sandi</label>
-              <input type={lihat ? 'text' : 'password'} value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} placeholder="minimal 8 karakter, ada huruf dan angka" style={besar} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
-              <label style={{ display: 'flex', gap: 8, alignItems: 'center', textTransform: 'none', fontSize: 13.5, color: 'var(--ink)', margin: '8px 0 0' }}><input type="checkbox" style={{ width: 18, height: 18 }} checked={lihat} onChange={e => setLihat(e.target.checked)} /> Tampilkan kata sandi</label>
-            </div>
-          )}
-          <button className="btn btn-primary" style={{width:'100%',marginTop:6,...besar}} disabled={loading}>{loading ? 'Memproses...' : mode==='signin' ? 'Masuk' : mode==='signup' ? 'Daftar' : 'Kirim link masuk ke email saya'}</button>
-        </form>
-
-        <div style={{textAlign:'center',marginTop:16,fontSize:14.5,lineHeight:2}}>
-          {mode === 'signin' && <><Link href="/lupa-sandi" style={{color:'var(--pmi-red)',fontWeight:700}}>Lupa kata sandi?</Link><br /><a href="#" onClick={e=>{e.preventDefault();setMode('link');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:600}}>Masuk tanpa kata sandi (kirim link ke email)</a><br /></>}
-          {mode === 'signin' ? <><Link href="/pasang" style={{color:'var(--pmi-red)',fontWeight:700}}>Pasang di layar HP</Link><br />Belum punya akun? <a href="#" onClick={e=>{e.preventDefault();setMode('signup');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>Daftar di sini</a></>
-            : <a href="#" onClick={e=>{e.preventDefault();setMode('signin');setError('');setInfo('')}} style={{color:'var(--pmi-red)',fontWeight:700}}>← Kembali ke halaman masuk</a>}
+        <div className="lg2-tautan">
+          {mode === 'signin' && <a href="#" onClick={e => { e.preventDefault(); setMode('link'); setError(''); setInfo('') }}>Masuk tanpa kata sandi (kirim link ke email)</a>}
+          {mode === 'signin' ? <>
+            <span>Belum punya akun? <a href="#" onClick={e => { e.preventDefault(); setMode('signup'); setError(''); setInfo('') }}><b>Daftar di sini</b></a></span>
+            <Link href="/pasang">Pasang di layar HP</Link></>
+            : <a href="#" onClick={e => { e.preventDefault(); setMode('signin'); setError(''); setInfo('') }}>← Kembali ke halaman masuk</a>}
         </div>
+        <div className="lg2-kaki">SURAT DIGITAL <i>•</i> PMI SUMATERA BARAT</div>
       </div>
     </div>
   )
