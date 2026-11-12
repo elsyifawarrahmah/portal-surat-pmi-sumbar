@@ -83,7 +83,7 @@ export default function LoginPage() {
     <div className="lg2">
       <i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" />
       <div className="lg2-isi">
-        <div className="lg2-logo"><img src="/icon-satria-v3-512.png" alt={NAMA_APLIKASI + ' - Palang Merah Indonesia Provinsi Sumatera Barat'} /></div>
+        <div className="lg2-logo"><img src="/icon-satria-v4-512.png" alt={NAMA_APLIKASI + ' - Palang Merah Indonesia Provinsi Sumatera Barat'} /></div>
         <h1 className="lg2-judul">{judul}</h1>
         <p className={'lg2-sub' + (mode === 'signin' ? ' spasi' : '')}>{sub}</p>
         {error && <div className="error-box">{error}</div>}

@@ -294,3 +294,22 @@ export function cetakLembarKoreksi({ surat, riwayat = [], namaPencetak, jenis = 
   ${jejakCetak(namaPencetak)}`
   buka('Lembar Koreksi', body)
 }
+
+// Rekap Data Aset: kop, dikeluarkan Biro Umum, diketahui Kepala Markas & mengetahui Sekretaris.
+export function cetakRekapAset({ jenis, kolom, baris, ringkasan, namaBiro, namaSekretaris, namaPencetak }) {
+  const tgl = tglPanjang(new Date().toISOString().slice(0, 10))
+  const ttd = (peran, nama, sub) => `<div class="rk-ttd"><div>${sub}</div><div><b>${peran}</b></div><div class="rk-garis"></div><div>${nama ? '<b><u>' + h(nama) + '</u></b>' : '(................................)'}</div></div>`
+  const isi = `${kop()}
+    <div class="judul">Rekapitulasi Data Aset ${h(jenis)}</div>
+    <div class="sub">Dikeluarkan oleh Biro Umum PMI Provinsi Sumatera Barat · per ${h(tgl)}</div>
+    <table><thead><tr><th style="width:28px">No</th>${kolom.map(k => `<th>${h(k)}</th>`).join('')}</tr></thead>
+    <tbody>${baris.map((r, i) => `<tr><td class="num">${i + 1}</td>${r.map(v => `<td>${h(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    <div style="margin-top:8px;font-weight:700">${h(ringkasan || '')}</div>
+    <div class="rk-ttdrow">
+      ${ttd('Biro Umum', namaBiro, 'Dibuat oleh,')}
+      ${ttd('Sekretaris', namaSekretaris, 'Mengetahui,')}
+      ${ttd('Kepala Markas', '', 'Diketahui,')}
+    </div>
+    ${jejakCetak(namaPencetak)}`
+  buka('Rekap Data Aset ' + jenis, isi, 'landscape', `.rk-ttdrow{display:flex;justify-content:space-around;gap:20px;margin-top:22px;page-break-inside:avoid}.rk-ttd{text-align:center;min-width:200px;font-size:12px;line-height:1.35}.rk-garis{height:62px}tr{page-break-inside:avoid}thead{display:table-header-group}`)
+}
