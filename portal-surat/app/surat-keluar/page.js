@@ -130,7 +130,11 @@ function SuratKeluarInner() {
       await supabase.from('surat_lampiran').delete().in('id', buang.map(r => r.id))
       buang.filter(r => r.url !== payload.file_bukti_url).forEach(r => hapusBerkasLama(supabase, r.url))
     }
-    if (editing?.file_bukti_url && !berkas.some(b => b.url === editing.file_bukti_url)) hapusBerkasLama(supabase, editing.file_bukti_url)
+    if (editing?.file_bukti_url && !berkas.some(b => b.url === editing.file_bukti_url)) {
+      // berkas lama yang pernah dikoreksi tetap disimpan sebagai "versi lama" (bukti), tidak dihapus
+      const dipakai = await supabase.from('surat_koreksi').select('id').eq('berkas_url', editing.file_bukti_url).limit(1)
+      if (!(dipakai.data && dipakai.data.length)) hapusBerkasLama(supabase, editing.file_bukti_url)
+    }
     const baru = lain.filter(b => !b.id)
     if (baru.length) {
       const er = await supabase.from('surat_lampiran').insert(baru.map(b => ({ jenis: 'keluar', surat_id: id, url: b.url, nama: b.nama, ukuran: b.ukuran || null })))

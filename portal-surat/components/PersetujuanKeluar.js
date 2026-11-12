@@ -5,6 +5,8 @@ import { KALIMAT_TOLAK } from '@/lib/surat'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Modal from '@/components/Modal'
+import KoreksiCoret from '@/components/KoreksiCoret'
+import GambarKoreksi, { TautanBerkas } from '@/components/GambarKoreksi'
 import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { fmtWaktu } from '@/lib/format'
 import { kabarkan } from '@/lib/notif'
@@ -44,6 +46,8 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
   const [buat, setBuat] = useState(false)
   const [alasan, setAlasan] = useState('')
   const [tipeKoreksi, setTipeKoreksi] = useState('')
+  const [coret, setCoret] = useState(null)   // { sumber: [...] } saat editor coret terbuka
+  const [bukaCoret, setBukaCoret] = useState(false)
   const [riwayat, setRiwayat] = useState([])
   const [kirim, setKirim] = useState([])
   const jenisSurat = rpc === 'surat_tugas' ? 'tugas' : 'keluar'
@@ -69,6 +73,20 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
     if (error) { setGalat(/function|schema cache|does not exist/i.test(error.message) ? 'Fitur ini belum aktif di database. Jalankan supabase/' + migrasi + ' dulu.' : error.message); return false }
     kabarkan(rpc, surat.id)
     onChanged && onChanged(); return true
+  }
+  async function bukaEditorCoret() {
+    setBukaCoret(true); setGalat('')
+    const sumber = surat.file_bukti_url ? [{ url: surat.file_bukti_url, nama: 'Surat' }] : []
+    const l = await supabase.from('surat_lampiran').select('url,nama').eq('jenis', 'keluar').eq('surat_id', surat.id).order('created_at')
+    ;(l.data || []).forEach(x => sumber.push({ url: x.url, nama: x.nama }))
+    setBukaCoret(false)
+    if (!sumber.length) { setGalat('Pembuat belum mengunggah berkas surat, jadi belum ada yang bisa dicoret. Gunakan catatan teks.'); return }
+    setCoret({ sumber })
+  }
+  async function kirimCoretan({ gambar, catatan }) {
+    const ok = await panggil('koreksi_' + rpc, { p_id: surat.id, p_tipe: tipeKoreksi, p_catatan: catatan || alasan || '', p_gambar: gambar, p_berkas: surat.file_bukti_url || null })
+    if (ok) { setCoret(null); setTipeKoreksi(''); setAlasan(''); muatRiwayat() }
+    return ok
   }
   async function simpanTtd(file) {
     try {
@@ -103,6 +121,8 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         <div style={{ background: '#FDECEC', border: '2px solid #B3261E', borderRadius: 12, padding: '12px 14px', marginBottom: 12 }}>
           <div style={{ color: '#B3261E', fontWeight: 800, fontSize: 16 }}>{st === 'ditolak' ? 'DITOLAK — tidak disetujui' : 'PERLU DIPERBAIKI'}</div>
           {(surat.catatan_revisi || riwayat[0]?.catatan) && <div style={{ color: '#8C1010', marginTop: 4, fontSize: 15 }}>{surat.catatan_revisi || riwayat[0]?.catatan}</div>}
+          {riwayat[0]?.gambar?.length > 0 && <GambarKoreksi supabase={supabase} daftar={riwayat[0].gambar} judul="Coretan dari pemeriksa" />}
+          {riwayat[0]?.gambar?.length > 0 && st === 'revisi' && <div style={{ fontSize: 13, color: '#5A1010', marginTop: 6 }}>Perbaiki di surat yang sama (tombol Edit di daftar surat keluar), lalu ajukan lagi. Berkas lama otomatis tersimpan sebagai versi lama, jadi <b>tidak perlu membuat surat baru</b>.</div>}
           {riwayat[0] && <div style={{ fontSize: 12.5, color: '#8C1010', marginTop: 4 }}>Oleh {riwayat[0].oleh_nama} ({riwayat[0].oleh_peran}) · {fmtWaktu(riwayat[0].created_at)}</div>}
         </div>
       )}
@@ -113,6 +133,8 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
             <div key={r.id} style={{ borderLeft: '4px solid #B3261E', background: '#FFF6F6', padding: '8px 12px', margin: '8px 0', borderRadius: 8, fontSize: 14 }}>
               <b style={{ color: '#B3261E' }}>{NAMA_TIPE[r.tipe]}</b> · {r.oleh_nama} ({r.oleh_peran}) · {fmtWaktu(r.created_at)}
               <div style={{ color: '#5A1010' }}>{r.catatan}</div>
+              {r.gambar?.length > 0 && <GambarKoreksi supabase={supabase} daftar={r.gambar} />}
+              {r.berkas_url && surat.file_bukti_url && r.berkas_url !== surat.file_bukti_url && <div style={{ fontSize: 12.5, color: '#6A4A00', background: '#FFF4D6', borderRadius: 8, padding: '5px 9px', marginTop: 6 }}>Versi lama: sudah diganti revisi, dibatalkan otomatis oleh sistem (tetap disimpan sebagai bukti). <TautanBerkas supabase={supabase} url={r.berkas_url} teks="Lihat berkas lama" /></div>}
             </div>
           ))}
         </details>
@@ -145,6 +167,11 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
           <div style={{ fontWeight: 700, color: '#B3261E', marginBottom: 6 }}>{JUDUL_TIPE[tipeKoreksi]}</div>
           <KalimatCepat daftar={KALIMAT_TOLAK} onPilih={k => setAlasan(a => tambahKalimat(a, k))} judul="Sentuh alasan untuk memasukkan:" />
           <TombolBicara tampil={peran.tipe === 'pimpinan'} onTeks={t => setAlasan(a => tambahKalimat(a, t))} />
+          {jenisSurat === 'keluar' && tipeKoreksi !== 'tolak' && (
+            <button type="button" className="btn btn-primary" style={{ width: '100%', minHeight: 52, fontSize: 16, marginBottom: 10, background: 'linear-gradient(135deg,#E5333F,#B01028)' }} disabled={bukaCoret || sibuk} onClick={bukaEditorCoret}>
+              {bukaCoret ? 'Membuka surat...' : '✎ Coret langsung di surat'}
+            </button>
+          )}
           <textarea rows={3} placeholder="Tulis catatan koreksi (minimal 5 huruf)" value={alasan} onChange={e => setAlasan(e.target.value)} style={{ fontSize: 16 }} />
           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
             <button className="btn btn-ghost" style={{ minHeight: 46 }} onClick={() => setTipeKoreksi('')}>Batal</button>
@@ -163,6 +190,7 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
         </div>
       )}
       {st === 'disetujui' && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 8 }} onClick={() => cetak({ surat, namaPencetak: peran.nama })}>Cetak lembar pengesahan (TTD + kode)</button>}
+      {coret && <KoreksiCoret supabase={supabase} sumber={coret.sumber} suratId={surat.id} judul={`Koreksi — ${surat.nomor_surat || 'surat'}`} awalKeterangan={alasan} onSelesai={kirimCoretan} onClose={() => setCoret(null)} />}
     </Modal>
   )
 }

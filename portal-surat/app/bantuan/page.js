@@ -47,6 +47,18 @@ export default function BantuanPage() {
         </div>
       ))}
 
+      <div className="panel">
+        <div className="panel-head"><h3>✎ Koreksi surat dengan coretan (Sekretaris / Kepala Markas / Ketua)</h3></div>
+        <div className="panel-body"><ol style={{ margin: '0 0 0 20px', padding: 0, fontSize: 15, lineHeight: 1.7 }}>
+          <li style={{ marginBottom: 6 }}>Buka surat keluar yang menunggu, tekan <b>Perlu diperbaiki</b>, lalu <b>Coret langsung di surat</b>.</li>
+          <li style={{ marginBottom: 6 }}>Pakai <b>Pena</b> untuk coret bebas, <b>Garis</b> untuk garis lurus yang rapi, <b>Stabilo</b> untuk menandai, dan <b>Teks (Aa)</b> untuk menulis koreksi dengan ketikan supaya jelas terbaca.</li>
+          <li style={{ marginBottom: 6 }}>Jari terlalu besar? Tekan <b>2×</b> atau <b>3×</b> untuk memperbesar surat, coretan otomatis jadi lebih halus.</li>
+          <li style={{ marginBottom: 6 }}>Tulis keterangan di kolom bawah (boleh kosong bila sudah dicoret), lalu tekan tombol kirim merah. Surat kembali ke pembuatnya <b>beserta coretannya</b>.</li>
+          <li>Pembuat memperbaiki di <b>surat yang sama</b> lalu mengajukan lagi. Berkas lama otomatis jadi <b>versi lama</b> (tersimpan, tidak dihapus), jadi tidak ada surat dobel yang menumpuk.</li>
+        </ol>
+        <div style={{ marginTop: 10, fontSize: 14 }}>Landasan hukumnya ada di menu <a href="/dasar-hukum" style={{ color: '#C8102E', fontWeight: 700 }}>Dasar Hukum</a>.</div></div>
+      </div>
+
       <div className="panel"><div className="panel-body" style={{ fontSize: 15 }}>
         <b>Ada yang tidak bisa dibuka atau muncul pesan aneh?</b> Screenshot layarnya lalu kirim ke admin web (Elsyifa).
       </div></div>

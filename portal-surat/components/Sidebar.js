@@ -47,6 +47,7 @@ const LINKS = [
   { href: '/data-aset', label: 'Data Aset', icon: 'aset', grup: 'utama', tone: 'emas' },
   { href: '/lacak', label: 'Lacak Surat', icon: 'lacak', grup: 'utama', tone: 'ungu' },
   { href: '/bantuan', label: 'Bantuan', icon: 'bantuan', grup: 'lain' },
+  { href: '/dasar-hukum', label: 'Dasar Hukum', icon: 'sk', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
   { href: '/pasang', label: 'Pasang di HP', icon: 'tugas', grup: 'lain' },
   { href: '/cek-kode', label: 'Cek Kode Paraf', icon: 'bantuan', grup: 'lain' },

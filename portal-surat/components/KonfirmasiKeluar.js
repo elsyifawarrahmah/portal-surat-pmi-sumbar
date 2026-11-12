@@ -33,8 +33,8 @@ export default function KonfirmasiKeluar() {
   useEffect(() => {
     const modalAda = () => document.querySelector('[data-guard-modal]')
     const onInput = e => {
-      const m = modalAda()
-      if (!m || !m.contains(e.target)) return
+      const m = e.target && e.target.closest ? e.target.closest('[data-guard-modal]') : null
+      if (!m) return
       const t = e.target
       if (!(t instanceof HTMLElement) || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.type === 'search') return
       diketik.current = true
@@ -68,7 +68,8 @@ export default function KonfirmasiKeluar() {
   }, [diBeranda])
 
   function tutupModal() {
-    const x = document.querySelector('[data-guard-modal] button[aria-label="Tutup"]')
+    const semua = document.querySelectorAll('[data-guard-modal] button[aria-label="Tutup"]')   // yang paling atas (terakhir) ditutup dulu
+    const x = semua[semua.length - 1]
     if (x) x.click()
   }
   function lanjut() {
