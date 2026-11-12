@@ -94,7 +94,7 @@ export default function LoginPage() {
           <label className="lg2-kolom"><span className="lg2-ik">{ikMail}</span><input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="Email" aria-label="Email" autoComplete="email" /></label>
           {mode !== 'link' && (
             <label className="lg2-kolom"><span className="lg2-ik">{ikKunci}</span>
-              <input type={lihat ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required minLength={8} placeholder={mode === 'signup' ? 'Kata sandi (min. 8, huruf + angka)' : 'Kata sandi'} aria-label="Kata sandi" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
+              <input type={lihat ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required minLength={8} placeholder={mode === 'signup' ? 'Kata sandi (min. 8 karakter)' : 'Kata sandi'} aria-label="Kata sandi" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} />
               <button type="button" className="lg2-mata" onClick={() => setLihat(v => !v)} aria-label={lihat ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{ikMata}</button>
             </label>
           )}
