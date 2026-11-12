@@ -278,10 +278,10 @@ export function cetakSuratTugas({ surat, skNomor, pksNomor, namaPencetak, namaSe
 }
 
 // Lembar koreksi: seperti naskah yang dicoret pimpinan dengan tinta merah. Dicetak bila surat dikembalikan / ditolak.
-export function cetakLembarKoreksi({ surat, riwayat = [], namaPencetak, jenis = 'Surat Keluar' }) {
+export function cetakLembarKoreksi({ surat, riwayat = [], namaPencetak, jenis = 'Surat Keluar', urlGambar = {} }) {
   const merah = '#C8102E', ditolak = surat.status_persetujuan === 'ditolak'
   const NAMA = { koreksi: 'Perlu diperbaiki', tolak: 'Ditolak (tidak setuju)', ke_sekretaris: 'Dikembalikan ke Sekretaris' }
-  const catatan = riwayat.length ? riwayat.map(r => `<div style="border-left:5px solid ${merah};background:#FFF3F3;color:#8C1010;padding:8px 12px;margin:8px 0"><b>${h(NAMA[r.tipe] || r.tipe)}</b> · ${h(r.oleh_nama || '')} (${h(r.oleh_peran || '')}) · ${h(fmtWaktu(r.created_at))}<div style="color:#5A1010;margin-top:3px">${h(r.catatan)}</div></div>`).join('')
+  const catatan = riwayat.length ? riwayat.map(r => `<div style="border-left:5px solid ${merah};background:#FFF3F3;color:#8C1010;padding:8px 12px;margin:8px 0"><b>${h(NAMA[r.tipe] || r.tipe)}</b> · ${h(r.oleh_nama || '')} (${h(r.oleh_peran || '')}) · ${h(fmtWaktu(r.created_at))}<div style="color:#5A1010;margin-top:3px">${h(r.catatan)}</div>${(r.gambar || []).map(u => `<img src="${h(urlGambar[u] || u)}" alt="Coretan koreksi" style="display:block;width:100%;max-height:170mm;object-fit:contain;border:1px solid #E5B4B4;background:#fff;margin:8px 0 2px;page-break-inside:avoid">`).join('')}</div>`).join('')
     : `<div style="border-left:5px solid ${merah};background:#FFF3F3;color:#8C1010;padding:8px 12px">${h(surat.catatan_revisi || '-')}</div>`
   const body = `${kop()}
   <div style="border:5px solid ${merah};color:${merah};font-weight:800;font-size:28px;text-align:center;padding:6px 14px;transform:rotate(-5deg);width:max-content;margin:44px auto 26px;opacity:.88">${ditolak ? 'DITOLAK — TIDAK DISETUJUI' : 'PERLU DIPERBAIKI'}</div>

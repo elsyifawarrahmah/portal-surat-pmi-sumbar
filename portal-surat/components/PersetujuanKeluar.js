@@ -11,6 +11,7 @@ import TandaTangan, { unggahTtd } from '@/components/TandaTangan'
 import { fmtWaktu } from '@/lib/format'
 import { kabarkan } from '@/lib/notif'
 import { cetakPengesahanKeluar, cetakLembarKoreksi } from '@/lib/cetak'
+import { urlAman } from '@/lib/berkas'
 
 export const LABEL_SETUJU = {
   null: ['Belum diajukan', '#6B6B6B'], revisi: ['PERLU DIPERBAIKI', '#B3261E'], ditolak: ['DITOLAK · tidak disetujui', '#B3261E'], diajukan: ['Menunggu paraf Sekretaris', '#B07A00'],
@@ -181,7 +182,7 @@ export default function PersetujuanKeluar({ supabase, surat, peran, bisaUbah, on
           </div>
         </div>
       )}
-      {['revisi', 'ditolak'].includes(st) && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 10, borderColor: '#B3261E', color: '#B3261E' }} onClick={() => cetakLembarKoreksi({ surat, riwayat, namaPencetak: peran.nama, jenis: rpc === 'surat_tugas' ? 'Surat Tugas' : 'Surat Keluar' })}>Cetak lembar koreksi (tanda merah)</button>}
+      {['revisi', 'ditolak'].includes(st) && <button className="btn btn-ghost" style={{ minHeight: 48, width: '100%', marginTop: 10, borderColor: '#B3261E', color: '#B3261E' }} onClick={async () => { const urlGambar = {}; for (const r of riwayat) for (const u of (r.gambar || [])) urlGambar[u] = await urlAman(supabase, u); cetakLembarKoreksi({ surat, riwayat, namaPencetak: peran.nama, jenis: rpc === 'surat_tugas' ? 'Surat Tugas' : 'Surat Keluar', urlGambar }) }}>Cetak lembar koreksi (tanda merah + coretan)</button>}
       {st === 'disetujui' && jenisSurat === 'keluar' && (
         <div style={{ marginTop: 12, border: '1px solid #BBD6C0', background: '#F3FAF4', borderRadius: 12, padding: 12 }}>
           <div style={{ fontWeight: 800, color: '#2E7D32', marginBottom: 4 }}>{kirim.length ? 'Surat sudah dikirim' : 'Langkah berikutnya: kirim surat'}</div>

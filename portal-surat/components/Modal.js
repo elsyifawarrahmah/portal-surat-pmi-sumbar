@@ -3,7 +3,7 @@
 export default function Modal({ judul, onClose, children, footer, lebar = 560 }) {
   return (
     <div data-guard-modal="1" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 120, padding: 12 }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: lebar, maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: '#fff', borderRadius: 26, width: '100%', maxWidth: lebar, boxShadow: '0 24px 60px rgba(60,0,10,.35)', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 22px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <h3 style={{ margin: 0, fontSize: 18 }}>{judul}</h3>
           <button onClick={onClose} aria-label="Tutup" style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 18, padding: 6 }}>✕</button>
