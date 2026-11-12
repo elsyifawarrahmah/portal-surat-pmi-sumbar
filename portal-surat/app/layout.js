@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon-v4.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon-v5.png" />
         <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-1290x2796.jpg" />
         <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-1179x2556.jpg" />
         <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/splash-1284x2778.jpg" />
@@ -52,7 +52,7 @@ export default function RootLayout({ children }) {
       <body>
         <div id="splash" aria-hidden="true">
           <div className="splash-isi">
-            <img src="/icon-satria-v4-512.png" alt="" className="splash-ikon" />
+            <img src="/icon-satria-v5-512.png" alt="" className="splash-ikon" />
             <div className="splash-nama">SATRIA PMI</div>
             <div className="splash-prov">PROV. SUMBAR</div>
           </div>
