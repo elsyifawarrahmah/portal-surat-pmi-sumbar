@@ -52,7 +52,7 @@ export default function AturUlangSandi() {
     kosong: 'Link tidak terbaca. Pastikan kamu membuka link dari email terbaru, dengan menyalin alamatnya utuh.',
   }
   return (
-    <div className="login-wrap"><i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" /><div className="login-card"><div className="lg2-logo kecil"><img src="/icon-satria-v5-512.png" alt="SATRIA PMI" /></div>
+    <div className="login-wrap"><i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" /><div className="login-card"><div className="lg2-logo kecil"><img src="/icon-satria-v6-512.png" alt="SATRIA PMI" /></div>
       <h1 style={{ fontSize: 21, margin: '0 0 6px' }}>Buat kata sandi baru</h1>
       {tahap === 'cek' && <p style={{ fontSize: 15.5, color: 'var(--ink-soft)' }}>⏳ Memeriksa link dari email... tunggu sebentar.</p>}
       {tahap === 'siap' && <>

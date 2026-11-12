@@ -41,8 +41,8 @@ function kop() {
 function fitHalaman(d) {
   const batas = 296 * 96 / 25.4
   d.querySelectorAll('.hal[data-fit]').forEach(el => {
-    for (const k of ['', 'p1', 'p2', 'p3']) {
-      el.classList.remove('p1', 'p2', 'p3'); if (k) el.classList.add(k)
+    for (const k of ['', 'p1', 'p2', 'p3', 'p4']) {
+      el.classList.remove('p1', 'p2', 'p3', 'p4'); if (k) el.classList.add(k)
       if (el.getBoundingClientRect().height <= batas + 1.5) break
     }
   })
@@ -143,8 +143,8 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
 // ===== Surat Tugas — format kertas PMI Sumatera Barat (satu halaman: daftar nama masuk di tabel, lampiran hanya bila > 8 orang) =====
 const BULAN_PANJANG = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const tglPanjang = v => { if (!v) return ''; const d = new Date(String(v).slice(0, 10) + 'T00:00:00'); return isNaN(d) ? '' : `${d.getDate()} ${BULAN_PANJANG[d.getMonth()]} ${d.getFullYear()}` }
-// Sampai 14 nama tetap satu halaman (tabel otomatis dipadatkan); lebih dari itu baru dipindah ke lampiran.
-const MAKS_NAMA_SATU_HALAMAN = 14
+// Sampai 30 nama tetap satu halaman (tabel otomatis dipadatkan); lebih dari itu daftar nama dipindah ke halaman Lampiran (jadi bukti pembayaran/penugasan).
+const MAKS_NAMA_SATU_HALAMAN = 30
 
 const CSS_TUGAS = `
 body{font-size:10.5pt;line-height:1.33;padding:0}
@@ -173,6 +173,8 @@ body{font-size:10.5pt;line-height:1.33;padding:0}
 .hal.p1 .isi{padding-top:4mm}.hal.p1 .nm td,.hal.p1 .nm th{padding:.6mm 2mm;font-size:9.8pt}.hal.p1 .kv td{padding:.8mm 0}.hal.p1 .ttdarea{height:15mm}.hal.p1 .ttdbox{margin-top:3mm}.hal.p1 .mgt td{padding:1mm 0}
 .hal.p2 .isi{padding-top:3mm}.hal.p2 .banner{height:15mm;margin-top:6mm}.hal.p2 .banner .lg img{height:12mm}.hal.p2 .nm td,.hal.p2 .nm th{padding:.4mm 2mm;font-size:9.4pt}.hal.p2 .kv td{padding:.5mm 0;font-size:10pt}.hal.p2 .ttdarea{height:12mm}.hal.p2 .ttdbox{margin-top:2mm}.hal.p2 .mgt td{padding:.5mm 0}.hal.p2 .nmr{margin-bottom:3mm}
 .hal.p3 .isi{padding-top:2mm}.hal.p3 .banner{height:13mm;margin-top:4mm}.hal.p3 .banner .lg img{height:10mm}.hal.p3 .nm td,.hal.p3 .nm th{padding:.2mm 2mm;font-size:9pt}.hal.p3 .kv td{padding:.3mm 0;font-size:9.5pt}.hal.p3 .ttdarea{height:9mm}.hal.p3 .ttdbox{margin-top:1mm;font-size:9.5pt}.hal.p3 .mgt td{padding:.3mm 0;font-size:9.5pt}.hal.p3 p{font-size:9.5pt}.hal.p3 .nmr{margin-bottom:2mm}
+.hal.p4{line-height:1.18}.hal.p4 .isi{padding-top:1.5mm}.hal.p4 .banner{height:11mm;margin-top:3mm}.hal.p4 .banner .lg img{height:8.5mm}.hal.p4 .nm{margin:.5mm 0 1.5mm 5mm}.hal.p4 .nm td,.hal.p4 .nm th{padding:.2mm 1.6mm;font-size:8.6pt}.hal.p4 .kv td{padding:.15mm 0;font-size:9pt}.hal.p4 .ttdarea{height:7mm}.hal.p4 .ttdbox{margin-top:.5mm;font-size:9pt}.hal.p4 .mgt td{padding:.15mm 0;font-size:9pt}.hal.p4 p{font-size:9pt;margin-top:1.5mm !important}.hal.p4 .nmr{margin-bottom:1mm}.hal.p4 .ft{margin-bottom:6mm;padding-top:1mm}
+.nm.lampiran{width:100%;margin:0}.nm.lampiran thead{display:table-header-group}.nm.lampiran tr{page-break-inside:avoid}
 .lamp{margin:0 0 3.5mm}.lamp td{border:none;padding:0 2mm 0 0;vertical-align:top}
 @media print{@page{margin:0}}
 .stempel{position:absolute;top:196mm;left:16mm;transform:rotate(-14deg);border:1.4mm solid #C8102E;color:#C8102E;font-weight:800;font-size:23pt;padding:1mm 6mm;opacity:.72;letter-spacing:.5pt;z-index:5}
@@ -232,7 +234,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   </div>`
   const halaman2 = lampiran ? `<div class="hal"><div class="isi" style="padding-top:22mm">
       <div>Lampiran Surat Tugas</div><div>Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${h(s.nomor_surat)}</div><hr style="border:0;border-top:1px solid #000;margin:2mm 0 8mm">
-      ${anggota.map((a, i) => `<table class="lamp"><tr><td style="width:8mm">${i + 1}.</td><td style="width:18mm">Nama</td><td>: ${h(a.nama)}</td></tr><tr><td></td><td>Jabatan</td><td>: ${h(a.jabatan || '')}</td></tr></table>`).join('')}
+      <table class="nm lampiran"><thead><tr><th style="width:11mm">No</th><th style="width:62mm">Nama</th><th>Jabatan</th></tr></thead><tbody>${anggota.map((a, i) => `<tr><td>${i + 1}</td><td>${h(a.nama)}</td><td>${h(a.jabatan || '')}</td></tr>`).join('')}</tbody></table>
     </div></div>` : ''
   buka('Surat Tugas', halaman1 + halaman2, 'portrait', CSS_TUGAS)
 }

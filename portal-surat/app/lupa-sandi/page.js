@@ -20,7 +20,7 @@ export default function LupaSandi() {
     setTerkirim(true)
   }
   return (
-    <div className="login-wrap"><i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" /><div className="login-card"><div className="lg2-logo kecil"><img src="/icon-satria-v5-512.png" alt="SATRIA PMI" /></div>
+    <div className="login-wrap"><i className="lg2-b1" /><i className="lg2-b2" /><i className="lg2-b3" /><i className="lg2-b4" /><div className="login-card"><div className="lg2-logo kecil"><img src="/icon-satria-v6-512.png" alt="SATRIA PMI" /></div>
       <h1 style={{ fontSize: 21, margin: '0 0 6px' }}>Lupa kata sandi?</h1>
       {terkirim ? (
         <>
