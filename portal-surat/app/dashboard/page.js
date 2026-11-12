@@ -119,6 +119,7 @@ export default function Beranda() {
       ))}
 
       <div style={{ marginTop: 24 }}><AjakPasang /><NotifikasiButton /></div>
+      <div style={{ marginTop: 18, textAlign: 'center', fontSize: 12.5, color: 'var(--ink-soft)' }}>SATRIA PMI mengikuti UU ITE, UU PDP, dan PP 71/2019. <Link href="/dasar-hukum" style={{ color: 'var(--ink-soft)', textDecoration: 'underline' }}>Dasar Hukum</Link></div>
     </div></div>
   )
 }
