@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [lihat, setLihat] = useState(false)
+  const [ingat, setIngat] = useState(true)   // ingat email di HP ini (kata sandi tidak pernah disimpan)
   const [nama, setNama] = useState('')
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    try { const e = localStorage.getItem('satria-email'); if (e) setEmail(e); if (localStorage.getItem('satria-ingat') === '0') setIngat(false) } catch (e) {}
     if (/type=recovery/.test(window.location.hash) && /access_token=/.test(window.location.hash)) { window.location.replace('/atur-ulang-sandi' + window.location.hash); return }
     // tombol Google/Facebook hanya muncul bila sudah diaktifkan admin di Supabase
     fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } })
@@ -35,6 +37,7 @@ export default function LoginPage() {
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
       if (error) { setError('Email atau kata sandi salah. Lupa kata sandi? Klik "Lupa kata sandi" di bawah.'); setLoading(false); return }
+      try { if (ingat) { localStorage.setItem('satria-email', email.trim()); localStorage.setItem('satria-ingat', '1') } else { localStorage.removeItem('satria-email'); localStorage.setItem('satria-ingat', '0') } } catch (e) {}
     } else if (mode === 'signup') {
       const cek = await fetch('/api/cek-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim() }) }).then(r => r.json()).catch(() => ({ ok: true }))
       if (!cek.ok) { setError(cek.pesan); setLoading(false); return }
@@ -98,7 +101,12 @@ export default function LoginPage() {
               <button type="button" className="lg2-mata" onClick={() => setLihat(v => !v)} aria-label={lihat ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{ikMata}</button>
             </label>
           )}
-          {mode === 'signin' && <div className="lg2-lupa"><Link href="/lupa-sandi">Lupa kata sandi?</Link></div>}
+          {mode === 'signin' && (
+            <div className="lg2-baris">
+              <label className="lg2-ingat"><input type="checkbox" checked={ingat} onChange={e => setIngat(e.target.checked)} /><span className="lg2-cek" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 12 10 18 20 6" /></svg></span>Ingat saya</label>
+              <Link href="/lupa-sandi" className="lg2-lupa-t">Lupa kata sandi?</Link>
+            </div>
+          )}
           <button className="lg2-tombol" disabled={loading}>
             <span>{loading ? 'Memproses...' : mode === 'signin' ? 'Masuk' : mode === 'signup' ? 'Daftar' : 'Kirim link masuk'}</span>
             <span className="lg2-panah" aria-hidden="true"><Ik><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></Ik></span>

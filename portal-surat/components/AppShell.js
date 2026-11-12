@@ -9,7 +9,7 @@ import KonfirmasiKeluar from '@/components/KonfirmasiKeluar'
 
 export default function AppShell({ children }) {
   const pathname = usePathname() || ''
-  const tanpaMenu = pathname === '/' || pathname.startsWith('/login') || pathname === '/pasang'
+  const tanpaMenu = pathname === '/' || pathname.startsWith('/login') || pathname === '/pasang' || pathname === '/lupa-sandi' || pathname === '/atur-ulang-sandi'
   return (
     <>
       <SplashScreen />
