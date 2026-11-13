@@ -65,9 +65,9 @@ export default function Beranda() {
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div className="hero-sapa">{sapaan()}</div>
           <h1>Halo, {(peran.nama || '...').split(' ')[0]} </h1>
-          <p>{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''} · SATria PMI</p>
+          <p>{peran.isAdmin ? 'Admin web' : peran.unit?.nama || ''} · SATRIA PMI</p>
         </div>
-        <img src="/logo-pmi.png" alt="" className="hero-logo" />
+        <img src="/logo-satria.png" alt="" className="hero-logo" />
       </div>
       <div className="tiles">
         {[

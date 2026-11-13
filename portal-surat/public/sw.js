@@ -4,8 +4,8 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    icon: '/icon-satria-v6-192.png',
-    badge: '/icon-satria-v6-192.png',
+    icon: '/icon-satria-v7-192.png',
+    badge: '/icon-satria-v7-192.png',
     data: { url: data.url || '/surat-masuk' },
     vibrate: [200, 100, 200],
     silent: false,

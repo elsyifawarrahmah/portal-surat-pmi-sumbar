@@ -461,3 +461,18 @@ html.splash-pudar #splash{opacity:0;visibility:hidden;}
 .main .btn-ghost{border-radius:16px;background:linear-gradient(180deg,#fff,#FBF3F4);box-shadow:0 4px 12px rgba(140,15,36,.07);}
 .main .btn-primary{border-radius:18px;box-shadow:0 10px 20px rgba(200,16,46,.28),inset 0 1px 1px rgba(255,255,255,.3);}
 .main .tag{border-radius:999px;}
+
+/* ===== Splash tanpa kotak: logo + tulisan SATria langsung di latar ===== */
+.splash-logo{width:min(44vw,230px);height:auto;filter:drop-shadow(0 12px 24px rgba(60,0,10,.45));}
+.splash-kata{width:min(56vw,290px);height:auto;margin-top:4.5vmin;}
+
+/* ===== Kartu sapaan: logo layar depan, tanpa lingkaran putih ===== */
+.hero-logo{width:78px;height:auto;aspect-ratio:1/1;object-fit:contain;border-radius:0;background:transparent;padding:0;box-shadow:none;filter:drop-shadow(0 8px 14px rgba(60,0,10,.35));}
+
+/* ===== Penyempurnaan Beranda ===== */
+.tile{transition:transform .14s ease,box-shadow .18s ease;}
+.tile:hover{box-shadow:0 12px 28px rgba(60,40,30,.16);transform:translateY(-2px);}
+.tile:active{transform:scale(.97);box-shadow:0 5px 14px rgba(60,40,30,.12);}
+.tile-ikon{transition:transform .18s ease;}
+.tile:active .tile-ikon{transform:scale(.92);}
+.hero h1{letter-spacing:-.01em;}
