@@ -39,7 +39,7 @@ export const ICONS = {
 }
 
 // grup: 'utama' = selalu tampil; 'lain' = dilipat di "Menu lain"; 'admin' = khusus admin web
-const LINKS = [
+export const LINKS = [
   { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama', tone: 'emas' },
   { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi', tone: 'biru' },
   { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama', tone: 'hijau' },
@@ -155,14 +155,15 @@ export default function Sidebar() {
 
   return (
     <>
-      <button className="hamburger-btn" onClick={toggleMenu} aria-label="Buka atau tutup menu"><span></span></button>
+      <button className={`hamburger-btn${mobileOpen ? ' sembunyi' : ''}`} onClick={toggleMenu} aria-label="Buka atau tutup menu"><span></span></button>
       {mobileOpen && <div className="backdrop" onClick={()=>setMobileOpen(false)} />}
       <div className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="brand">
+          <button type="button" className="sidebar-tutup" aria-label="Tutup menu" onClick={() => setMobileOpen(false)}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg></button>
           <div className="brand-baru">
-            <img src="/logo-satria.png" alt="Logo SATRIA PMI" className="brand-bunga" />
+            <img src="/icon-satria-v7-192.png" alt="Logo SATRIA PMI" className="brand-ikon" />
             <div className="brand-teks">
-              <img src="/wordmark-satria-putih.png" alt={NAMA_APLIKASI} className="brand-kata" />
+              <div className="brand-nama">{NAMA_APLIKASI}</div>
               <div className="brand-sub">PMI Provinsi Sumatera Barat</div>
             </div>
           </div>

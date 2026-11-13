@@ -17,7 +17,6 @@ export default function AppShell({ children }) {
       <KonfirmasiKeluar />
       <PullToRefresh />
       <CekVersi />
-      {!tanpaMenu && <div className="bg-gelembung" aria-hidden="true"><i /><i /><i /></div>}
       {!tanpaMenu && <Sidebar />}
       {children}
       {!tanpaMenu && <BottomNav />}

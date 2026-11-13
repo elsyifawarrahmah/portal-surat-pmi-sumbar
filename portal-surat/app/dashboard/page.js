@@ -8,7 +8,7 @@ import { usePeran } from '@/lib/peran'
 import NotifikasiButton from '@/components/NotifikasiButton'
 import AjakPasang from '@/components/AjakPasang'
 import PeringatanUnit from '@/components/PeringatanUnit'
-import { ICONS } from '@/components/Sidebar'
+import { ICONS, LINKS } from '@/components/Sidebar'
 import { fmtTgl, fmtWaktu } from '@/lib/format'
 import { STATUS_SURAT, statusUntukSaya } from '@/lib/surat'
 
@@ -69,24 +69,33 @@ export default function Beranda() {
         </div>
         <img src="/logo-satria.png" alt="" className="hero-logo" />
       </div>
-      <div className="tiles">
-        {[
-          { href: '/surat', label: 'Surat Masuk', ikon: 'masuk', tone: '#1F5E99', pale: '#E4EEF9', badge: penuh ? hit('belum_diteruskan') : hit('belum') },
-          { href: '/surat-keluar', label: 'Surat Keluar', ikon: 'keluar', tone: '#2E7D32', pale: '#E7F4EA' },
-          { href: '/surat-tugas', label: 'Surat Tugas', ikon: 'tugas', tone: '#C2570C', pale: '#FDEBDD' },
-          { href: '/data-aset', label: 'Data Aset', ikon: 'aset', tone: '#B7791F', pale: '#FBF1DC' },
-          { href: '/lacak', label: 'Lacak Surat', ikon: 'lacak', tone: '#6B3FB5', pale: '#EEE7FA' },
-          peran.bisaCatatMasuk ? { href: '/surat-masuk?tambah=1', label: 'Catat Surat', ikon: 'buku', tone: '#B3261E', pale: '#FBE7E7' } : { href: '/pasang', label: 'Pasang di HP', ikon: 'bantuan', tone: '#B3261E', pale: '#FBE7E7' },
-          { href: '/bantuan', label: 'Bantuan', ikon: 'bantuan', tone: '#B7791F', pale: '#FBF1DC' },
-          { href: '/dasar-hukum', label: 'Dasar Hukum', ikon: 'sk', tone: '#1F5E99', pale: '#E4EEF9' },
-        ].map(t => (
-          <Link key={t.label} href={t.href} className="tile" style={{ '--tone': t.tone, '--pale': t.pale }}>
+      {(() => {
+        const inti = [
+          { href: '/surat', label: 'Surat Masuk', ikon: 'masuk', tone: '#1F5E99', pale: '#E3EBF8', badge: penuh ? hit('belum_diteruskan') : hit('belum') },
+          { href: '/surat-keluar', label: 'Surat Keluar', ikon: 'keluar', tone: '#2E7D32', pale: '#E5F1E7' },
+          { href: '/surat-tugas', label: 'Surat Tugas', ikon: 'tugas', tone: '#C2570C', pale: '#FEE9D8' },
+          { href: '/data-aset', label: 'Data Aset', ikon: 'aset', tone: '#B7791F', pale: '#FDEFD5' },
+          { href: '/lacak', label: 'Lacak Surat', ikon: 'lacak', tone: '#6B3FB5', pale: '#EBE3FB' },
+          peran.bisaCatatMasuk ? { href: '/surat-masuk?tambah=1', label: 'Catat Surat', ikon: 'buku', tone: '#B3261E', pale: '#FAE8E6' } : { href: '/pasang', label: 'Pasang di HP', ikon: 'bantuan', tone: '#B3261E', pale: '#FAE8E6' },
+          { href: '/bantuan', label: 'Bantuan', ikon: 'bantuan', tone: '#B7791F', pale: '#FDEFD5' },
+          { href: '/dasar-hukum', label: 'Dasar Hukum', ikon: 'sk', tone: '#1F5E99', pale: '#E3EBF8' },
+        ]
+        const dipakai = new Set(inti.map(t => t.href.split('?')[0]))
+        const palet = [['#1F5E99', '#E3EBF8'], ['#2E7D32', '#E5F1E7'], ['#C2570C', '#FEE9D8'], ['#B7791F', '#FDEFD5'], ['#6B3FB5', '#EBE3FB'], ['#B3261E', '#FAE8E6']]
+        const lain = LINKS.filter(l => l.href !== '/dashboard' && !dipakai.has(l.href) && !(l.grup === 'admin' && !peran.isAdmin) && !(l.penuh && !peran.aksesPenuh))
+          .map((l, i) => ({ href: l.href, label: l.label === 'Pemantauan' && !peran.bisaPantau ? 'Panggilan Biro Umum' : l.label, ikon: l.icon, tone: palet[i % 6][0], pale: palet[i % 6][1], badge: l.badge === 'panggilan' ? panggilan.length : 0 }))
+        const kartu = t => (
+          <Link key={t.href + t.label} href={t.href} className="tile" style={{ '--tone': t.tone, '--pale': t.pale }}>
             <span className="tile-ikon">{ICONS[t.ikon]}</span>
-            {t.label}
+            <span className="tile-label">{t.label}</span>
             {t.badge > 0 && <span className="tile-badge">{t.badge > 99 ? '99+' : t.badge}</span>}
           </Link>
-        ))}
-      </div>
+        )
+        return <>
+          <div className="tiles">{inti.map(kartu)}</div>
+          {lain.length > 0 && <><h2 className="tiles-judul">Menu Lainnya</h2><div className="tiles tiles-lain">{lain.map(kartu)}</div></>}
+        </>
+      })()}
       <PeringatanUnit peran={peran} />
 
       {panggilan.length > 0 && (
