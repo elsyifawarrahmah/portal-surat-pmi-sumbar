@@ -159,13 +159,13 @@ export default function Sidebar() {
       {mobileOpen && <div className="backdrop" onClick={()=>setMobileOpen(false)} />}
       <div className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
         <div className="brand">
-          <div className="brand-logo">
-            <img src="/logo-pmi.png" alt="Lambang Palang Merah Indonesia" width={42} height={42} />
-            <div className="brand-name">Palang<br />Merah<br />Indonesia</div>
-            <div className="brand-vline" />
-            <div className="brand-prov">Provinsi<br />Sumatera Barat</div>
+          <div className="brand-baru">
+            <img src="/logo-satria.png" alt="Logo SATRIA PMI" className="brand-bunga" />
+            <div className="brand-teks">
+              <img src="/wordmark-satria-putih.png" alt={NAMA_APLIKASI} className="brand-kata" />
+              <div className="brand-sub">PMI Provinsi Sumatera Barat</div>
+            </div>
           </div>
-          <div style={{fontSize:15,fontWeight:800,opacity:.95,marginTop:10,letterSpacing:'.02em'}}>{NAMA_APLIKASI}</div>
         </div>
         {peran.nama && <div className="sapa"><span>{sapaan()},</span><b>{peran.nama.split(' ')[0]}</b></div>}
         <div className="nav">

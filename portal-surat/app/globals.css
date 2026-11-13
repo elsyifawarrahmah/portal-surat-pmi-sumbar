@@ -476,3 +476,28 @@ html.splash-pudar #splash{opacity:0;visibility:hidden;}
 .tile-ikon{transition:transform .18s ease;}
 .tile:active .tile-ikon{transform:scale(.92);}
 .hero h1{letter-spacing:-.01em;}
+
+/* ===== Logo & nama di menu samping (logo layar depan + tulisan SATria) ===== */
+.brand-baru{display:flex;align-items:center;gap:12px;}
+.brand-bunga{width:52px;height:52px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 6px 10px rgba(40,0,8,.4));}
+.brand-teks{min-width:0;}
+.brand-kata{display:block;height:44px;width:auto;max-width:100%;}
+.brand-sub{margin-top:4px;font-size:11.5px;font-weight:600;letter-spacing:.02em;opacity:.88;line-height:1.25;}
+
+/* ===== Halaman dalam: latar merah muda lembut + gelembung 3D, selaras dengan halaman masuk ===== */
+body{background:linear-gradient(180deg,#F8F4F5 0%,#F6E9EB 55%,#F3DDE0 100%) fixed;}
+.bg-gelembung{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
+.bg-gelembung i{position:absolute;display:block;border-radius:50%;}
+.bg-gelembung i:nth-child(1){width:380px;height:380px;right:-150px;top:-150px;background:radial-gradient(circle at 35% 30%,#F7B8BE 0,#E5333F 62%,#C8102E 100%);opacity:.42;box-shadow:inset -14px -16px 34px rgba(140,15,36,.25),inset 12px 12px 26px rgba(255,255,255,.55);}
+.bg-gelembung i:nth-child(2){width:150px;height:150px;right:7%;bottom:14%;background:radial-gradient(circle at 35% 30%,#FFE3E5,#F18A93 70%);opacity:.5;box-shadow:inset -8px -10px 22px rgba(200,16,46,.22),inset 8px 8px 18px rgba(255,255,255,.7);}
+.bg-gelembung i:nth-child(3){width:330px;height:330px;right:-120px;bottom:-150px;background:radial-gradient(circle at 30% 30%,#FFD9DC,#D81F3A 78%);opacity:.32;box-shadow:inset 10px 10px 26px rgba(255,255,255,.55);}
+@media (max-width:768px){ .bg-gelembung i:nth-child(1){width:240px;height:240px;right:-110px;top:-100px;} .bg-gelembung i:nth-child(2){width:90px;height:90px;} .bg-gelembung i:nth-child(3){width:220px;height:220px;right:-90px;bottom:-100px;} }
+
+/* Menu beranda: kartu timbul lembut, 4 kolom di layar lebar */
+.tile{background:linear-gradient(180deg,#fff,#FBF3F4);border:1px solid rgba(255,255,255,.95);border-radius:26px;box-shadow:0 12px 26px rgba(140,15,36,.10),0 2px 4px rgba(140,15,36,.06),inset 0 1px 0 #fff;}
+.tile:hover{box-shadow:0 16px 32px rgba(140,15,36,.15),0 2px 4px rgba(140,15,36,.06),inset 0 1px 0 #fff;}
+.tile-ikon{border-radius:20px;background:var(--pale);box-shadow:0 8px 16px rgba(140,15,36,.10),inset 0 1px 2px #fff,inset 0 -3px 6px rgba(0,0,0,.04);}
+@media (min-width:900px){.tiles{grid-template-columns:repeat(4,1fr);gap:18px;}}
+.hero{box-shadow:0 18px 36px rgba(140,15,36,.28),inset 0 1px 0 rgba(255,255,255,.22);}
+.stat{background:linear-gradient(180deg,#fff,#FCF7F7);border:1px solid rgba(255,255,255,.95);border-radius:22px;box-shadow:0 10px 24px rgba(140,15,36,.08),0 1px 2px rgba(140,15,36,.06);}
+.stat::before{border-radius:22px 0 0 22px;}

@@ -78,6 +78,7 @@ export default function Beranda() {
           { href: '/lacak', label: 'Lacak Surat', ikon: 'lacak', tone: '#6B3FB5', pale: '#EEE7FA' },
           peran.bisaCatatMasuk ? { href: '/surat-masuk?tambah=1', label: 'Catat Surat', ikon: 'buku', tone: '#B3261E', pale: '#FBE7E7' } : { href: '/pasang', label: 'Pasang di HP', ikon: 'bantuan', tone: '#B3261E', pale: '#FBE7E7' },
           { href: '/bantuan', label: 'Bantuan', ikon: 'bantuan', tone: '#B7791F', pale: '#FBF1DC' },
+          { href: '/dasar-hukum', label: 'Dasar Hukum', ikon: 'sk', tone: '#1F5E99', pale: '#E4EEF9' },
         ].map(t => (
           <Link key={t.label} href={t.href} className="tile" style={{ '--tone': t.tone, '--pale': t.pale }}>
             <span className="tile-ikon">{ICONS[t.ikon]}</span>
