@@ -25,7 +25,7 @@ export async function middleware(request) {
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
   const isLoginPage = path === '/login'
-  const halamanTerbuka = isLoginPage || path === '/lupa-sandi' || path === '/atur-ulang-sandi' || path === '/pasang' || path === '/api/cek-email' || path.startsWith('/auth/')   // boleh dibuka tanpa masuk
+  const halamanTerbuka = isLoginPage || path === '/lupa-sandi' || path === '/atur-ulang-sandi' || path === '/pasang' || path === '/api/cek-email' || path === '/api/versi' || path.startsWith('/auth/')   // boleh dibuka tanpa masuk
   if (!user && !halamanTerbuka) return NextResponse.redirect(new URL('/login', request.url))
   if (user && isLoginPage) return NextResponse.redirect(new URL('/dashboard', request.url))
   return response
