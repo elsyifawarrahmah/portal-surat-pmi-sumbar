@@ -140,14 +140,17 @@ export function cetakPengesahanKeluar({ surat, namaPencetak }) {
 
 // Surat Tugas / Surat Aset / Tugas Kerja Sama — semua kolom terisi otomatis dari data surat (anggota, tanggal, kendaraan, TTD + kode).
 // Boleh dicetak kapan saja; sebelum disetujui TTD kosong dan ada keterangan "DRAF".
-// ===== Surat Tugas — format kertas PMI Sumatera Barat (satu halaman: daftar nama masuk di tabel, lampiran hanya bila > 8 orang) =====
+// ===== Surat Tugas — format kertas PMI Sumatera Barat (mengikuti contoh surat tugas resmi: daftar nama berbentuk personal) =====
 const BULAN_PANJANG = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const tglPanjang = v => { if (!v) return ''; const d = new Date(String(v).slice(0, 10) + 'T00:00:00'); return isNaN(d) ? '' : `${d.getDate()} ${BULAN_PANJANG[d.getMonth()]} ${d.getFullYear()}` }
-// Sampai 30 nama tetap satu halaman (tabel otomatis dipadatkan); lebih dari itu daftar nama dipindah ke halaman Lampiran (jadi bukti pembayaran/penugasan).
-const MAKS_NAMA_SATU_HALAMAN = 30
+// Tanggal dengan dua angka hari, seperti di surat tugas resmi: 02 Juni 2026
+const tglDua = v => { if (!v) return ''; const d = new Date(String(v).slice(0, 10) + 'T00:00:00'); return isNaN(d) ? '' : `${String(d.getDate()).padStart(2, '0')} ${BULAN_PANJANG[d.getMonth()]} ${d.getFullYear()}` }
+// Sampai sekian orang tetap satu halaman (huruf & jarak otomatis memadat); lebih dari itu daftar nama dipindah ke halaman Lampiran (bukti penugasan/pembayaran).
+const MAKS_NAMA_SATU_HALAMAN = 12
+const barisBaru = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean)
 
 const CSS_TUGAS = `
-body{font-size:10.5pt;line-height:1.33;padding:0}
+body{font-family:'Trebuchet MS','Segoe UI',Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.3;padding:0}
 .hal{position:relative;width:210mm;min-height:296mm;display:flex;flex-direction:column;page-break-after:always}
 .isi{flex:1 0 auto}
 .hal:last-child{page-break-after:auto}
@@ -155,27 +158,29 @@ body{font-size:10.5pt;line-height:1.33;padding:0}
 .banner .b1{flex:4.2;background:#DE5B4C}.banner .b2{flex:2.3;background:#E88C80}.banner .b3{flex:1.4;background:#F2B7AF}.banner .b4{flex:1;background:#F8D9D4}
 .banner .lg{flex:2.5;display:flex;align-items:center;gap:2mm;padding-left:3mm;font-weight:700;font-size:8.5pt;line-height:1.05}
 .banner .lg img{height:13mm}
-.isi{padding:6mm 20mm 0 20mm}
-.jdl{text-align:center;font-weight:700;text-decoration:underline;font-size:11.5pt;margin-top:2mm}
-.nmr{text-align:center;margin-bottom:4mm}
+.isi{padding:5mm 24mm 0 24mm;font-size:11pt}
+.jdl{text-align:center;font-weight:700;text-decoration:underline;font-size:12pt;margin-top:2mm}
+.nmr{text-align:center;margin-bottom:3.5mm}
+.kv,.org,.mgt{font-size:inherit;line-height:inherit}
 .kv{width:100%;border-collapse:collapse;margin:0}
-.kv td{border:none;padding:1.1mm 0;vertical-align:top}
-.kv td.k{width:33mm}.kv td.t{width:4mm}
-.nm{width:calc(100% - 5mm);margin:1mm 0 3mm 5mm;border-collapse:collapse}
-.nm th,.nm td{border:1px solid #000;padding:.9mm 2mm;font-size:10pt;text-align:left;vertical-align:top;text-transform:none}
-.nm th{background:#f2f2f2;font-size:9.5pt}
-.ttdbox{margin:4mm 0 0 98mm;width:72mm;text-align:center}
-.ttdarea{height:19mm;display:flex;align-items:center;justify-content:center}
-.ttdarea img{max-height:19mm;max-width:60mm}
-.mgt td{border:none;padding:1.5mm 0;vertical-align:bottom}
-.ft{margin:auto 20mm 9mm;padding-top:3mm;font-size:9pt;font-weight:700;line-height:1.35;flex-shrink:0}
-/* padat otomatis (diukur saat cetak): p1 ringan, p2 sedang, p3 paling rapat — supaya tetap satu lembar */
-.hal.p1 .isi{padding-top:4mm}.hal.p1 .nm td,.hal.p1 .nm th{padding:.6mm 2mm;font-size:9.8pt}.hal.p1 .kv td{padding:.8mm 0}.hal.p1 .ttdarea{height:15mm}.hal.p1 .ttdbox{margin-top:3mm}.hal.p1 .mgt td{padding:1mm 0}
-.hal.p2 .isi{padding-top:3mm}.hal.p2 .banner{height:15mm;margin-top:6mm}.hal.p2 .banner .lg img{height:12mm}.hal.p2 .nm td,.hal.p2 .nm th{padding:.4mm 2mm;font-size:9.4pt}.hal.p2 .kv td{padding:.5mm 0;font-size:10pt}.hal.p2 .ttdarea{height:12mm}.hal.p2 .ttdbox{margin-top:2mm}.hal.p2 .mgt td{padding:.5mm 0}.hal.p2 .nmr{margin-bottom:3mm}
-.hal.p3 .isi{padding-top:2mm}.hal.p3 .banner{height:13mm;margin-top:4mm}.hal.p3 .banner .lg img{height:10mm}.hal.p3 .nm td,.hal.p3 .nm th{padding:.2mm 2mm;font-size:9pt}.hal.p3 .kv td{padding:.3mm 0;font-size:9.5pt}.hal.p3 .ttdarea{height:9mm}.hal.p3 .ttdbox{margin-top:1mm;font-size:9.5pt}.hal.p3 .mgt td{padding:.3mm 0;font-size:9.5pt}.hal.p3 p{font-size:9.5pt}.hal.p3 .nmr{margin-bottom:2mm}
-.hal.p4{line-height:1.18}.hal.p4 .isi{padding-top:1.5mm}.hal.p4 .banner{height:11mm;margin-top:3mm}.hal.p4 .banner .lg img{height:8.5mm}.hal.p4 .nm{margin:.5mm 0 1.5mm 5mm}.hal.p4 .nm td,.hal.p4 .nm th{padding:.2mm 1.6mm;font-size:8.6pt}.hal.p4 .kv td{padding:.15mm 0;font-size:9pt}.hal.p4 .ttdarea{height:7mm}.hal.p4 .ttdbox{margin-top:.5mm;font-size:9pt}.hal.p4 .mgt td{padding:.15mm 0;font-size:9pt}.hal.p4 p{font-size:9pt;margin-top:1.5mm !important}.hal.p4 .nmr{margin-bottom:1mm}.hal.p4 .ft{margin-bottom:6mm;padding-top:1mm}
-.nm.lampiran{width:100%;margin:0}.nm.lampiran thead{display:table-header-group}.nm.lampiran tr{page-break-inside:avoid}
-.lamp{margin:0 0 3.5mm}.lamp td{border:none;padding:0 2mm 0 0;vertical-align:top}
+.kv td{border:none;padding:.9mm 0;vertical-align:top;font-size:1em}
+.kv td.k{width:34mm}.kv td.t{width:4mm}
+.li{display:flex;gap:2mm}.li .b{flex:0 0 5mm}
+.org{width:calc(100% - 9mm);margin:.8mm 0 2.5mm 9mm;border-collapse:collapse}
+.org td{border:none;padding:0;vertical-align:top;font-size:1em;text-transform:none}
+.org td.no{width:7mm}.org td.lb{width:21mm}.org td.cl{width:4mm}
+.org tr.o2 td{padding-bottom:1.1mm}
+.ttdbox{margin:3.5mm 0 0 80mm;width:72mm;text-align:left}
+.ttdarea{height:18mm;display:flex;align-items:center;justify-content:flex-start}
+.ttdarea img{max-height:18mm;max-width:60mm}
+.mgt{border-collapse:collapse;width:100%}.mgt td{border:none;padding:1mm 0;vertical-align:bottom;font-size:1em;white-space:nowrap}
+.ft{margin:auto 24mm 9mm;padding-top:3mm;font-size:9pt;font-weight:700;line-height:1.35;flex-shrink:0}
+/* padat otomatis (diukur saat cetak): p1 ringan sampai p4 paling rapat, supaya tetap satu lembar */
+.hal.p1 .isi{font-size:10.4pt;padding-top:4mm}.hal.p1 .kv td{padding:.6mm 0}.hal.p1 .org tr.o2 td{padding-bottom:.8mm}.hal.p1 .ttdarea{height:15mm}.hal.p1 .ttdbox{margin-top:3mm}.hal.p1 .mgt td{padding:.8mm 0}
+.hal.p2 .isi{font-size:9.8pt;padding-top:3mm}.hal.p2 .banner{height:15mm;margin-top:6mm}.hal.p2 .banner .lg img{height:12mm}.hal.p2 .kv td{padding:.4mm 0}.hal.p2 .org tr.o2 td{padding-bottom:.5mm}.hal.p2 .ttdarea{height:12mm}.hal.p2 .ttdbox{margin-top:2mm}.hal.p2 .mgt td{padding:.5mm 0}.hal.p2 .nmr{margin-bottom:2.5mm}
+.hal.p3{line-height:1.2}.hal.p3 .isi{font-size:9.2pt;padding-top:2mm}.hal.p3 .banner{height:13mm;margin-top:4mm}.hal.p3 .banner .lg img{height:10mm}.hal.p3 .kv td{padding:.25mm 0}.hal.p3 .org{margin-bottom:1.5mm}.hal.p3 .org tr.o2 td{padding-bottom:.3mm}.hal.p3 .ttdarea{height:9mm}.hal.p3 .ttdbox{margin-top:1mm}.hal.p3 .mgt td{padding:.3mm 0}.hal.p3 p{margin-top:2mm !important}.hal.p3 .nmr{margin-bottom:2mm}
+.hal.p4{line-height:1.15}.hal.p4 .isi{font-size:8.4pt;padding-top:1.5mm}.hal.p4 .banner{height:11mm;margin-top:3mm}.hal.p4 .banner .lg img{height:8.5mm}.hal.p4 .kv td{padding:.1mm 0}.hal.p4 .org{margin:.4mm 0 1mm 9mm}.hal.p4 .org tr.o2 td{padding-bottom:.15mm}.hal.p4 .ttdarea{height:7mm}.hal.p4 .ttdbox{margin-top:.5mm}.hal.p4 .mgt td{padding:.15mm 0}.hal.p4 p{margin-top:1.5mm !important}.hal.p4 .nmr{margin-bottom:1mm}.hal.p4 .ft{margin-bottom:6mm;padding-top:1mm}
+.org.lampiran{width:100%;margin:0}.org.lampiran tbody{page-break-inside:avoid}.org.lampiran tr.o2 td{padding-bottom:3.2mm}
 @media print{@page{margin:0}}
 .stempel{position:absolute;top:196mm;left:16mm;transform:rotate(-14deg);border:1.4mm solid #C8102E;color:#C8102E;font-weight:800;font-size:23pt;padding:1mm 6mm;opacity:.72;letter-spacing:.5pt;z-index:5}
 .koreksi{position:absolute;left:20mm;right:20mm;bottom:22mm;border:.4mm solid #C8102E;color:#C8102E;padding:2mm 3mm;font-size:9pt;line-height:1.3}
@@ -187,46 +192,51 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   const lampiran = anggota.length > MAKS_NAMA_SATU_HALAMAN
   const logo = (typeof window !== 'undefined' ? window.location.origin : '') + '/logo-pmi.png'
   const kv = (k, v) => `<tr><td class="k">${h(k)}</td><td class="t">:</td><td>${v}</td></tr>`
-  const dasar = [s.dasar, skNomor ? 'SK Nomor ' + skNomor : ''].filter(Boolean).map(h).join('<br>')
-  const angkutan = [h(s.angkutan || 'Kendaraan PMI'), s.kendaraan_nama || s.kendaraan_nopol ? '(' + h([s.kendaraan_nama, s.kendaraan_nopol, s.sopir ? 'Sopir: ' + s.sopir : ''].filter(Boolean).join(' · ')) + ')' : ''].filter(Boolean).join(' ')
-  const tabelNama = lampiran
-    ? '<div style="margin:1mm 0 3mm 5mm">Nama-nama terlampir</div>'
-    : anggota.length
-      ? `<table class="nm"><thead><tr><th style="width:9mm">No</th><th style="width:60mm">Nama</th><th>Jabatan</th></tr></thead><tbody>${anggota.map((a, i) => `<tr><td>${i + 1}</td><td>${h(a.nama)}</td><td>${h(a.jabatan || '')}</td></tr>`).join('')}</tbody></table>`
-      : '<div style="margin:1mm 0 3mm 5mm">........................................</div>'
+  // Dasar & Tujuan: satu poin per baris. Lebih dari satu poin = daftar bertanda "-" (Dasar) atau bernomor (Tujuan).
+  const butirDasar = [...barisBaru(s.dasar), skNomor ? 'SK Nomor ' + skNomor : ''].filter(Boolean)
+  const dasar = butirDasar.length > 1 ? butirDasar.map(x => `<div class="li"><span class="b">-</span><span>${h(x)}</span></div>`).join('') : h(butirDasar[0] || '-')
+  const butirTujuan = barisBaru(s.tujuan_surat)
+  const tujuan = butirTujuan.length > 1 ? butirTujuan.map((x, i) => `<div class="li"><span class="b">${i + 1}.</span><span>${h(x.replace(/^\d+[.)]\s*/, ''))}</span></div>`).join('') : h(butirTujuan[0] || '-')
+  const tugas = h(s.perihal).replace(/\n/g, '<br>')
+  const angkutan = [h(s.angkutan || 'Darat'), s.kendaraan_nama || s.kendaraan_nopol ? '(' + h([s.kendaraan_nama, s.kendaraan_nopol, s.sopir ? 'Sopir: ' + s.sopir : ''].filter(Boolean).join(' · ')) + ')' : ''].filter(Boolean).join(' ')
+  // Daftar nama bentuk personal: 1. Nama : ...  /  Jabatan : ...  (bisa ditambah sebanyak yang diperlukan)
+  const orang = (cls = '') => `<table class="org ${cls}">${anggota.map((a, i) => `<tbody><tr class="o1"><td class="no" rowspan="2">${i + 1}.</td><td class="lb">Nama</td><td class="cl">:</td><td>${h(a.nama)}</td></tr><tr class="o2"><td class="lb">Jabatan</td><td class="cl">:</td><td>${h(a.jabatan || '')}</td></tr></tbody>`).join('')}</table>`
+  const daftarNama = lampiran
+    ? '<div style="margin:1mm 0 3mm 9mm">Nama-nama terlampir</div>'
+    : anggota.length ? orang() : '<div style="margin:1mm 0 3mm 9mm">........................................</div>'
   const kodeSah = sah && s.setuju_kode ? `<div style="font-size:7.5pt;color:#444;margin-top:1mm">Disetujui digital oleh ${h(s.setuju_nama || '')} · Kode ${h(s.setuju_kode)} · ${h(fmtWaktu(s.setuju_pada))}</div>` : ''
   const merahStatus = ['revisi', 'ditolak'].includes(s.status_persetujuan)
   const stempel = merahStatus ? `<div class="stempel">${s.status_persetujuan === 'ditolak' ? 'DITOLAK' : 'PERLU DIPERBAIKI'}</div>` : ''
   const catatanMerah = merahStatus && s.catatan_revisi ? `<div class="koreksi"><b>Catatan koreksi:</b> ${h(s.catatan_revisi)}</div>` : ''
+  const titik = '.........................'
   const halaman1 = `<div class="hal" data-fit="1">${stempel}${catatanMerah}
     <div class="banner"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
     <div class="isi">
       <div class="jdl">SURAT TUGAS</div>
       <div class="nmr">Nomor : ${h(s.nomor_surat)}</div>
-      <table class="kv">${kv('Dasar', dasar || '-')}</table>
-      <p style="margin:3mm 0 0">Ditugaskan Kepada :</p>
-      ${tabelNama}
+      <table class="kv">${kv('Dasar', dasar)}</table>
+      <p style="margin:2.5mm 0 0">Ditugaskan kepada :</p>
+      ${daftarNama}
       <table class="kv">
-        ${kv('Tugas', h(s.perihal))}
-        ${kv('Tujuan', h(s.tujuan_surat || '-'))}
-        ${kv('Berangkat', h(tglPanjang(s.tanggal_berangkat)))}
-        ${kv('Kembali', h(tglPanjang(s.tanggal_kembali)))}
+        ${kv('Tugas', tugas)}
+        ${kv('Tujuan', tujuan)}
+        ${kv('Berangkat tgl.', h(tglDua(s.tanggal_berangkat)))}
+        ${kv('Kembali tgl.', h(tglDua(s.tanggal_kembali)))}
         ${kv('Angkutan', angkutan)}
         ${kv('Anggaran', h(s.anggaran || 'PMI'))}
       </table>
-      <p style="margin:3.5mm 0 1.5mm">Demikian kami sampaikan, atas perhatian serta kerjasama yang baik diucapkan terima kasih</p>
-      <p style="margin:0">Demikian surat tugas ini dibuat, untuk dapat dilaksanakan dan dipergunakan sebagaimana mestinya serta pihak-pihak lain mempermudah selama proses penugasan terima kasih.</p>
+      <p style="margin:3.5mm 0 0;text-align:justify">Demikian Surat Tugas ini dikeluarkan, untuk dapat dipergunakan sebagaimana mestinya, kepada pihak-pihak terkait diharapkan kerjasama dalam pelaksanaan tugas-tugas yang bersangkutan dan kepada yang ditugaskan agar membuat laporan pelaksanaan kegiatan secara tertulis kepada Pengurus Provinsi PMI Sumatera Barat.</p>
       <div class="ttdbox">
-        <div>Padang, ${h(tglPanjang(s.tanggal_surat))}</div>
+        <div>Padang, ${h(tglDua(s.tanggal_surat))}</div>
         <div>Pengurus Provinsi</div><div>PALANG MERAH INDONESIA</div><div>Sumatera Barat</div><div>Sekretaris,</div>
         <div class="ttdarea">${s.paraf_ttd_url ? `<img src="${h(s.paraf_ttd_url)}" alt="TTD">` : ''}</div>
         <div>${h(s.paraf_nama || namaSekretaris || '')}</div>
         ${kodeSah}
       </div>
-      <div style="margin-top:3mm"><b>Mengetahui :</b></div>
+      <div style="margin-top:3mm">Mengetahui:</div>
       <table class="mgt">
-        <tr><td style="width:50mm">Tiba di Lokasi tanggal</td><td style="width:4mm">:</td><td style="width:62mm">.....................................</td><td>(.....................................)</td></tr>
-        <tr><td style="padding-top:5mm">Kembali ke Markas tanggal</td><td style="padding-top:5mm">:</td><td style="padding-top:5mm">.....................................</td><td style="padding-top:5mm">(.....................................)</td></tr>
+        <tr><td style="width:76mm">Tiba dilokasi tgl,</td><td style="width:40mm">${titik}</td><td>( ......................... )</td></tr>
+        <tr><td style="padding-top:5mm">Kembali ke Markas Provinsi Sumbar tgl,</td><td style="padding-top:5mm">${titik}</td><td style="padding-top:5mm">( ......................... )</td></tr>
       </table>
       ${s.tembusan ? `<div style="margin-top:3mm;font-size:10.5pt"><b>Tembusan :</b><br>${String(s.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map((x, i) => `${i + 1}. ${h(x.replace(/^\d+[.)]\s*/, ''))}`).join('<br>')}</div>` : ''}
     </div>
@@ -234,7 +244,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   </div>`
   const halaman2 = lampiran ? `<div class="hal"><div class="isi" style="padding-top:22mm">
       <div>Lampiran Surat Tugas</div><div>Nomor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: ${h(s.nomor_surat)}</div><hr style="border:0;border-top:1px solid #000;margin:2mm 0 8mm">
-      <table class="nm lampiran"><thead><tr><th style="width:11mm">No</th><th style="width:62mm">Nama</th><th>Jabatan</th></tr></thead><tbody>${anggota.map((a, i) => `<tr><td>${i + 1}</td><td>${h(a.nama)}</td><td>${h(a.jabatan || '')}</td></tr>`).join('')}</tbody></table>
+      ${orang('lampiran')}
     </div></div>` : ''
   buka('Surat Tugas', halaman1 + halaman2, 'portrait', CSS_TUGAS)
 }

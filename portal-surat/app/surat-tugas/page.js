@@ -11,7 +11,7 @@ import { cetakSuratTugas } from '@/lib/cetak'
 
 const JENIS = { tugas: 'Surat Tugas', aset: 'Surat Aset', kerja_sama: 'Kerja Sama' }
 const BELUM_AKTIF = 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-surat-tugas.sql di Supabase (SQL Editor) satu kali.'
-const kosong = j => ({ jenis: j, tanggal_surat: hariIni(), anggota: [{ nama: '', jabatan: '' }], ...(j === 'tugas' ? { angkutan: 'Kendaraan PMI', anggaran: 'PMI' } : {}) })
+const kosong = j => ({ jenis: j, tanggal_surat: hariIni(), anggota: [{ nama: '', jabatan: '' }], ...(j === 'tugas' ? { angkutan: 'Darat', anggaran: 'PMI' } : {}) })
 const ROMAWI = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 const tumpang = (a1, a2, b1, b2) => a1 && a2 && b1 && b2 && a1 <= b2 && b1 <= a2
 
@@ -169,7 +169,7 @@ export default function SuratTugasPage() {
                         <td data-label="Perihal">{r.perihal}{sedangTugas(r) && <span className="tag" style={{ marginLeft: 6, background: 'var(--gold-bg)', color: 'var(--gold)' }}>Sedang bertugas</span>}</td>
                         {tab === 'tugas' && <>
                           <td data-label="Ditugaskan" style={{ fontSize: 13 }}>{(r.anggota || []).map(a => a.nama).join(', ') || '-'}</td>
-                          <td data-label="Tanggal tugas" style={{ whiteSpace: 'nowrap', fontSize: 13 }}>{fmtTgl(r.tanggal_berangkat)} – {fmtTgl(r.tanggal_kembali)}<div style={{ color: 'var(--ink-soft)' }}>{r.tujuan_surat}</div></td>
+                          <td data-label="Tanggal tugas" style={{ whiteSpace: 'nowrap', fontSize: 13 }}>{fmtTgl(r.tanggal_berangkat)} – {fmtTgl(r.tanggal_kembali)}<div style={{ color: 'var(--ink-soft)' }}>{String(r.tujuan_surat || '').split('\n').filter(Boolean).join(' · ')}</div></td>
                           <td data-label="Kendaraan" style={{ fontSize: 13 }}>{r.kendaraan_nama ? <>{r.kendaraan_nama}<br />{r.kendaraan_nopol}</> : '-'}</td>
                         </>}
                         {tab !== 'tugas' && <td data-label="Pihak">{r.tujuan_surat || '-'}</td>}
@@ -202,16 +202,16 @@ export default function SuratTugasPage() {
               {j === 'tugas' && <button type="button" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }} onClick={() => { const d = new Date((form.tanggal_surat || hariIni()) + 'T00:00:00'); set('nomor_surat', `/01.04.00/ST-ORG/${ROMAWI[d.getMonth()]}/${d.getFullYear()}`) }}>Pakai format</button>}
             </div>
             {j === 'tugas' && <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>Tekan “Pakai format”, lalu tambahkan nomor urut di depan garis miring pertama.</div>}</div>
-          <div className="field"><label>{j === 'tugas' ? 'Maksud / Perihal Penugasan *' : 'Perihal *'}</label><input value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} /></div>
-          <div className="field"><label>Dasar</label><textarea rows={2} value={form.dasar || ''} onChange={e => set('dasar', e.target.value)} placeholder="mis. Undangan dari ... / Surat Keputusan ..." /></div>
-          <div className="field"><label>{j === 'tugas' ? 'Tujuan / Lokasi' : j === 'aset' ? 'Kepada' : 'Mitra / Pihak'}</label><input value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} /></div>
+          <div className="field"><label>{j === 'tugas' ? 'Tugas *' : 'Perihal *'}</label>{j === 'tugas' ? <textarea rows={2} value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} placeholder="mis. Pendampingan Monitoring PMI Pusat dan Distribusi Voucher ..." /> : <input value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} />}</div>
+          <div className="field"><label>Dasar{j === 'tugas' ? ' (satu poin per baris)' : ''}</label><textarea rows={j === 'tugas' ? 3 : 2} value={form.dasar || ''} onChange={e => set('dasar', e.target.value)} placeholder={j === 'tugas' ? 'Program Kerja PMI Provinsi Sumatera Barat tahun 2026\nRencana Kegiatan PMI Kabupaten Solok' : 'mis. Undangan dari ... / Surat Keputusan ...'} />{j === 'tugas' && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 3 }}>Bila lebih dari satu baris, di surat tercetak sebagai daftar bertanda “-”.</div>}</div>
+          <div className="field"><label>{j === 'tugas' ? 'Tujuan (satu tempat per baris)' : j === 'aset' ? 'Kepada' : 'Mitra / Pihak'}</label>{j === 'tugas' ? <textarea rows={3} value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} placeholder={'PMI Kabupaten Solok\nKecamatan Bayang\nKecamatan Batang Kapas'} /> : <input value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} />}{j === 'tugas' && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 3 }}>Bila lebih dari satu baris, di surat tercetak bernomor 1, 2, 3.</div>}</div>
           {j === 'tugas' && <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Tanggal Berangkat *</label><input type="date" value={form.tanggal_berangkat || ''} onChange={e => set('tanggal_berangkat', e.target.value)} /></div>
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Tanggal Kembali *</label><input type="date" value={form.tanggal_kembali || ''} onChange={e => set('tanggal_kembali', e.target.value)} /></div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Angkutan</label><input value={form.angkutan || ''} onChange={e => set('angkutan', e.target.value)} placeholder="Kendaraan PMI" /></div>
+              <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Angkutan</label><input list="opsi-angkutan" value={form.angkutan || ''} onChange={e => set('angkutan', e.target.value)} placeholder="Darat" /><datalist id="opsi-angkutan"><option value="Darat" /><option value="Laut" /><option value="Udara" /><option value="Kendaraan PMI" /></datalist></div>
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Anggaran</label><input value={form.anggaran || ''} onChange={e => set('anggaran', e.target.value)} placeholder="PMI" /></div>
             </div>
             <div className="field"><label>Kendaraan (untuk jadwal; tampil di cetakan)</label>
