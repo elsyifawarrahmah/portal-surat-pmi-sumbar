@@ -607,3 +607,14 @@ html,body{background:var(--latar-ui) !important;}
 .sidebar-foot .btn-ghost:hover{background:#FDECEC !important;}
 .hamburger-btn{border:1px solid #E6DCDD;}
 .brand-bunga{border:1px solid #EADFE0;border-radius:14px !important;filter:none !important;background:#fff;}
+
+/* =====================================================================
+   GEMBOK GESER SAMPING: halaman tidak boleh bergeser kiri-kanan ("goyang") di HP.
+   Gulir ke atas-bawah tetap normal; zoom cubit tetap boleh.
+   ===================================================================== */
+html{overflow-x:hidden;overscroll-behavior-x:none;touch-action:pan-y pinch-zoom;max-width:100%;}
+body{position:relative;width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;}
+@supports (overflow:clip){ html,body{overflow-x:clip;} }
+.main{min-width:0;max-width:100%;overflow-wrap:break-word;}
+img,svg,video,canvas,iframe{max-width:100%;}
+.main table{max-width:100%;}
