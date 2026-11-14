@@ -154,7 +154,7 @@ body{font-family:'Trebuchet MS','Segoe UI',Arial,Helvetica,sans-serif;font-size:
 .hal{position:relative;width:210mm;min-height:296mm;display:flex;flex-direction:column;page-break-after:always}
 .isi{flex:1 0 auto}
 .hal:last-child{page-break-after:auto}
-.banner{display:flex;align-items:stretch;height:19mm;margin-top:2.5mm}
+.banner{display:flex;align-items:stretch;height:19mm;margin-top:2.5mm;margin-left:3mm;margin-right:5mm}
 .banner .b1{flex:53.7;background:#D9574B}.banner .b2{flex:13.6;background:#E0695D}.banner .b3{flex:10.5;background:#EDA9A1}
 .banner .lg{flex:22.2;display:flex;align-items:center;gap:2.2mm;padding-left:4mm;font-weight:700;font-size:8.6pt;line-height:1.15;color:#4a4a4a}
 .banner .lg img{height:12mm}
@@ -241,7 +241,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
         <tr><td style="width:76mm">Tiba dilokasi tgl,</td><td style="width:40mm">${titik}</td><td>( ......................... )</td></tr>
         <tr><td style="padding-top:5mm">Kembali ke Markas Provinsi Sumbar tgl,</td><td style="padding-top:5mm">${titik}</td><td style="padding-top:5mm">( ......................... )</td></tr>
       </table>
-      ${s.tembusan ? `<div style="margin-top:3mm;font-size:10.5pt"><b>Tembusan :</b><br>${String(s.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map((x, i) => `${i + 1}. ${h(x.replace(/^\d+[.)]\s*/, ''))}`).join('<br>')}</div>` : ''}
+      ${s.tembusan ? `<div style="margin-top:3mm;font-size:1em"><b>Tembusan :</b><br>${String(s.tembusan).split('\n').map(x => x.trim()).filter(Boolean).map((x, i) => `${i + 1}. ${h(x.replace(/^\d+[.)]\s*/, ''))}`).join('<br>')}</div>` : ''}
     </div>
     <div class="ft"><span style="color:#B3282D">Markas PMI Provinsi Sumatera Barat</span> Jl. Sisingamangaraja No. 34 Padang<br>Telepon : 0751-8951757 email: sumatera_barat@pmi.or.id</div>
   </div>`
