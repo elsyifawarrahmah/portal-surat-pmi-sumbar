@@ -11,6 +11,26 @@ import { cetakSuratTugas } from '@/lib/cetak'
 
 const JENIS = { tugas: 'Surat Tugas', aset: 'Surat Aset', kerja_sama: 'Kerja Sama' }
 const BELUM_AKTIF = 'Fitur ini belum aktif di database. Jalankan supabase/migrasi-surat-tugas.sql di Supabase (SQL Editor) satu kali.'
+// Daftar poin yang bisa ditambah/dihapus (dipakai untuk Dasar dan Tujuan). Disimpan sebagai teks, satu poin per baris.
+function DaftarPoin({ label, nilai, onChange, placeholder, bernomor, tambah, bantu }) {
+  const [daftar, setDaftar] = useState(() => { const a = String(nilai || '').split('\n').map(x => x.replace(/^\s*[-–]\s*/, '').replace(/^\d+[.)]\s*/, '')); return a.length ? a : [''] })
+  const ubah = a => { setDaftar(a); onChange(a.map(x => x.trim()).filter(Boolean).join('\n')) }
+  return (
+    <div className="field">
+      <label>{label}</label>
+      {daftar.map((v, i) => (
+        <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+          <span style={{ width: 24, textAlign: 'right', color: 'var(--ink-soft)', fontWeight: 700, flexShrink: 0 }}>{bernomor ? i + 1 + '.' : '–'}</span>
+          <input style={{ flex: 1 }} value={v} placeholder={i === 0 ? placeholder : ''} onChange={e => ubah(daftar.map((x, n) => (n === i ? e.target.value : x)))} />
+          <button type="button" className="btn btn-ghost" style={{ minHeight: 40 }} aria-label="Hapus" onClick={() => ubah(daftar.length > 1 ? daftar.filter((_, n) => n !== i) : [''])}>✕</button>
+        </div>
+      ))}
+      <button type="button" className="btn btn-ghost" onClick={() => ubah([...daftar, ''])}>{tambah}</button>
+      {bantu && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 4 }}>{bantu}</div>}
+    </div>
+  )
+}
+
 const kosong = j => ({ jenis: j, tanggal_surat: hariIni(), anggota: [{ nama: '', jabatan: '' }], ...(j === 'tugas' ? { angkutan: 'Darat', anggaran: 'PMI' } : {}) })
 const ROMAWI = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 const tumpang = (a1, a2, b1, b2) => a1 && a2 && b1 && b2 && a1 <= b2 && b1 <= a2
@@ -203,8 +223,12 @@ export default function SuratTugasPage() {
             </div>
             {j === 'tugas' && <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>Tekan “Pakai format”, lalu tambahkan nomor urut di depan garis miring pertama.</div>}</div>
           <div className="field"><label>{j === 'tugas' ? 'Tugas *' : 'Perihal *'}</label>{j === 'tugas' ? <textarea rows={2} value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} placeholder="mis. Pendampingan Monitoring PMI Pusat dan Distribusi Voucher ..." /> : <input value={form.perihal || ''} onChange={e => set('perihal', e.target.value)} />}</div>
-          <div className="field"><label>Dasar{j === 'tugas' ? ' (satu poin per baris)' : ''}</label><textarea rows={j === 'tugas' ? 3 : 2} value={form.dasar || ''} onChange={e => set('dasar', e.target.value)} placeholder={j === 'tugas' ? 'Program Kerja PMI Provinsi Sumatera Barat tahun 2026\nRencana Kegiatan PMI Kabupaten Solok' : 'mis. Undangan dari ... / Surat Keputusan ...'} />{j === 'tugas' && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 3 }}>Bila lebih dari satu baris, di surat tercetak sebagai daftar bertanda “-”.</div>}</div>
+          {j === 'tugas' ? <DaftarPoin label="Dasar" nilai={form.dasar} onChange={v => set('dasar', v)} placeholder="mis. Program Kerja PMI Provinsi Sumatera Barat tahun 2026" tambah="+ Tambah poin dasar" bantu="Satu poin per kolom. Di surat tercetak sebagai daftar bertanda “-” bila lebih dari satu." /> : (
+          <div className="field"><label>Dasar</label><textarea rows={j === 'tugas' ? 3 : 2} value={form.dasar || ''} onChange={e => set('dasar', e.target.value)} placeholder={j === 'tugas' ? 'Program Kerja PMI Provinsi Sumatera Barat tahun 2026\nRencana Kegiatan PMI Kabupaten Solok' : 'mis. Undangan dari ... / Surat Keputusan ...'} />{j === 'tugas' && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 3 }}>Bila lebih dari satu baris, di surat tercetak sebagai daftar bertanda “-”.</div>}</div>
+          )}
+          {j === 'tugas' ? <DaftarPoin bernomor label="Tujuan" nilai={form.tujuan_surat} onChange={v => set('tujuan_surat', v)} placeholder="mis. PMI Kabupaten Solok" tambah="+ Tambah tujuan" bantu="Satu tempat per kolom. Di surat tercetak bernomor 1, 2, 3 bila lebih dari satu." /> : (
           <div className="field"><label>{j === 'tugas' ? 'Tujuan (satu tempat per baris)' : j === 'aset' ? 'Kepada' : 'Mitra / Pihak'}</label>{j === 'tugas' ? <textarea rows={3} value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} placeholder={'PMI Kabupaten Solok\nKecamatan Bayang\nKecamatan Batang Kapas'} /> : <input value={form.tujuan_surat || ''} onChange={e => set('tujuan_surat', e.target.value)} />}{j === 'tugas' && <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 3 }}>Bila lebih dari satu baris, di surat tercetak bernomor 1, 2, 3.</div>}</div>
+          )}
           {j === 'tugas' && <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <div className="field" style={{ flex: 1, minWidth: 160 }}><label>Tanggal Berangkat *</label><input type="date" value={form.tanggal_berangkat || ''} onChange={e => set('tanggal_berangkat', e.target.value)} /></div>
