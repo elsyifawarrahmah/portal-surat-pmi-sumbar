@@ -147,14 +147,16 @@ const tglPanjang = v => { if (!v) return ''; const d = new Date(String(v).slice(
 const tglDua = v => { if (!v) return ''; const d = new Date(String(v).slice(0, 10) + 'T00:00:00'); return isNaN(d) ? '' : `${String(d.getDate()).padStart(2, '0')} ${BULAN_PANJANG[d.getMonth()]} ${d.getFullYear()}` }
 // Sampai sekian orang tetap satu halaman (huruf & jarak otomatis memadat); lebih dari itu daftar nama dipindah ke halaman Lampiran (bukti penugasan/pembayaran).
 const MAKS_NAMA_SATU_HALAMAN = 30
-const barisBaru = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean)
+const barisBaru = t => String(t || '').split('\n').map(x => x.trim().replace(/^[-•*]\s*/, '')).filter(x => x.replace(/[\s\d.)\-•*]/g, '').length > 0)
 
 const CSS_TUGAS = `
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:'Trebuchet MS','Segoe UI',Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.3;padding:0}
 .hal{position:relative;width:210mm;min-height:296mm;display:flex;flex-direction:column;page-break-after:always}
 .isi{flex:1 0 auto}
 .hal:last-child{page-break-after:auto}
 .banner{display:flex;align-items:stretch;height:19mm;margin-top:2.5mm;margin-left:3mm;margin-right:5mm}
+.banner .blok{flex:77.80;height:100%;display:block}
 .banner .b1{flex:53.7;background:#D9574B}.banner .b2{flex:13.6;background:#E0695D}.banner .b3{flex:10.5;background:#EDA9A1}
 .banner .lg{flex:22.2;display:flex;align-items:center;gap:2.2mm;padding-left:4mm;font-weight:700;font-size:8.6pt;line-height:1.15;color:#4a4a4a}
 .banner .lg img{height:12mm}
@@ -213,7 +215,7 @@ function cetakSuratTugasPMI({ surat: s, skNomor, namaSekretaris }) {
   const catatanMerah = merahStatus && s.catatan_revisi ? `<div class="koreksi"><b>Catatan koreksi:</b> ${h(s.catatan_revisi)}</div>` : ''
   const titik = '.........................'
   const halaman1 = `<div class="hal" data-fit="1">${stempel}${catatanMerah}
-    <div class="banner"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
+    <div class="banner"><svg class="blok" viewBox="0 0 861 100" preserveAspectRatio="none" aria-hidden="true"><rect width="594.3" height="100" fill="#D9574B"/><rect x="594.3" width="150.5" height="100" fill="#E0695D"/><rect x="744.8" width="116.2" height="100" fill="#EDA9A1"/></svg><div class="lg"><img src="${logo}" alt=""><div>Palang<br>Merah<br>Indonesia</div></div></div>
     <div class="isi">
       <div class="jdl">SURAT TUGAS</div>
       <div class="nmr">Nomor : ${h(s.nomor_surat)}</div>
