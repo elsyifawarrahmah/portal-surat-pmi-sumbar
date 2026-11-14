@@ -573,3 +573,37 @@ html,body{background:var(--latar-ui) !important;}
   .brand-sub{font-size:11.5px;}
   .nav{padding-bottom:18px;}
 }
+
+/* =====================================================================
+   MENU SAMPING (final): panel putih, teks gelap kontras, aksen merah kop.
+   Mudah dibaca di mata, bersih, modern. Menggantikan gaya panel merah gelap.
+   ===================================================================== */
+.sidebar{background:linear-gradient(90deg,#CF2321 0 54.5%,#E4605C 54.5% 69.5%,#EF9793 69.5% 85%,#F7BDBC 85% 100%) top left/100% 8px no-repeat,#fff !important;color:#2B1B1D !important;border-right:1px solid #EADFE0;box-shadow:6px 0 28px rgba(60,30,30,.10) !important;}
+@media (max-width:768px){ .sidebar{border-radius:0 20px 20px 0 !important;} }
+.sidebar-tutup{background:#fff !important;color:#2B1B1D !important;border:1px solid #E6DCDD !important;box-shadow:0 2px 8px rgba(60,30,30,.08) !important;}
+.sidebar .brand,.sidebar:not(.collapsed) .brand{padding:72px 18px 14px;border-bottom:1px solid #EFE6E7 !important;background:transparent !important;color:#2B1B1D;}
+.brand-nama{color:#B71C1C !important;font-weight:800 !important;letter-spacing:.01em;}
+.brand-sub{color:#6B5B5D !important;opacity:1 !important;font-weight:600;}
+.sapa{background:#FBF3F3 !important;border:1px solid #F1E1E1;color:#2B1B1D !important;}
+.sapa span{color:#6B5B5D !important;opacity:1 !important;}
+.sapa b{color:#2B1B1D !important;}
+.nav{scrollbar-color:#D9C9CA transparent;}
+.nav a{color:#3A2B2D !important;opacity:1 !important;font-weight:600;border-radius:12px;}
+.nav a:hover{background:#F7EFEF !important;transform:none;}
+.nav a.active{background:#FDECEC !important;color:#B71C1C !important;font-weight:800;}
+.nav a.active::before{background:#CF2321 !important;}
+.nav a .chip{background:#F6EEEE !important;color:#7A6062 !important;box-shadow:none !important;}
+.nav a.active .chip{background:#CF2321 !important;color:#fff !important;}
+.nav-badge,.nav a.active .nav-badge{background:#CF2321 !important;color:#fff !important;}
+.nav-label{color:#8A7779 !important;opacity:1 !important;}
+.nav-seksi{background:#F8F2F2 !important;border:1px solid #F0E4E4 !important;color:#3A2B2D !important;}
+.nav-seksi:hover{background:#F3E9E9 !important;}
+.nav-seksi .seksi-ikon{background:#fff !important;color:#B71C1C !important;box-shadow:0 1px 3px rgba(60,30,30,.08);}
+.nav-seksi .panah{color:#7A6062;opacity:1;}
+.sidebar-foot{border-top:1px solid #EFE6E7 !important;background:#fff !important;}
+.sidebar-user{background:#FBF3F3 !important;border:1px solid #F1E1E1 !important;color:#2B1B1D !important;}
+.sidebar-user span{color:#6B5B5D !important;opacity:1 !important;}
+.sidebar-foot .btn-ghost{background:#fff !important;border:1.5px solid #CF2321 !important;color:#CF2321 !important;font-weight:700;box-shadow:none !important;}
+.sidebar-foot .btn-ghost:hover{background:#FDECEC !important;}
+.hamburger-btn{border:1px solid #E6DCDD;}
+.brand-bunga{border:1px solid #EADFE0;border-radius:14px !important;filter:none !important;background:#fff;}
