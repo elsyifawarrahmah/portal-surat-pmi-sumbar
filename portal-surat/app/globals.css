@@ -642,3 +642,8 @@ img,svg,video,canvas,iframe{max-width:100%;}
 .stp .lbl{display:block;margin-top:4px;font-weight:700;}
 .stp.ok{color:#1B1B1B;}
 @media (max-width:600px){.feed li{flex-wrap:wrap}.feed-jam{flex-basis:100%}}
+
+/* Perbaikan: kotak ikon menu bentrok dengan gaya .chip (label pill) sehingga ikon terjepit jadi titik */
+.nav a .chip,.nav-seksi .seksi-ikon{padding:0 !important;margin:0 !important;gap:0 !important;}
+.nav a .chip svg{width:20px !important;height:20px !important;flex:none;}
+.nav-seksi .seksi-ikon svg{width:18px !important;height:18px !important;flex:none;}
