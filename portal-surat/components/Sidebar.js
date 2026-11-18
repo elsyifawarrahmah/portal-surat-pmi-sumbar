@@ -161,7 +161,7 @@ export default function Sidebar() {
         <div className="brand">
           <button type="button" className="sidebar-tutup" aria-label="Tutup menu" onClick={() => setMobileOpen(false)}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg></button>
           <div className="brand-baru">
-            <img src="/icon-satria-v9-192.png" alt="Logo SATRIA PMI" className="brand-ikon" />
+            <img src="/icon-satria-v10-192.png" alt="Logo SATRIA PMI" className="brand-ikon" />
             <div className="brand-teks">
               <div className="brand-nama">{NAMA_APLIKASI}</div>
               <div className="brand-sub">PMI Provinsi Sumatera Barat</div>
