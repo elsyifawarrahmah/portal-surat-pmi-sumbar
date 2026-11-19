@@ -40,12 +40,12 @@ export const ICONS = {
 
 // grup: 'utama' = selalu tampil; 'lain' = dilipat di "Menu lain"; 'admin' = khusus admin web
 export const LINKS = [
-  { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama', tone: 'emas' },
-  { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi', tone: 'biru' },
-  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama', tone: 'hijau' },
-  { href: '/surat-tugas', label: 'Surat Tugas', icon: 'tugas', grup: 'utama', tone: 'oranye' },
-  { href: '/data-aset', label: 'Data Aset', icon: 'aset', grup: 'utama', tone: 'emas' },
-  { href: '/lacak', label: 'Lacak Surat', icon: 'lacak', grup: 'utama', tone: 'ungu' },
+  { href: '/dashboard', label: 'Beranda', icon: 'dashboard', grup: 'utama', tone: 'emas', plain: true },
+  { href: '/surat', label: 'Surat Masuk', icon: 'masuk', grup: 'utama', badge: 'disposisi', tone: 'biru', alur: true, cap: 'Terima dan catat' },
+  { href: '/surat-keluar', label: 'Surat Keluar', icon: 'keluar', grup: 'utama', tone: 'hijau', alur: true, cap: 'Kirim dan setujui' },
+  { href: '/surat-tugas', label: 'Surat Tugas', icon: 'tugas', grup: 'utama', tone: 'oranye', alur: true, cap: 'Tugaskan personel' },
+  { href: '/data-aset', label: 'Data Aset', icon: 'aset', grup: 'utama', tone: 'emas', plain: true },
+  { href: '/lacak', label: 'Lacak Surat', icon: 'lacak', grup: 'utama', tone: 'ungu', alur: true, cap: 'Pantau posisi surat' },
   { href: '/bantuan', label: 'Bantuan', icon: 'bantuan', grup: 'lain' },
   { href: '/dasar-hukum', label: 'Dasar Hukum', icon: 'sk', grup: 'lain' },
   { href: '/pemantauan', label: 'Pemantauan', icon: 'pantau', badge: 'panggilan', grup: 'lain' },
@@ -173,14 +173,18 @@ export default function Sidebar() {
           {(() => {
             const bisaLihat = l => !(l.grup === 'admin' && !peran.isAdmin && !peran.loading) && !(l.penuh && !peran.aksesPenuh && !peran.loading)
             const item = l => (
-              <Link key={l.href} href={l.href} data-tone={l.tone || 'netral'} className={pathname === l.href || (l.href === '/surat' && pathname.startsWith('/surat/')) ? 'active' : ''}>
-                <span className="chip">{ICONS[l.icon]}</span><span style={{flex:1}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}</span>
+              <Link key={l.href} href={l.href} data-tone={l.tone || 'netral'} className={[pathname === l.href || (l.href === '/surat' && pathname.startsWith('/surat/')) ? 'active' : '', l.alur ? 'alur' : '', l.plain ? 'plain' : ''].filter(Boolean).join(' ')}>
+                <span className="chip">{ICONS[l.icon]}</span><span style={{flex:1,minWidth:0}}>{l.label === 'Pemantauan' && !peran.bisaPantau && !peran.loading ? 'Panggilan Biro Umum' : l.label}{l.cap && <small className="nav-cap">{l.cap}</small>}</span>
                 {l.badge && badge[l.badge] > 0 && <span className="nav-badge">{badge[l.badge] > 99 ? '99+' : badge[l.badge]}</span>}
               </Link>
             )
             const dipakai = new Set()
             return <>
-              {LINKS.filter(l => l.grup === 'utama').map(item)}
+              {LINKS.filter(l => l.grup === 'utama' && l.href === '/dashboard').map(item)}
+              <div className="nav-grup">Alur surat</div>
+              <div className="alur-wrap">{LINKS.filter(l => l.grup === 'utama' && l.alur).map(item)}</div>
+              <div className="nav-grup">Kelola</div>
+              {LINKS.filter(l => l.grup === 'utama' && !l.alur && l.href !== '/dashboard').map(item)}
               {SEKSI.map(sk => {
                 const daftar = sk.hrefs.map(h => LINKS.find(l => l.href === h)).filter(l => l && bisaLihat(l))
                 daftar.forEach(l => dipakai.add(l.href))
